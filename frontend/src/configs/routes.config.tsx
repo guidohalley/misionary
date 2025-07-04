@@ -12,7 +12,10 @@ const ProductoEdit = lazy(() => import('@/views/productos/ProductoEdit'));
 const ServiciosView = lazy(() => import('@/views/servicios'));
 const ServicioNew = lazy(() => import('@/views/servicios/ServicioNew'));
 const ServicioEdit = lazy(() => import('@/views/servicios/ServicioEdit'));
-const PresupuestoView = lazy(() => import('@/views/PresupuestoView'));
+const PresupuestosView = lazy(() => import('@/views/presupuestos/PresupuestosView'));
+const PresupuestoNew = lazy(() => import('@/views/presupuestos/PresupuestoNew'));
+const PresupuestoEdit = lazy(() => import('@/views/presupuestos/PresupuestoEdit'));
+const PresupuestoView = lazy(() => import('@/views/presupuestos/PresupuestoView'));
 
 const publicRoutes = [
   {
@@ -76,6 +79,21 @@ const protectedRoutes = [
   {
     key: 'presupuestos',
     path: '/presupuestos',
+    component: PresupuestosView,
+  },
+  {
+    key: 'presupuesto-new',
+    path: '/presupuestos/new',
+    component: PresupuestoNew,
+  },
+  {
+    key: 'presupuesto-edit',
+    path: '/presupuestos/edit/:id',
+    component: PresupuestoEdit,
+  },
+  {
+    key: 'presupuesto-view',
+    path: '/presupuestos/view/:id',
     component: PresupuestoView,
   }
 ];

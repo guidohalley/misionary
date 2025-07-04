@@ -15,6 +15,7 @@ import {
     HiOutlineReceiptTax,
     HiOutlineClipboardList,
     HiOutlineHashtag, // Usamos este en lugar de HiOutlinePercent
+    HiOutlineClipboardCheck,
 } from 'react-icons/hi'
 import type { JSX } from 'react'
 
@@ -33,6 +34,8 @@ const navigationIcon: NavigationIcons = {
     invoice: <HiOutlineReceiptTax />,
     receipt: <HiOutlineClipboardList />,
     percentage: <HiOutlineHashtag />, // Cambiado a HiOutlineHashtag
+    presupuesto: <HiOutlineClipboardCheck />, // Icono específico para presupuestos
+    fileText: <HiOutlineClipboardCheck />, // Alias para compatibilidad
     // Iconos del template original (mantener por compatibilidad)
     singleMenu: <HiOutlineViewGridAdd />,
     collapseMenu: <HiOutlineTemplate />,

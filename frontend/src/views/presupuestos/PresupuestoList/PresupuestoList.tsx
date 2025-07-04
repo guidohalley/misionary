@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Button, Badge, Pagination, Select, Input, Notification, toast } from '@/components/ui';
-import { HiOutlinePencil, HiOutlineTrash, HiOutlineEye, HiOutlineCheck, HiOutlineMail } from 'react-icons/hi';
+import { HiOutlinePencil, HiOutlineTrash, HiOutlineEye, HiOutlineCheck, HiOutlineMail, HiOutlinePrinter } from 'react-icons/hi';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { usePresupuesto } from '@/modules/presupuesto/hooks/usePresupuesto';
@@ -13,7 +13,7 @@ interface PresupuestoListProps {
 
 const PresupuestoList: React.FC<PresupuestoListProps> = ({ className }) => {
   const navigate = useNavigate();
-  const { presupuestos, loading, error, refreshPresupuestos, deletePresupuesto, changeEstado } = usePresupuesto();
+  const { presupuestos, loading, error, refreshPresupuestos, deletePresupuesto, updateEstado } = usePresupuesto();
   
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -47,6 +47,11 @@ const PresupuestoList: React.FC<PresupuestoListProps> = ({ className }) => {
     navigate(`/presupuestos/view/${id}`);
   };
 
+  const handlePrint = (id: number) => {
+    // Abrir una nueva ventana con el presupuesto para imprimir
+    window.open(`/presupuestos/view/${id}`, '_blank');
+  };
+
   const handleDelete = async (id: number) => {
     if (window.confirm('¿Está seguro de que desea eliminar este presupuesto?')) {
       try {
@@ -68,7 +73,7 @@ const PresupuestoList: React.FC<PresupuestoListProps> = ({ className }) => {
 
   const handleChangeEstado = async (id: number, nuevoEstado: EstadoPresupuesto) => {
     try {
-      await changeEstado(id, nuevoEstado);
+      await updateEstado(id, nuevoEstado);
       toast.push(
         <Notification title="Éxito" type="success">
           Estado del presupuesto actualizado
@@ -243,6 +248,15 @@ const PresupuestoList: React.FC<PresupuestoListProps> = ({ className }) => {
                           icon={<HiOutlineEye />}
                           onClick={() => handleView(presupuesto.id)}
                           className="text-blue-600 hover:text-blue-700"
+                          title="Ver presupuesto"
+                        />
+                        <Button
+                          size="sm"
+                          variant="twoTone"
+                          icon={<HiOutlinePrinter />}
+                          onClick={() => handlePrint(presupuesto.id)}
+                          className="text-gray-600 hover:text-gray-700"
+                          title="Imprimir presupuesto"
                         />
                         {presupuesto.estado === EstadoPresupuesto.BORRADOR && (
                           <Button
@@ -251,6 +265,7 @@ const PresupuestoList: React.FC<PresupuestoListProps> = ({ className }) => {
                             icon={<HiOutlinePencil />}
                             onClick={() => handleEdit(presupuesto.id)}
                             className="text-amber-600 hover:text-amber-700"
+                            title="Editar presupuesto"
                           />
                         )}
                         {nextEstado && (
@@ -270,6 +285,7 @@ const PresupuestoList: React.FC<PresupuestoListProps> = ({ className }) => {
                             icon={<HiOutlineTrash />}
                             onClick={() => handleDelete(presupuesto.id)}
                             className="text-red-600 hover:text-red-700"
+                            title="Eliminar presupuesto"
                           />
                         )}
                       </div>

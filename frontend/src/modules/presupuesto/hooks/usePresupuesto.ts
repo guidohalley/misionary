@@ -83,7 +83,7 @@ export function usePresupuesto(params?: {
     }
   };
 
-  const updateEstado = async (id: number, estado: EstadoPresupuesto) => {
+  const updateEstado = useCallback(async (id: number, estado: EstadoPresupuesto) => {
     try {
       setLoading(true);
       setError(null);
@@ -99,11 +99,27 @@ export function usePresupuesto(params?: {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const selectPresupuesto = (presupuesto: Presupuesto | null) => {
     setSelectedPresupuesto(presupuesto);
   };
+
+  const getPresupuesto = useCallback(async (id: number) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const presupuesto = await presupuestoService.fetchPresupuestoById(id);
+      setSelectedPresupuesto(presupuesto);
+      return presupuesto;
+    } catch (err) {
+      setError('Error al obtener el presupuesto');
+      console.error('Error getting presupuesto:', err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   return {
     presupuestos,
@@ -115,7 +131,8 @@ export function usePresupuesto(params?: {
     deletePresupuesto,
     updateEstado,
     selectPresupuesto,
-    refreshPresupuestos: fetchPresupuestos
+    refreshPresupuestos: fetchPresupuestos,
+    getPresupuesto
   };
 }
 

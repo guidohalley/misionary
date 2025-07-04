@@ -9,6 +9,7 @@ import productoRoutes from './routes/producto.routes';
 import servicioRoutes from './routes/servicio.routes';
 import presupuestoRoutes from './routes/presupuesto.routes';
 import facturaRoutes from './routes/factura.routes';
+import impuestoRoutes from './routes/impuesto.routes';
 
 const app = express();
 
@@ -25,6 +26,7 @@ app.use('/api/productos', productoRoutes);
 app.use('/api/servicios', servicioRoutes);
 app.use('/api/presupuestos', presupuestoRoutes);
 app.use('/api/facturas', facturaRoutes);
+app.use('/api/impuestos', impuestoRoutes);
 
 // Error handling
 import { errorHandler } from './middleware/error';

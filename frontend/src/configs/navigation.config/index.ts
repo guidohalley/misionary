@@ -51,7 +51,7 @@ const navigationConfig: NavigationTree[] = [
         path: '/presupuestos',
         title: 'Presupuestos',
         translateKey: 'nav.presupuestos',
-        icon: 'document',
+        icon: 'presupuesto',
         type: NAV_ITEM_TYPE_ITEM,
         authority: [],
         subMenu: [],

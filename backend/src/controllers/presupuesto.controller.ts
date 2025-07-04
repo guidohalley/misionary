@@ -5,10 +5,14 @@ import { EstadoPresupuesto } from '@prisma/client';
 export class PresupuestoController {
   static async create(req: Request, res: Response) {
     try {
+      console.log('Creating presupuesto with data:', JSON.stringify(req.body, null, 2));
       const presupuesto = await PresupuestoService.create(req.body);
+      console.log('Presupuesto created successfully:', presupuesto.id);
       res.status(201).json(presupuesto);
     } catch (error) {
-      res.status(500).json({ error: 'Error al crear el presupuesto' });
+      console.error('Error creating presupuesto:', error);
+      console.error('Error stack:', error instanceof Error ? error.stack : 'Unknown error');
+      res.status(500).json({ error: 'Error al crear el presupuesto', details: error instanceof Error ? error.message : 'Unknown error' });
     }
   }
 

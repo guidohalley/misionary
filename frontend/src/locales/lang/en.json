@@ -1,6 +1,22 @@
 {
     "nav": {
         "home": "Home",
+        "personas": "People",
+        "productos": "Products",
+        "servicios": "Services",
+        "presupuestos": "Budgets",
+        "gestion": {
+            "title": "Commercial Management",
+            "clientes": "Clients",
+            "proveedores": "Suppliers",
+            "servicios": "Services"
+        },
+        "facturacion": {
+            "title": "Billing",
+            "facturas": "Invoices",
+            "recibos": "Receipts",
+            "impuestos": "Taxes"
+        },
         "singleMenuItem": "Single menu item",
         "collapseMenu": {
             "collapseMenu": "Collapse menu item",

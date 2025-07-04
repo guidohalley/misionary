@@ -13,11 +13,9 @@ export function usePersona() {
       setLoading(true);
       setError(null);
       const data = await personaService.fetchPersonas();
-      console.log('Personas fetched:', data);
       setPersonas(data);
     } catch (err) {
       setError('Error al cargar las personas');
-      console.error('Error fetching personas:', err);
     } finally {
       setLoading(false);
     }
@@ -36,7 +34,6 @@ export function usePersona() {
       return newPersona;
     } catch (err) {
       setError('Error al crear la persona');
-      console.error('Error creating persona:', err);
       throw err;
     } finally {
       setLoading(false);
@@ -52,7 +49,6 @@ export function usePersona() {
       return updatedPersona;
     } catch (err) {
       setError('Error al actualizar la persona');
-      console.error('Error updating persona:', err);
       throw err;
     } finally {
       setLoading(false);
@@ -67,7 +63,6 @@ export function usePersona() {
       setPersonas(prev => prev.filter(p => p.id !== id));
     } catch (err) {
       setError('Error al eliminar la persona');
-      console.error('Error deleting persona:', err);
       throw err;
     } finally {
       setLoading(false);
@@ -90,7 +85,6 @@ export function usePersona() {
       const persona = await personaService.fetchPersonaById(id);
       return persona;
     } catch (err) {
-      console.error('Error getting persona by id:', err);
       return null;
     }
   }, [personas]);

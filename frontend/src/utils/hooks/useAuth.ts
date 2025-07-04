@@ -18,22 +18,14 @@ function useAuth() {
     
     // Calcular authenticated correctamente
     const authenticated = Boolean(token && signedIn);
-    
-    console.log('🔑 useAuth - Estado actual:', { 
-        token: token || 'no existe', 
-        signedIn, 
-        authenticated 
-    });
 
     // Efecto para verificar el estado de autenticación al montar el componente
     useEffect(() => {
         const checkAuthState = () => {
             const currentState = AuthService.getAuthState();
-            console.log('🔑 useAuth - Estado localStorage:', currentState);
             
             // Sincronizar con Redux si hay diferencias
             if (currentState.isAuthenticated && currentState.token && !signedIn) {
-                console.log('🔑 useAuth - Sincronizando con Redux desde localStorage');
                 dispatch(signInSuccess(currentState.token));
                 if (currentState.user) {
                     dispatch(setUser({

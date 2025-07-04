@@ -27,19 +27,14 @@ const Layout = () => {
 
     const { authenticated } = useAuth()
 
-    console.log('🏗️ Layout - Renderizando con:', { layoutType, authenticated })
-
     useDirection()
 
     useLocale()
 
     const AppLayout = useMemo(() => {
-        console.log('🏗️ Layout - Determinando layout:', { authenticated, layoutType })
         if (authenticated) {
-            console.log('🏗️ Layout - Usuario autenticado, usando layout:', layoutType)
             return layouts[layoutType]
         }
-        console.log('🏗️ Layout - Usuario no autenticado, usando AuthLayout')
         return lazy(() => import('./AuthLayout'))
     }, [layoutType, authenticated])
 

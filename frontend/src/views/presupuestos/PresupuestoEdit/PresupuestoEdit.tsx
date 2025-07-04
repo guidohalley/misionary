@@ -1,0 +1,97 @@
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { usePresupuesto } from '@/modules/presupuesto/hooks/usePresupuesto';
+import PresupuestoForm from '../PresupuestoForm/PresupuestoForm';
+import type { PresupuestoFormData } from '../types';
+
+const PresupuestoEdit: React.FC = () => {
+  const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
+  const { selectedPresupuesto, loading, error, getPresupuesto, updatePresupuesto } = usePresupuesto();
+  const [initialData, setInitialData] = useState<PresupuestoFormData | undefined>();
+
+  useEffect(() => {
+    if (id) {
+      getPresupuesto(parseInt(id));
+    }
+  }, [id, getPresupuesto]);
+
+  useEffect(() => {
+    if (selectedPresupuesto) {
+      setInitialData({
+        clienteId: selectedPresupuesto.clienteId,
+        items: selectedPresupuesto.items.map(item => ({
+          productoId: item.productoId || undefined,
+          servicioId: item.servicioId || undefined,
+          cantidad: item.cantidad,
+          precioUnitario: item.precioUnitario
+        }))
+      });
+    }
+  }, [selectedPresupuesto]);
+
+  const handleSubmit = async (data: PresupuestoFormData) => {
+    try {
+      if (id) {
+        await updatePresupuesto(parseInt(id), data);
+        navigate('/presupuestos');
+      }
+    } catch (error) {
+      console.error('Error updating presupuesto:', error);
+      throw error;
+    }
+  };
+
+  const handleCancel = () => {
+    navigate('/presupuestos');
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-red-600">Error: {error}</p>
+        <button 
+          onClick={() => navigate('/presupuestos')}
+          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        >
+          Volver a Presupuestos
+        </button>
+      </div>
+    );
+  }
+
+  if (!selectedPresupuesto) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-600">Presupuesto no encontrado</p>
+        <button 
+          onClick={() => navigate('/presupuestos')}
+          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        >
+          Volver a Presupuestos
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-full">
+      <PresupuestoForm
+        initialData={initialData}
+        onSubmit={handleSubmit}
+        onCancel={handleCancel}
+        isEdit={true}
+      />
+    </div>
+  );
+};
+
+export default PresupuestoEdit;
