@@ -1,0 +1,144 @@
+// This is your Prisma schema file.
+// Learn more at https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────── ENUMS ─────────────────── 
+
+enum TipoPersona {
+  CLIENTE
+  PROVEEDOR
+  INTERNO
+}
+
+enum RolUsuario {
+  ADMIN
+  CONTADOR
+  PROVEEDOR
+}
+
+enum EstadoPresupuesto {
+  BORRADOR
+  ENVIADO
+  APROBADO
+  FACTURADO
+}
+
+enum EstadoFactura {
+  EMITIDA
+  PAGADA
+  ANULADA
+}
+
+// ─────────────────── MODELOS ─────────────────── 
+
+model Persona {
+  id           Int            @id @default(autoincrement())
+  nombre       String
+  tipo         TipoPersona
+  telefono     String?
+  cvu          String?
+  roles        RolUsuario[]
+  password     String
+  email        String         @unique
+  productos    Producto[]
+  servicios    Servicio[]
+  presupuestos Presupuesto[]  @relation("ClientePresupuestos")
+  recibos      Recibo[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+}
+
+model Producto {
+  id          Int        @id @default(autoincrement())
+  nombre      String
+  precio      Float
+  proveedorId Int
+  proveedor   Persona    @relation(fields: [proveedorId], references: [id])
+  items       Item[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model Servicio {
+  id          Int        @id @default(autoincrement())
+  nombre      String
+  descripcion String
+  precio      Float
+  proveedorId Int
+  proveedor   Persona    @relation(fields: [proveedorId], references: [id])
+  items       Item[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model Presupuesto {
+  id            Int               @id @default(autoincrement())
+  clienteId     Int
+  cliente       Persona           @relation("ClientePresupuestos", fields: [clienteId], references: [id])
+  items         Item[]
+  subtotal      Float
+  impuestos     Float
+  total         Float
+  estado        EstadoPresupuesto @default(BORRADOR)
+  factura       Factura?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+}
+
+model Item {
+  id             Int         @id @default(autoincrement())
+  presupuestoId  Int
+  presupuesto    Presupuesto @relation(fields: [presupuestoId], references: [id])
+  productoId     Int?
+  producto       Producto?   @relation(fields: [productoId], references: [id])
+  servicioId     Int?
+  servicio       Servicio?   @relation(fields: [servicioId], references: [id])
+  cantidad       Int
+  precioUnitario Float
+}
+
+model Factura {
+  id                 Int            @id @default(autoincrement())
+  numero             String         @unique
+  presupuestoId      Int           @unique
+  presupuesto        Presupuesto   @relation(fields: [presupuestoId], references: [id])
+  fecha              DateTime
+  subtotal           Float
+  impuestos          Float
+  total              Float
+  estado             EstadoFactura
+  impuestoAplicadoId Int
+  impuestoAplicado   Impuesto      @relation(fields: [impuestoAplicadoId], references: [id])
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+}
+
+model Recibo {
+  id         Int       @id @default(autoincrement())
+  personaId  Int
+  persona    Persona   @relation(fields: [personaId], references: [id])
+  concepto   String
+  monto      Float
+  fecha      DateTime
+  metodoPago String
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+model Impuesto {
+  id         Int       @id @default(autoincrement())
+  nombre     String
+  porcentaje Float
+  activo     Boolean   @default(true)
+  facturas   Factura[]
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}

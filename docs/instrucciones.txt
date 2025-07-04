@@ -1,0 +1,502 @@
+# Instrucciones para Agentes de IA - Proyecto ERP Misionary
+
+## ✅ **ESTADO ACTUAL: AUTENTICACIÓN COMPLETAMENTE FUNCIONAL**
+
+### 🎉 **LOGIN Y NAVEGACIÓN FUNCIONANDO CORRECTAMENTE**
+- ✅ Sistema de login completamente operativo
+- ✅ Usuario autenticado redirigido automáticamente al layout principal
+- ✅ Layout Elstar completo visible (header, sidebar, navegación)
+- ✅ Rutas protegidas y públicas configuradas correctamente
+- ✅ Sincronización AuthService ↔ Redux ↔ localStorage
+- ✅ Sesiones persistentes entre recargas del navegador
+
+### 🔑 **CREDENCIALES DE PRUEBA:**
+- Email: admin@misionary.com
+- Password: admin123
+
+### 🚀 **PRÓXIMOS PASOS - DESARROLLO INCREMENTAL:**
+**FASE 1: CRUD PRODUCTOS (SIGUIENTE)**
+**FASE 2: CRUD PERSONAS**
+**FASE 3: CRUD PRESUPUESTOS**
+**FASE 4: CRUD FACTURAS**
+
+---
+
+## Información General del Proyecto
+- **Nombre**: Misionary ERP
+- **Tipo**: Sistema ERP completo para empresa en crecimiento (10-100 empleados)
+- **Stack**: Docker + Node.js/Express/Prisma/PostgreSQL (Backend) + React/Vite/Tailwind (Frontend)
+- **Template Frontend**: Elstar React Template (https://elstar.themenate.net/app)
+
+## Arquitectura del Proyecto
+
+### Estructura de Directorios
+```
+misionary/
+├── docker-compose.yml          # Orquestación de contenedores
+├── .env                       # Variables de entorno principales
+├── backend/                   # API Node.js/Express
+│   ├── Dockerfile            # Configuración Docker backend
+│   ├── package.json          # Dependencias Node.js
+│   ├── .env                  # Variables de entorno backend
+│   ├── prisma/               # ORM y base de datos
+│   │   ├── schema.prisma     # Esquema de base de datos
+│   │   ├── seed.ts          # Datos iniciales
+│   │   └── migrations/       # Migraciones de BD
+│   └── src/                  # Código fuente
+│       ├── index.ts          # Punto de entrada
+│       ├── config/           # Configuraciones
+│       ├── controllers/      # Controladores API
+│       ├── services/         # Lógica de negocio
+│       ├── middleware/       # Middlewares
+│       └── routes/           # Rutas API
+└── frontend/                 # App React con Elstar Template
+    ├── Dockerfile           # Configuración Docker frontend
+    ├── package.json         # Dependencias React
+    └── src/                 # Código fuente React
+```
+
+## Configuración del Entorno
+
+### Variables de Entorno Principales (.env raíz)
+```
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+POSTGRES_DB=misionary
+NODE_ENV=development
+JWT_SECRET=your_super_secret_jwt_key_for_production
+JWT_EXPIRES_IN=1d
+VITE_API_URL=http://localhost:3001/api
+CORS_ORIGIN=http://localhost:3000
+```
+
+### Puertos de Servicios
+- **Frontend**: Puerto 3000 (http://localhost:3000) - Vite dev server
+- **Backend API**: Puerto 3001 (http://localhost:3001/api)
+- **PostgreSQL**: Puerto 5432 (localhost:5432)
+
+## Comandos Esenciales
+
+### Inicio Completo del Entorno
+```bash
+cd misionary/
+docker-compose up -d
+```
+
+### Verificar Estado de Contenedores
+```bash
+docker ps -a
+```
+
+### Ver Logs de Servicios
+```bash
+docker logs misionary-backend-1
+docker logs misionary-frontend-1
+docker logs misionary-postgres-1
+```
+
+### Ejecutar Migraciones y Seed
+```bash
+# Desde el contenedor backend
+docker exec misionary-backend-1 npm run db:migrate
+docker exec misionary-backend-1 npm run db:seed
+```
+
+### Reconstruir Contenedores (cuando hay cambios)
+```bash
+docker-compose down
+docker-compose build --no-cache
+docker-compose up -d
+```
+
+## Dependencias Clave
+
+### Backend (Node.js)
+- **ORM**: Prisma 6.9.0
+- **Framework**: Express 5.1.0
+- **Auth**: bcrypt + jsonwebtoken
+- **Validación**: express-validator
+- **Seguridad**: helmet, cors
+- **Dev**: TypeScript, ts-node-dev (hot reload)
+
+### Frontend (React)
+- **Template**: Elstar React Template (comercial)
+- **Build**: Vite
+- **Styling**: Tailwind CSS
+- **State**: Zustand/Redux (verificar template)
+- **Routing**: React Router
+
+## Configuración Especial del Template Elstar
+
+### Características del Template
+- Dashboard administrativo completo
+- Componentes UI preconstruidos
+- Tema dark/light
+- Responsive design
+- Múltiples layouts
+- Componentes de tablas, formularios, gráficos
+
+### Integración con el ERP
+- **Autenticación**: Adaptar el sistema de auth del template con nuestro JWT
+- **Rutas**: Configurar rutas según roles (ADMIN, CONTADOR, PROVEEDOR)
+- **API Integration**: Conectar componentes con nuestros endpoints
+- **Temas**: Personalizar colores/branding para Misionary
+
+## Estructura de la Base de Datos (Prisma Schema)
+
+### Entidades Principales
+1. **Persona**: Clientes, Proveedores, Internos
+2. **Producto/Servicio**: Items para presupuestos
+3. **Presupuesto**: Estados BORRADOR → ENVIADO → APROBADO → FACTURADO
+4. **Factura**: Estados EMITIDA / PAGADA / ANULADA
+5. **Recibo**: Vinculado a facturas pagadas
+
+### Usuario Admin por Defecto
+- **Email**: admin@misionary.com
+- **Password**: admin123
+- **Rol**: ADMIN
+
+## Estrategia de Desarrollo - IMPORTANTE
+
+### ⚠️ REGLA DE ORO: UN MÓDULO A LA VEZ
+- **NUNCA** intentar implementar múltiples CRUDs simultáneamente
+- **SIEMPRE** completar un módulo antes de pasar al siguiente
+- **ENFOQUE**: Configuración → Autenticación → Un CRUD → Siguiente CRUD
+
+### Estado Actual del Proyecto
+✅ **COMPLETADO:**
+- Docker environment funcionando
+- Backend API operativo (puerto 3001)
+- PostgreSQL con migraciones aplicadas
+- Autenticación JWT funcional
+- Usuario admin creado: admin@misionary.com / admin123
+- Frontend Elstar funcionando (puerto 3000) - CON HOT RELOAD
+- Configuración de puertos corregida (3000:5173)
+- Error de autoprefixer corregido
+- Configuración PostCSS/Tailwind corregida (@tailwindcss/postcss)
+- Error de locale/idioma corregido (español agregado)
+- Configuración de rutas corregida (component vs element)
+- Conexión frontend-backend establecida (login funcional)
+- Sincronización autenticación con Redux store del template
+- Configuración de rutas de autenticación (/home)
+- Frontend completamente funcional CON LAYOUT
+
+❌ **PENDIENTE (NO TOCAR HASTA COMPLETAR ANTERIOR):**
+- CRUD Personas
+- CRUD Productos
+- CRUD Presupuestos
+- Dashboard
+
+## Patrones de Desarrollo
+
+### API Endpoints
+```
+/api/auth/login    (POST) - Autenticación
+/api/auth/register (POST) - Registro
+/api/personas/*    (CRUD) - Gestión personas
+/api/productos/*   (CRUD) - Gestión productos
+/api/presupuestos/* (CRUD) - Gestión presupuestos
+/api/facturas/*    (CRUD) - Gestión facturas
+```
+
+### Estructura de Controllers
+- Usar clases estáticas con métodos async
+- Manejo de errores con try/catch
+- Validación con express-validator
+- Respuestas JSON consistentes
+
+### Middleware de Autenticación
+- JWT en header Authorization: Bearer <token>
+- Middleware `auth` para proteger rutas
+- Middleware `checkRole` para autorización por rol
+
+## Troubleshooting Común
+
+### Problemas de Contenedores
+```bash
+# Limpiar contenedores y volúmenes
+docker-compose down -v
+docker system prune -f
+
+# Reconstruir desde cero
+docker-compose build --no-cache
+```
+
+### Problemas de Base de Datos
+```bash
+# Reset completo de BD
+docker-compose down -v
+docker-compose up -d postgres
+# Esperar que esté healthy, luego:
+docker exec misionary-backend-1 npx prisma migrate deploy
+docker exec misionary-backend-1 npx prisma db seed
+```
+
+### Problemas de TypeScript
+- Verificar que @types/* estén instalados
+- Generar cliente Prisma: `npx prisma generate`
+- Verificar imports (usar `bcrypt` no `bcryptjs`)
+
+## Integraciones Futuras (No MVP)
+- AFIP SDK para facturación electrónica
+- Microservicio de emails
+- Sistema de inventario
+- Integraciones bancarias
+
+## Notas Importantes para Agentes IA
+1. **NUNCA** cambiar configuraciones de Docker sin consultar
+2. **SIEMPRE** usar `bcrypt` en lugar de `bcryptjs`
+3. **VERIFICAR** que el template Elstar esté correctamente configurado
+4. **RESPETAR** la estructura de roles y permisos establecida
+5. **USAR** los endpoints existentes antes de crear nuevos
+6. **DOCUMENTAR** cualquier cambio importante en este archivo
+
+## Contacto y Referencias
+- Template Elstar: https://elstar.themenate.net/app
+- Documentación Prisma: https://www.prisma.io/docs
+- Documentación Express: https://expressjs.com/
+- Documentación Docker Compose: https://docs.docker.com/compose/
+
+---
+
+## ✅ **ESTADO ACTUAL COMPLETADO (Enero 2025)**
+
+### 🎯 **AUTENTICACIÓN Y NAVEGACIÓN - 100% FUNCIONAL**
+
+#### Backend API:
+- ✅ Servidor Express corriendo en puerto 3001
+- ✅ PostgreSQL 16 con datos de prueba
+- ✅ Endpoint `/api/auth/login` funcionando correctamente
+- ✅ JWT tokens generados y validados
+- ✅ Usuario admin creado: admin@misionary.com / admin123
+
+#### Frontend React:
+- ✅ Aplicación corriendo en puerto 3000
+- ✅ Template Elstar completamente integrado
+- ✅ Sistema de rutas protegidas/públicas
+- ✅ Hook useAuth sincronizado con Redux
+- ✅ AuthService manejando localStorage
+- ✅ Login funcional con redirección automática
+- ✅ Layout principal visible post-autenticación
+
+#### Flujo de Autenticación:
+1. Usuario accede a `/login`
+2. Ingresa credenciales (admin@misionary.com / admin123)
+3. AuthService envía POST `/api/auth/login`
+4. Backend responde con { user, token }
+5. Frontend almacena en localStorage + Redux
+6. Usuario es redirigido a `/home` (layout principal)
+7. Layout Elstar se muestra con header, sidebar, navegación
+
+### 🚀 **PRÓXIMA FASE: DESARROLLO INCREMENTAL DE CRUDS**
+
+#### **✅ FASE COMPLETADA: CRUD PERSONAS - EJEMPLO DE IMPLEMENTACIÓN EXITOSA**
+
+**🎉 ESTADO: 100% FUNCIONAL - CREAR, LISTAR, EDITAR, ELIMINAR**
+
+**ARQUITECTURA HÍBRIDA IMPLEMENTADA:**
+Hemos establecido una arquitectura que separa claramente la lógica de negocio de la lógica de UI:
+
+```
+frontend/src/
+├── modules/                           # LÓGICA DE NEGOCIO
+│   └── persona/
+│       ├── types.ts                   # Tipos de dominio (Persona, DTOs)
+│       ├── service.ts                 # Llamadas a API (usando ApiService.fetchData)
+│       └── hooks/
+│           └── usePersona.ts          # Hook principal con lógica de negocio
+├── views/                             # LÓGICA DE UI
+│   └── personas/
+│       ├── types.ts                   # Re-exports + tipos específicos de UI
+│       ├── schemas.ts                 # Validación Zod + enums locales
+│       ├── hooks/
+│       │   └── index.ts               # Hooks específicos de UI (filtros, etc.)
+│       ├── PersonaList/
+│       │   ├── index.tsx              # Export limpio
+│       │   └── PersonaList.tsx        # Componente principal con DataTable
+│       ├── PersonaForm/
+│       │   ├── index.tsx              # Export limpio
+│       │   └── PersonaForm.tsx        # Formulario base reutilizable
+│       ├── PersonaNew/
+│       │   ├── index.tsx              # Export limpio
+│       │   └── PersonaNew.tsx         # Página de alta con React Hook Form + Zod
+│       ├── PersonaEdit/
+│       │   ├── index.tsx              # Export limpio
+│       │   └── PersonaEdit.tsx        # Página de edición con React Hook Form + Zod
+│       └── index.tsx                  # Vista principal que orquesta todo
+```
+
+**TECNOLOGÍAS INTEGRADAS Y FUNCIONANDO:**
+- ✅ **Framer Motion**: Animaciones y microinteracciones en todas las vistas
+- ✅ **React Hook Form**: Gestión de formularios en PersonaNew y PersonaEdit
+- ✅ **Zod**: Validación de esquemas con enums locales
+- ✅ **DataTable**: Listado con filtros, paginación, ordenamiento
+- ✅ **Componentes UI**: Badge, Tag, Tooltip, Button, Dialog, Alert integrados
+
+**FUNCIONALIDADES 100% OPERATIVAS:**
+1. **✅ CREAR**: `/personas/new` - Formulario completo con validación
+2. **✅ LISTAR**: `/personas` - DataTable con columnas ID, Nombre, Email, Tipo, Roles, Acciones
+3. **✅ EDITAR**: `/personas/edit/:id` - Formulario pre-poblado con validación
+4. **✅ ELIMINAR**: Confirmación con ConfirmDialog antes de eliminar
+5. **✅ NAVEGACIÓN**: Integración completa con sidebar del template
+6. **✅ ROLES MÚLTIPLES**: Visualización correcta con Tags de colores únicos
+7. **✅ VALIDACIÓN**: Esquemas Zod funcionando en tiempo real
+8. **✅ ANIMACIONES**: Microinteracciones suaves con Framer Motion
+
+**PROBLEMAS RESUELTOS EXITOSAMENTE:**
+1. **❌→✅ @prisma/client**: Eliminado del frontend, creados enums locales
+2. **❌→✅ Loop infinito**: Corregidas dependencias de useEffect
+3. **❌→✅ Keys duplicadas**: Agregados índices únicos en mapeo de roles
+4. **❌→✅ Formularios**: React Hook Form + Zod implementado correctamente
+5. **❌→✅ Navegación**: Rutas de edición funcionando perfectamente
+6. **❌→✅ Actualización**: Backend y frontend sincronizados
+
+#### **🎯 SIGUIENTE FASE: CRUD PRODUCTOS (USAR PERSONAS COMO PLANTILLA PERFECTA)**
+
+**PASO A PASO PARA REPLICAR EL ÉXITO:**
+
+**1. CREAR ESTRUCTURA DE ARCHIVOS (OBLIGATORIA):**
+```bash
+mkdir -p frontend/src/views/productos/{ProductoList,ProductoForm,ProductoNew,ProductoEdit,hooks}
+```
+
+```
+views/productos/
+├── schemas.ts                    # CRÍTICO: Enums locales + validación Zod
+├── types.ts                      # Re-exports desde modules/
+├── hooks/index.ts                # Hooks UI específicos
+├── ProductoList/
+│   ├── index.tsx                # export { default } from './ProductoList';
+│   └── ProductoList.tsx         # DataTable + columnas + acciones
+├── ProductoForm/
+│   ├── index.tsx                # export { default } from './ProductoForm';
+│   └── ProductoForm.tsx         # Formulario base reutilizable
+├── ProductoNew/
+│   ├── index.tsx                # export { default } from './ProductoNew';
+│   └── ProductoNew.tsx          # React Hook Form + Zod + animaciones
+├── ProductoEdit/
+│   ├── index.tsx                # export { default } from './ProductoEdit';
+│   └── ProductoEdit.tsx         # React Hook Form + Zod + animaciones
+└── index.tsx                    # Vista principal orquestadora
+```
+
+**2. CONFIGURAR VALIDACIÓN ZOD (COPIAR DE PERSONAS):**
+```typescript
+// views/productos/schemas.ts
+import { z } from 'zod';
+
+// CRÍTICO: Enums locales (NO @prisma/client)
+export enum TipoProducto {
+  PRODUCTO = 'PRODUCTO',
+  SERVICIO = 'SERVICIO'
+}
+
+export enum EstadoProducto {
+  ACTIVO = 'ACTIVO',
+  INACTIVO = 'INACTIVO'
+}
+
+export const productoSchema = z.object({
+  nombre: z.string().min(2, 'Mínimo 2 caracteres'),
+  descripcion: z.string().optional(),
+  precio: z.number().positive('Debe ser positivo'),
+  tipo: z.nativeEnum(TipoProducto),
+  estado: z.nativeEnum(EstadoProducto)
+});
+
+export const createProductoSchema = productoSchema;
+export const updateProductoSchema = productoSchema.partial();
+
+export type CreateProductoFormData = z.infer<typeof createProductoSchema>;
+export type UpdateProductoFormData = z.infer<typeof updateProductoSchema>;
+```
+
+**3. ACTUALIZAR LÓGICA DE NEGOCIO:**
+```typescript
+// modules/producto/service.ts - USAR PATRÓN FETCHDATA
+export async function fetchProductos(): Promise<Producto[]> {
+  const response = await ApiService.fetchData<Producto[]>({ 
+    url: '/productos', 
+    method: 'GET' 
+  });
+  return response.data;
+}
+
+export async function createProducto(data: CreateProductoDTO): Promise<Producto> {
+  const response = await ApiService.fetchData<Producto>({ 
+    url: '/productos', 
+    method: 'POST', 
+    data 
+  });
+  return response.data;
+}
+// ... más métodos igual que personas
+```
+
+**4. CONFIGURAR NAVEGACIÓN (COPIAR PATRÓN PERSONAS):**
+```typescript
+// configs/routes.config.tsx
+const ProductoView = lazy(() => import('@/views/productos'));
+const ProductoNew = lazy(() => import('@/views/productos/ProductoNew'));
+const ProductoEdit = lazy(() => import('@/views/productos/ProductoEdit'));
+
+// Agregar rutas:
+{ key: 'productos', path: '/productos', component: ProductoView },
+{ key: 'producto-new', path: '/productos/new', component: ProductoNew },
+{ key: 'producto-edit', path: '/productos/edit/:id', component: ProductoEdit },
+```
+
+**5. CREAR COMPONENTES (COPIAR ESTRUCTURA DE PERSONAS):**
+- **ProductoList.tsx**: DataTable con columnas específicas
+- **ProductoNew.tsx**: React Hook Form + Zod + Framer Motion
+- **ProductoEdit.tsx**: Igual que PersonaEdit pero para productos
+- **hooks/useProducto.ts**: Hook principal con CRUD operations
+
+**PUNTOS CRÍTICOS PARA NO FALLAR:**
+1. **❌ NUNCA** importar de `@prisma/client` en frontend
+2. **✅ SIEMPRE** crear enums locales en `schemas.ts`
+3. **✅ USAR** `ApiService.fetchData({ url, method, data })`
+4. **✅ MANTENER** estructura modules/ + views/
+5. **✅ AGREGAR** rutas en routes.config.tsx
+6. **✅ CONFIGURAR** navegación en navigation.config/
+7. **✅ AGREGAR** traducciones en locales/lang/es.json
+
+#### **🔧 COMANDOS DESARROLLO:**
+```bash
+# Instalar nuevas dependencias
+./manage.sh frontend npm install
+
+# Iniciar desarrollo frontend
+./manage.sh frontend npm run dev
+
+# Ver errores en tiempo real
+docker-compose logs -f frontend
+```
+
+### 🔧 **COMANDOS ÚTILES**
+```bash
+# Iniciar entorno completo
+docker-compose up -d
+
+# Ver logs
+docker-compose logs -f frontend
+docker-compose logs -f backend
+
+# Reiniciar servicios
+docker-compose restart frontend
+docker-compose restart backend
+
+# Acceder a base de datos
+docker exec -it misionary-postgres-1 psql -U postgres -d misionary
+```
+
+### 📋 **VERIFICACIONES DIARIAS**
+- [ ] Contenedores corriendo: `docker ps`
+- [ ] Backend responde: `curl http://localhost:3001/api/health`
+- [ ] Frontend carga: `http://localhost:3000`
+- [ ] Login funciona: admin@misionary.com / admin123
+- [ ] Layout principal visible post-login
+
+---
+
+**🎉 ENTORNO COMPLETAMENTE FUNCIONAL - READY FOR DEVELOPMENT! 🎉**

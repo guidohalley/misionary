@@ -1,0 +1,43 @@
+{
+  "Welcome": "Bienvenido",
+  "Home": "Inicio",
+  "Dashboard": "Panel de Control",
+  "Login": "Iniciar Sesión",
+  "Logout": "Cerrar Sesión",
+  "Email": "Correo Electrónico",
+  "Password": "Contraseña",
+  "Sign In": "Acceder",
+  "Remember Me": "Recordarme",
+  "Forgot Password": "Olvidé mi Contraseña",
+  "Personas": "Personas",
+  "Productos": "Productos",
+  "Presupuestos": "Presupuestos",
+  "Facturas": "Facturas",
+  "Name": "Nombre",
+  "Actions": "Acciones",
+  "Edit": "Editar",
+  "Delete": "Eliminar",
+  "Save": "Guardar",
+  "Cancel": "Cancelar",
+  "Loading": "Cargando",
+  "Error": "Error",
+  "Success": "Éxito",
+  "nav": {
+    "home": "Dashboard",
+    "personas": "Personas",
+    "productos": "Productos",
+    "presupuestos": "Presupuestos",
+    "gestion": {
+      "title": "Gestión Comercial",
+      "clientes": "Clientes",
+      "proveedores": "Proveedores",
+      "servicios": "Servicios"
+    },
+    "facturacion": {
+      "title": "Facturación",
+      "facturas": "Facturas",
+      "recibos": "Recibos",
+      "impuestos": "Impuestos"
+    }
+  }
+}
