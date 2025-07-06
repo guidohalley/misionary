@@ -17,7 +17,6 @@ export class MonedaController {
   static async getAllMonedas(req: Request, res: Response) {
     try {
       const monedas = await MonedaService.getAllMonedas();
-      
       res.json({
         success: true,
         data: monedas,

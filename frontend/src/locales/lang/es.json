@@ -43,6 +43,12 @@
       "recibos": "Recibos",
       "impuestos": "Impuestos",
       "monedas": "Monedas"
+    },
+    "finanzas": {
+      "title": "Finanzas y Costos",
+      "gastos": "Gastos Operativos",
+      "nuevoGasto": "Nuevo Gasto",
+      "rentabilidad": "Análisis de Rentabilidad"
     }
   }
 }

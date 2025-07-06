@@ -179,6 +179,47 @@ const navigationConfig: NavigationTree[] = [
             },
         ],
     },
+    {
+        key: 'finanzas',
+        path: '',
+        title: 'Finanzas y Costos',
+        translateKey: 'nav.finanzas.title',
+        icon: 'chartLine',
+        type: NAV_ITEM_TYPE_COLLAPSE,
+        authority: [],
+        subMenu: [
+            {
+                key: 'finanzas.gastos',
+                path: '/gastos',
+                title: 'Gastos Operativos',
+                translateKey: 'nav.finanzas.gastos',
+                icon: 'cash',
+                type: NAV_ITEM_TYPE_ITEM,
+                authority: [],
+                subMenu: [],
+            },
+            {
+                key: 'finanzas.gastos.nuevo',
+                path: '/gastos/new',
+                title: 'Nuevo Gasto',
+                translateKey: 'nav.finanzas.nuevoGasto',
+                icon: 'plus',
+                type: NAV_ITEM_TYPE_ITEM,
+                authority: [],
+                subMenu: [],
+            },
+            {
+                key: 'finanzas.rentabilidad',
+                path: '/gastos/rentabilidad',
+                title: 'Análisis de Rentabilidad',
+                translateKey: 'nav.finanzas.rentabilidad',
+                icon: 'trendingUp',
+                type: NAV_ITEM_TYPE_ITEM,
+                authority: [],
+                subMenu: [],
+            },
+        ],
+    },
 ]
 
 export default navigationConfig

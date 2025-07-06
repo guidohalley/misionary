@@ -24,6 +24,8 @@ const PresupuestoNew = lazy(() => import('@/views/presupuestos/PresupuestoNew'))
 const PresupuestoEdit = lazy(() => import('@/views/presupuestos/PresupuestoEdit'));
 const PresupuestoView = lazy(() => import('@/views/presupuestos/PresupuestoView'));
 const MonedaView = lazy(() => import('@/views/moneda'));
+const GastosView = lazy(() => import('@/views/gastos'));
+const GastoNew = lazy(() => import('@/views/gastos/GastoNew'));
 
 const publicRoutes = [
   {
@@ -143,6 +145,16 @@ const protectedRoutes = [
     key: 'monedas',
     path: '/monedas',
     component: MonedaView,
+  },
+  {
+    key: 'gastos',
+    path: '/gastos',
+    component: GastosView,
+  },
+  {
+    key: 'gasto-new',
+    path: '/gastos/new',
+    component: GastoNew,
   }
 ];
 

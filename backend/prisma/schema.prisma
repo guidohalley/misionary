@@ -43,6 +43,18 @@ enum CodigoMoneda {
   EUR
 }
 
+// Categorías de gastos operativos
+enum CategoriaGasto {
+  OFICINA          // Alquiler, servicios, limpieza
+  PERSONAL         // Sueldos, cargas sociales, capacitación
+  MARKETING        // Publicidad, eventos, contenido
+  TECNOLOGIA       // Software, hardware, hosting
+  SERVICIOS        // Contabilidad, legal, consultoría
+  TRANSPORTE       // Combustible, mantenimiento, viajes
+  COMUNICACION     // Internet, teléfono, reuniones
+  OTROS            // Gastos diversos
+}
+
 // ─────────────────── MODELOS ─────────────────── 
 
 // NUEVO: Sistema Multi-Moneda
@@ -62,6 +74,7 @@ model Moneda {
   servicios        Servicio[]
   presupuestos     Presupuesto[]
   facturas         Factura[]
+  gastosOperativos GastoOperativo[]  // Gastos operativos en esta moneda
 }
 
 model TipoCambio {
@@ -92,6 +105,7 @@ model Persona {
   servicios    Servicio[]
   presupuestos Presupuesto[]  @relation("ClientePresupuestos")
   recibos      Recibo[]
+  gastosComoProveedor GastoOperativo[] @relation("GastoProveedor")
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
 }
@@ -136,6 +150,7 @@ model Presupuesto {
   estado               EstadoPresupuesto       @default(BORRADOR)
   factura              Factura?
   presupuestoImpuestos PresupuestoImpuesto[]
+  asignacionesGasto    AsignacionGastoProyecto[] // Gastos operativos asignados a este proyecto
   moneda               Moneda                  @relation(fields: [monedaId], references: [id])
   createdAt            DateTime                @default(now())
   updatedAt            DateTime                @updatedAt
@@ -207,4 +222,50 @@ model PresupuestoImpuesto {
   updatedAt     DateTime    @updatedAt
 
   @@unique([presupuestoId, impuestoId])
+}
+
+// ─────────────────── GESTIÓN DE COSTOS OPERATIVOS ─────────────────── 
+
+// Gastos operativos de la empresa
+model GastoOperativo {
+  id              Int                         @id @default(autoincrement())
+  concepto        String                      // "Alquiler oficina", "Sueldo desarrollador", etc.
+  descripcion     String?                     // Descripción detallada opcional
+  monto           Decimal                     @db.Decimal(15,2)
+  monedaId        Int
+  fecha           DateTime                    // Fecha del gasto
+  categoria       CategoriaGasto
+  esRecurrente    Boolean                     @default(false) // Si es un gasto que se repite
+  frecuencia      String?                     // "MENSUAL", "ANUAL", etc. (solo si esRecurrente = true)
+  proveedorId     Int?                        // Proveedor del gasto (opcional)
+  comprobante     String?                     // Número de factura/recibo
+  observaciones   String?
+  activo          Boolean                     @default(true)
+  
+  // Relaciones
+  moneda          Moneda                      @relation(fields: [monedaId], references: [id])
+  proveedor       Persona?                    @relation("GastoProveedor", fields: [proveedorId], references: [id])
+  asignaciones    AsignacionGastoProyecto[]   // A qué proyectos se asigna este gasto
+  
+  createdAt       DateTime                    @default(now())
+  updatedAt       DateTime                    @updatedAt
+}
+
+// Asignación de gastos operativos a proyectos específicos
+model AsignacionGastoProyecto {
+  id              Int                 @id @default(autoincrement())
+  gastoId         Int
+  presupuestoId   Int                 // Proyecto al que se asigna el gasto
+  porcentaje      Decimal             @db.Decimal(5,2)  // Porcentaje del gasto asignado (ej: 25.50%)
+  montoAsignado   Decimal             @db.Decimal(15,2) // Monto calculado automáticamente
+  justificacion   String?             // Por qué se asigna este porcentaje a este proyecto
+  
+  // Relaciones
+  gasto           GastoOperativo      @relation(fields: [gastoId], references: [id], onDelete: Cascade)
+  presupuesto     Presupuesto         @relation(fields: [presupuestoId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  
+  @@unique([gastoId, presupuestoId]) // Un gasto puede asignarse solo una vez por proyecto
 }
