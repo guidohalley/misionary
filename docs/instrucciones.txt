@@ -38,6 +38,170 @@ En el contexto económico argentino, donde coexisten múltiples monedas (Pesos, 
 - Integración con sistema multi-moneda
 - **JUSTIFICACIÓN**: Permite conocer la rentabilidad real considerando todos los costos, fundamental para tomar decisiones comerciales correctas
 
+### ✅ **ESTADO: GASTOS OPERATIVOS IMPLEMENTADOS EXITOSAMENTE (Julio 2025)**
+
+**🎯 FUNCIONALIDAD COMPLETADA AL 85%:**
+
+#### **BACKEND IMPLEMENTADO:**
+- ✅ **Schema Prisma**: Tabla `GastoOperativo` con todas las relaciones necesarias
+  - Categorías predefinidas (OFICINA, PERSONAL, MARKETING, TECNOLOGIA, etc.)
+  - Relación con `Moneda` (multi-moneda funcional)
+  - Relación con `Persona` (proveedores)
+  - Campos: concepto, descripción, monto, fecha, categoria, esRecurrente, frecuencia
+  - Soft delete y timestamps automáticos
+
+- ✅ **Controller**: `/backend/src/controllers/gasto.controller.ts`
+  - `getGastosOperativos()` - Filtros por categoría, proveedor, moneda, fecha, búsqueda
+  - `createGastoOperativo()` - Validación completa de datos
+  - `updateGastoOperativo()` - Actualización parcial
+  - `deleteGastoOperativo()` - Eliminación lógica
+  - **FORMATO RESPUESTA**: `{ success: true, data: [...], message: "..." }` (consistente con monedas)
+
+- ✅ **Service**: `/backend/src/services/gasto.service.ts`
+  - Lógica de negocio con Prisma
+  - Includes automáticos (moneda, proveedor)
+  - Filtros avanzados y búsqueda por texto
+
+- ✅ **Routes**: `/backend/src/routes/gasto.routes.ts`
+  - CRUD completo: GET, POST, PUT, DELETE
+  - Middleware de autenticación aplicado
+  - Registradas en `/backend/src/index.ts` como `/api/gastos-operativos`
+
+#### **FRONTEND IMPLEMENTADO:**
+- ✅ **Arquitectura Híbrida** (siguiendo patrón de personas exitoso):
+  ```
+  frontend/src/
+  ├── modules/gasto/                    # LÓGICA DE NEGOCIO
+  │   ├── types.ts                      # Tipos de dominio
+  │   ├── service.ts                    # Llamadas API (fetchMonedas, fetchProveedores, fetchGastos)
+  │   └── hooks/useGasto.ts             # Hook principal + useGastoAuxiliarData
+  └── views/gastos/                     # LÓGICA DE UI
+      ├── types.ts                      # Re-exports + tipos UI
+      ├── schemas.ts                    # Validación Zod + enums locales
+      ├── GastoList/                    # Listado con DataTable
+      ├── GastoNew/                     # Formulario de alta
+      └── index.tsx                     # Vista orquestadora
+  ```
+
+- ✅ **Componente MoneyInput Personalizado**: `/frontend/src/components/shared/MoneyInput/`
+  - Formateo automático de moneda argentina (separadores de miles)
+  - Símbolo de moneda dinámico ($ ARS, USD, €)
+  - Validación de entrada (solo números, comas, puntos)
+  - UX mejorada: formato en blur, edición en focus
+  - Integración perfecta con React Hook Form
+
+- ✅ **Formulario de Alta**: `/frontend/src/views/gastos/GastoNew/GastoNew.tsx`
+  - React Hook Form + Zod para validación
+  - Campos: concepto*, categoría*, monto*, moneda*, fecha*, proveedor, descripción
+  - Selects con opciones dinámicas (monedas, proveedores, categorías)
+  - Checkbox para gastos recurrentes con frecuencia
+  - Animaciones Framer Motion
+
+- ✅ **Listado DataTable**: `/frontend/src/views/gastos/GastoList/GastoList.tsx`
+  - Columnas: ID, Concepto, Monto (con símbolo), Categoría (con iconos), Fecha, Proveedor
+  - Badges coloreados por categoría
+  - Acciones: Ver, Editar, Asignar a proyectos, Eliminar
+  - Responsive y con loading states
+
+#### **SERVICIOS INTEGRADOS:**
+- ✅ **Multi-moneda**: Conexión con `/api/monedas` (estructura: `{success, data, message}`)
+- ✅ **Proveedores**: Conexión con `/api/personas?tipo=PROVEEDOR` (array directo)
+- ✅ **Navegación**: Rutas configuradas en sidebar "Gestión Comercial > Gastos Operativos"
+
+#### **PROBLEMAS RESUELTOS:**
+1. **❌→✅ Inconsistencia API**: Unificado formato de respuesta backend (monedas y gastos usan wrapper, personas array directo)
+2. **❌→✅ Error `.map is not a function`**: Validación defensive en frontend con `Array.isArray()`
+3. **❌→✅ MoneyInput UX**: Componente personalizado con formateo argentino y símbolos dinámicos
+4. **❌→✅ Estructura de datos**: Servicios frontend adaptados a diferentes formatos de API
+
+#### **COMANDOS PARA VERIFICAR:**
+```bash
+# Backend funcionando
+curl http://localhost:3001/api/monedas
+curl http://localhost:3001/api/gastos-operativos  # (requiere auth)
+
+# Frontend funcionando
+# http://localhost:3000/gastos (listado)
+# http://localhost:3000/gastos/new (formulario)
+```
+
+#### **📋 PENDIENTE PARA PRÓXIMA IA:**
+
+**PRIORIDAD ALTA:**
+1. **Página de Edición**: `/frontend/src/views/gastos/GastoEdit/` (copiar patrón de PersonaEdit)
+2. **Asignación a Proyectos**: Sistema para asignar gastos a presupuestos específicos
+3. **Dashboard de Rentabilidad**: Métricas y gráficos de costos vs ingresos por proyecto
+
+**PRIORIDAD MEDIA:**
+4. **Filtros Avanzados**: Filtros en GastoList por categoría, fecha, proveedor
+5. **Gastos Recurrentes**: Lógica para auto-generar gastos mensuales/anuales
+6. **Reportes**: Exportación de gastos por período
+
+**INSTRUCCIONES TÉCNICAS PARA PRÓXIMA IA:**
+
+**🚨 MANTENER CONSISTENCIA API:**
+- **Monedas y Gastos**: Usar `response.data.data` (estructura wrapper)
+- **Personas**: Usar `response.data` (array directo)
+- NO cambiar controladores que ya funcionan
+
+**🎯 IMPLEMENTAR EDICIÓN (COPIAR PATRÓN PERSONAS):**
+```typescript
+// 1. Crear GastoEdit.tsx (copiar PersonaEdit como template)
+// 2. Usar useParams() para obtener ID
+// 3. Hook useGasto.fetchGastoById(id) para cargar datos
+// 4. React Hook Form con defaultValues pre-poblados
+// 5. updateGasto() en onSubmit
+// 6. Navegación: /gastos/edit/:id
+
+// Estructura necesaria:
+views/gastos/GastoEdit/
+├── index.ts              # export { default } from './GastoEdit';
+└── GastoEdit.tsx         # React Hook Form + Zod + MoneyInput
+```
+
+**🔧 ASIGNACIÓN A PROYECTOS:**
+```sql
+-- Tabla nueva necesaria en Prisma:
+model AsignacionGastoProyecto {
+  id           Int            @id @default(autoincrement())
+  gastoId      Int
+  presupuestoId Int
+  porcentaje   Float          @default(100)
+  monto        Float
+  gasto        GastoOperativo @relation(fields: [gastoId], references: [id])
+  presupuesto  Presupuesto    @relation(fields: [presupuestoId], references: [id])
+  createdAt    DateTime       @default(now())
+}
+```
+
+**🎨 COMPONENTES A REUTILIZAR:**
+- `MoneyInput`: Ya funcional, usar en todos los formularios de dinero
+- `DataTable`: Pattern establecido para listados
+- `ConfirmDialog`: Para eliminaciones
+- `Framer Motion`: Animaciones consistentes
+
+**📱 RUTAS CONFIGURADAS:**
+- ✅ `/gastos` - Vista principal (GastosView)
+- ✅ `/gastos/new` - Crear gasto (GastoNew)
+- ❌ `/gastos/edit/:id` - Editar gasto (PENDIENTE)
+- ❌ `/gastos/asignar/:id` - Asignar a proyectos (PENDIENTE)
+
+**🔗 ENDPOINTS BACKEND LISTOS:**
+- ✅ `GET /api/gastos-operativos` - Listar con filtros
+- ✅ `POST /api/gastos-operativos` - Crear
+- ✅ `PUT /api/gastos-operativos/:id` - Actualizar (IMPLEMENTADO, FALTA FRONTEND)
+- ✅ `DELETE /api/gastos-operativos/:id` - Eliminar (IMPLEMENTADO, FALTA FRONTEND)
+
+**ESTRUCTURA EXITOSA A MANTENER:**
+```
+✅ modules/gasto/           # Lógica de negocio
+✅ views/gastos/            # Lógica de UI  
+✅ MoneyInput component     # Reutilizable para otros módulos
+✅ Hooks separados          # useGasto + useGastoAuxiliarData
+✅ Servicios diferenciados  # fetchGastos vs fetchMonedas vs fetchProveedores
+```
+---
+
 **PRIORIDAD 3: PRECIOS DINÁMICOS CON MULTI-MONEDA**
 - Historial de precios por moneda
 - Actualización masiva por inflación/devaluación
@@ -70,7 +234,8 @@ En el contexto económico argentino, donde coexisten múltiples monedas (Pesos, 
 - Proyecciones considerando costos operativos
 - **JUSTIFICACIÓN**: Dashboard realmente útil solo cuando tiene datos financieros precisos y completos
 
----
+
+
 
 ## Información General del Proyecto
 - **Nombre**: Misionary ERP
@@ -568,34 +733,23 @@ frontend/src/
 - ✅ **DataTable**: Listado con filtros por tipo
 - ✅ **Componentes UI**: Badge, Tag, Tooltip, Button, Dialog integrados
 
-**COMANDOS PARA PROBAR LA FUNCIONALIDAD:**
+**FUNCIONALIDADES 100% OPERATIVAS:**
+1. **✅ CREAR**: `/personas/new` - Formulario completo con validación
+2. **✅ LISTAR**: `/personas` - DataTable con columnas ID, Nombre, Email, Tipo, Roles, Acciones
+3. **✅ EDITAR**: `/personas/edit/:id` - Formulario pre-poblado con validación
+4. **✅ ELIMINAR**: Confirmación con ConfirmDialog antes de eliminar
+5. **✅ NAVEGACIÓN**: Integración completa con sidebar del template
+6. **✅ ROLES MÚLTIPLES**: Visualización correcta con Tags de colores únicos
+7. **✅ VALIDACIÓN**: Esquemas Zod funcionando en tiempo real
+8. **✅ ANIMACIONES**: Microinteracciones suaves con Framer Motion
 
-```bash
-# 1. Iniciar el entorno
-docker-compose up -d
-
-# 2. Acceder a la aplicación
-# http://localhost:3000
-# Login: admin@misionary.com / admin123
-
-# 3. Navegar a:
-# - Gestión Comercial > Nuevo Cliente    (/personas/cliente/new)
-# - Gestión Comercial > Nuevo Proveedor  (/personas/proveedor/new)
-# - Gestión Comercial > Nuevo Usuario Interno (/personas/interno/new)
-# - O usar el selector: /personas/new
-
-# 4. Verificar en backend que se crean correctamente:
-docker exec misionary-backend-1 npm run db:studio
-```
-
-**PRÓXIMOS PASOS RECOMENDADOS:**
-
-1. **✅ COMPLETADO**: Formularios específicos por tipo de persona
-2. **✅ COMPLETADO**: Navegación mejorada con opciones específicas
-3. **✅ COMPLETADO**: Validaciones diferenciadas por tipo
-4. **🔄 SIGUIENTE**: Filtros en PersonaList por tipo de persona
-5. **🔄 SIGUIENTE**: Páginas de edición específicas por tipo
-6. **🔄 SIGUIENTE**: CRUD Productos (usar estructura de personas como template)
+**PROBLEMAS RESUELTOS EXITOSAMENTE:**
+1. **❌→✅ @prisma/client**: Eliminado del frontend, creados enums locales
+2. **❌→✅ Loop infinito**: Corregidas dependencias de useEffect
+3. **❌→✅ Keys duplicadas**: Agregados índices únicos en mapeo de roles
+4. **❌→✅ Formularios**: React Hook Form + Zod implementado correctamente
+5. **❌→✅ Navegación**: Rutas de edición funcionando perfectamente
+6. **❌→✅ Actualización**: Backend y frontend sincronizados
 
 #### **✅ FASE COMPLETADA: CRUD PERSONAS - EJEMPLO DE IMPLEMENTACIÓN EXITOSA**
 
@@ -674,7 +828,7 @@ views/productos/
 ├── hooks/index.ts                # Hooks UI específicos
 ├── ProductoList/
 │   ├── index.tsx                # export { default } from './ProductoList';
-│   └── ProductoList.tsx         # DataTable + columnas + acciones
+│   └── ProductoList.tsx         # Componente principal con DataTable
 ├── ProductoForm/
 │   ├── index.tsx                # export { default } from './ProductoForm';
 │   └── ProductoForm.tsx         # Formulario base reutilizable

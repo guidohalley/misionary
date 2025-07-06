@@ -12,6 +12,7 @@ import {
   DatePicker,
   Checkbox
 } from '@/components/ui';
+import MoneyInput from '@/components/shared/MoneyInput';
 import { HiOutlineArrowLeft, HiOutlineSave, HiOutlineX, HiOutlineCash } from 'react-icons/hi';
 import { useGasto, useGastoAuxiliarData } from '@/modules/gasto/hooks/useGasto';
 import { CategoriaGasto, categoriasGastoOptions, frecuenciaOptions } from '../schemas';
@@ -91,6 +92,9 @@ const GastoNew: React.FC = () => {
     value: categoria.value,
     label: `${categoria.icon} ${categoria.label}`
   }));
+
+  // Obtener la moneda seleccionada para el MoneyInput
+  const selectedMoneda = monedas.find(m => m.id === formData.monedaId);
 
   return (
     <motion.div
@@ -192,14 +196,14 @@ const GastoNew: React.FC = () => {
                   label="Monto"
                   asterisk
                 >
-                  <Input
+                  <MoneyInput
                     value={formData.monto}
-                    onChange={(e) => setFormData({...formData, monto: parseFloat(e.target.value) || 0})}
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    placeholder="0.00"
+                    onChange={(value) => setFormData({...formData, monto: value})}
+                    currency={selectedMoneda?.codigo || 'ARS'}
+                    currencySymbol={selectedMoneda?.simbolo || '$'}
+                    placeholder="0,00"
                     disabled={isSubmitting}
+                    min={0}
                   />
                 </FormItem>
 
