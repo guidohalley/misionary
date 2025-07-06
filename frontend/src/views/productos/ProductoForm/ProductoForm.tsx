@@ -47,9 +47,11 @@ const ProductoForm: React.FC<ProductoFormProps> = ({
     reset,
     setValue,
   } = useForm<ProductoFormData>({
-    // resolver: zodResolver(productoSchema), // Temporalmente deshabilitado hasta actualizar schema
+    resolver: zodResolver(productoSchema), // Reactivado con el schema actualizado
     defaultValues: initialData || {
       nombre: '',
+      costoProveedor: 0,
+      margenAgencia: 0,
       precio: 0,
       proveedorId: undefined,
       monedaId: 1, // ARS por defecto
@@ -58,6 +60,18 @@ const ProductoForm: React.FC<ProductoFormProps> = ({
 
   const monedaIdSeleccionada = watch('monedaId');
   const monedaSeleccionada = monedas.find(m => m.id === monedaIdSeleccionada);
+  
+  // Watch para cálculo automático del precio
+  const costoProveedor = watch('costoProveedor');
+  const margenAgencia = watch('margenAgencia');
+
+  // Efecto para calcular precio automáticamente
+  useEffect(() => {
+    if (costoProveedor > 0 && margenAgencia >= 0) {
+      const precioCalculado = costoProveedor * (1 + margenAgencia / 100);
+      setValue('precio', Number(precioCalculado.toFixed(2)));
+    }
+  }, [costoProveedor, margenAgencia, setValue]);
 
   useEffect(() => {
     refreshPersonas();
@@ -237,11 +251,71 @@ const ProductoForm: React.FC<ProductoFormProps> = ({
                         Pricing y Moneda
                       </h3>
                       <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                        Configure el precio y la moneda del producto
+                        Configure el costo del proveedor y margen de agencia. El precio se calculará automáticamente.
                       </p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormItem
+                        label="Costo del Proveedor"
+                        invalid={!!errors.costoProveedor}
+                        errorMessage={errors.costoProveedor?.message}
+                        asterisk
+                      >
+                        <Controller
+                          name="costoProveedor"
+                          control={control}
+                          rules={{ 
+                            required: 'El costo del proveedor es requerido',
+                            min: { value: 0, message: 'El costo debe ser mayor o igual a 0' }
+                          }}
+                          render={({ field }) => (
+                            <MoneyInput
+                              value={field.value || 0}
+                              onChange={field.onChange}
+                              currency={monedaSeleccionada?.codigo || 'ARS'}
+                              currencySymbol={monedaSeleccionada?.simbolo || '$'}
+                              placeholder="0,00"
+                              disabled={isSubmitting}
+                            />
+                          )}
+                        />
+                      </FormItem>
+
+                      <FormItem
+                        label="Margen de Agencia (%)"
+                        invalid={!!errors.margenAgencia}
+                        errorMessage={errors.margenAgencia?.message}
+                        asterisk
+                      >
+                        <Controller
+                          name="margenAgencia"
+                          control={control}
+                          rules={{ 
+                            required: 'El margen de agencia es requerido',
+                            min: { value: 0, message: 'El margen debe ser mayor o igual a 0' },
+                            max: { value: 1000, message: 'El margen no puede exceder 1000%' }
+                          }}
+                          render={({ field }) => (
+                            <Input
+                              {...field}
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              max="1000"
+                              value={field.value || ''}
+                              onChange={(e) => field.onChange(Number(e.target.value))}
+                              placeholder="Ej: 25 (para 25%)"
+                              disabled={isSubmitting}
+                              className="rounded-lg"
+                              suffix="%"
+                            />
+                          )}
+                        />
+                      </FormItem>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                       <FormItem
                         label="Moneda"
                         invalid={!!errors.monedaId}
@@ -267,18 +341,13 @@ const ProductoForm: React.FC<ProductoFormProps> = ({
                       </FormItem>
 
                       <FormItem
-                        label="Precio"
+                        label="Precio Final (Calculado automáticamente)"
                         invalid={!!errors.precio}
                         errorMessage={errors.precio?.message}
-                        asterisk
                       >
                         <Controller
                           name="precio"
                           control={control}
-                          rules={{ 
-                            required: 'El precio es requerido',
-                            min: { value: 0, message: 'El precio debe ser mayor o igual a 0' }
-                          }}
                           render={({ field }) => (
                             <MoneyInput
                               value={field.value || 0}
@@ -286,7 +355,8 @@ const ProductoForm: React.FC<ProductoFormProps> = ({
                               currency={monedaSeleccionada?.codigo || 'ARS'}
                               currencySymbol={monedaSeleccionada?.simbolo || '$'}
                               placeholder="0,00"
-                              disabled={isSubmitting}
+                              disabled={true} // Siempre readonly porque se calcula automáticamente
+                              className="bg-gray-50 dark:bg-gray-700"
                             />
                           )}
                         />

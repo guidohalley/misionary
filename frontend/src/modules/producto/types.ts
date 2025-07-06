@@ -12,6 +12,8 @@ export interface Moneda {
 export interface Producto {
   id: number;
   nombre: string;
+  costoProveedor: number;
+  margenAgencia: number;
   precio: number;
   proveedorId: number;
   proveedor: Persona;
@@ -23,13 +25,17 @@ export interface Producto {
 
 export interface CreateProductoDTO {
   nombre: string;
-  precio: number;
+  costoProveedor: number;
+  margenAgencia: number;
+  precio?: number; // Opcional, se calculará automáticamente
   proveedorId: number;
-  monedaId: number;
+  monedaId?: number; // Opcional, por defecto será ARS
 }
 
 export interface UpdateProductoDTO {
   nombre?: string;
+  costoProveedor?: number;
+  margenAgencia?: number;
   precio?: number;
   proveedorId?: number;
   monedaId?: number;

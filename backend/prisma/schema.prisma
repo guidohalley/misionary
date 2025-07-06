@@ -62,6 +62,8 @@ model Persona {
 model Producto {
   id               Int               @id @default(autoincrement())
   nombre           String
+  costoProveedor   Decimal           @db.Decimal(15, 2)
+  margenAgencia    Decimal           @db.Decimal(5, 2)
   precio           Decimal           @db.Decimal(15, 2)
   proveedorId      Int
   createdAt        DateTime          @default(now())
@@ -77,6 +79,8 @@ model Servicio {
   id               Int               @id @default(autoincrement())
   nombre           String
   descripcion      String
+  costoProveedor   Decimal           @db.Decimal(15, 2)
+  margenAgencia    Decimal           @db.Decimal(5, 2)
   precio           Decimal           @db.Decimal(15, 2)
   proveedorId      Int
   createdAt        DateTime          @default(now())

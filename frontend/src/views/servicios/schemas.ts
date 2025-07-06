@@ -10,9 +10,18 @@ export const servicioSchema = z.object({
     .min(10, 'La descripción debe tener al menos 10 caracteres')
     .max(500, 'La descripción no puede exceder 500 caracteres'),
   
+  costoProveedor: z.number()
+    .min(0, 'El costo del proveedor debe ser mayor o igual a 0')
+    .positive('El costo del proveedor debe ser positivo'),
+  
+  margenAgencia: z.number()
+    .min(0, 'El margen de agencia debe ser mayor o igual a 0')
+    .max(1000, 'El margen de agencia no puede exceder 1000%'),
+  
   precio: z.number()
     .min(0, 'El precio debe ser mayor o igual a 0')
-    .positive('El precio debe ser positivo'),
+    .positive('El precio debe ser positivo')
+    .optional(), // Opcional porque se calcula automáticamente
   
   proveedorId: z.number()
     .int('Debe seleccionar un proveedor')
@@ -21,7 +30,8 @@ export const servicioSchema = z.object({
   monedaId: z.number()
     .int('Debe seleccionar una moneda')
     .positive('Debe seleccionar una moneda válida')
-    .default(1), // ARS por defecto
+    .default(1) // ARS por defecto
+    .optional(),
 });
 
 // Schema para creación
@@ -33,11 +43,13 @@ export const updateServicioSchema = servicioSchema.partial();
 export type CreateServicioFormData = z.infer<typeof createServicioSchema>;
 export type UpdateServicioFormData = z.infer<typeof updateServicioSchema>;
 
-// Tipo genérico para formularios que incluye monedaId
+// Tipo genérico para formularios que incluye todos los campos
 export type ServicioFormData = {
   nombre: string;
   descripcion: string;
-  precio: number;
+  costoProveedor: number;
+  margenAgencia: number;
+  precio?: number; // Opcional, se calcula automáticamente
   proveedorId: number;
-  monedaId: number;
+  monedaId?: number; // Opcional, ARS por defecto
 };

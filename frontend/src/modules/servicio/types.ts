@@ -14,6 +14,8 @@ export interface Servicio {
   id: number;
   nombre: string;
   descripcion: string;
+  costoProveedor: number;
+  margenAgencia: number;
   precio: number;
   proveedorId: number;
   proveedor: Persona;
@@ -27,14 +29,18 @@ export interface Servicio {
 export interface CreateServicioDTO {
   nombre: string;
   descripcion: string;
-  precio: number;
+  costoProveedor: number;
+  margenAgencia: number;
+  precio?: number; // Opcional, se calculará automáticamente
   proveedorId: number;
-  monedaId: number;
+  monedaId?: number; // Opcional, por defecto será ARS
 }
 
 export interface UpdateServicioDTO {
   nombre?: string;
   descripcion?: string;
+  costoProveedor?: number;
+  margenAgencia?: number;
   precio?: number;
   proveedorId?: number;
   monedaId?: number;
