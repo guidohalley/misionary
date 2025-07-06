@@ -20,8 +20,8 @@ const createEmpresaValidation = [
   
   body('cuit')
     .optional()
-    .matches(/^\d{2}-\d{8}-\d{1}$/)
-    .withMessage('El CUIT debe tener el formato XX-XXXXXXXX-X'),
+    .isLength({ min: 0, max: 20 })
+    .withMessage('El CUIT no puede exceder 20 caracteres'),
   
   body('telefono')
     .optional()
@@ -39,8 +39,13 @@ const createEmpresaValidation = [
     .withMessage('La dirección no puede exceder 300 caracteres'),
   
   body('clienteId')
-    .isInt({ min: 1 })
-    .withMessage('El ID del cliente debe ser un número entero positivo')
+    .custom((value) => {
+      const num = parseInt(value);
+      if (isNaN(num) || num < 1) {
+        throw new Error('El ID del cliente debe ser un número entero positivo');
+      }
+      return true;
+    })
 ];
 
 // Validaciones para actualizar empresa

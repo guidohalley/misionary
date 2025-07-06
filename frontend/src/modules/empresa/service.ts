@@ -9,10 +9,10 @@ import type {
 } from './types';
 
 const ENDPOINTS = {
-  empresas: '/api/empresas',
-  empresaById: (id: number) => `/api/empresas/${id}`,
-  empresasByCliente: (clienteId: number) => `/api/empresas/cliente/${clienteId}`,
-  searchEmpresas: '/api/empresas/search'
+  empresas: '/empresas',
+  empresaById: (id: number) => `/empresas/${id}`,
+  empresasByCliente: (clienteId: number) => `/empresas/cliente/${clienteId}`,
+  searchEmpresas: '/empresas/search'
 };
 
 // Función auxiliar para construir query params
@@ -33,14 +33,13 @@ export const empresaService = {
       const queryParams = buildQueryParams(filters);
       const url = queryParams ? `${ENDPOINTS.empresas}?${queryParams}` : ENDPOINTS.empresas;
       
-      const response = await ApiService.fetchData<EmpresaResponse>({
+      const response = await ApiService.fetchData<Empresa[]>({
         url,
         method: 'GET'
       });
       
-      // Seguir patrón: algunas APIs usan wrapper, otras array directo
-      // Para empresas, asumir formato wrapper como gastos/monedas
-      return response.data?.data || [];
+      // Backend devuelve array directo, no wrapper
+      return Array.isArray(response.data) ? response.data : [];
     } catch (error) {
       console.error('Error fetching empresas:', error);
       throw new Error('Error al cargar empresas');
@@ -50,12 +49,12 @@ export const empresaService = {
   // Obtener empresa por ID
   async fetchEmpresaById(id: number): Promise<Empresa> {
     try {
-      const response = await ApiService.fetchData<SingleEmpresaResponse>({
+      const response = await ApiService.fetchData<Empresa>({
         url: ENDPOINTS.empresaById(id),
         method: 'GET'
       });
       
-      return response.data.data;
+      return response.data;
     } catch (error) {
       console.error('Error fetching empresa by ID:', error);
       throw new Error('Error al cargar empresa');
@@ -65,12 +64,12 @@ export const empresaService = {
   // Obtener empresas por cliente
   async fetchEmpresasByCliente(clienteId: number): Promise<Empresa[]> {
     try {
-      const response = await ApiService.fetchData<EmpresaResponse>({
+      const response = await ApiService.fetchData<Empresa[]>({
         url: ENDPOINTS.empresasByCliente(clienteId),
         method: 'GET'
       });
       
-      return response.data?.data || [];
+      return Array.isArray(response.data) ? response.data : [];
     } catch (error) {
       console.error('Error fetching empresas by cliente:', error);
       throw new Error('Error al cargar empresas del cliente');
@@ -80,13 +79,13 @@ export const empresaService = {
   // Crear empresa
   async createEmpresa(data: CreateEmpresaRequest): Promise<Empresa> {
     try {
-      const response = await ApiService.fetchData<SingleEmpresaResponse>({
+      const response = await ApiService.fetchData<Empresa>({
         url: ENDPOINTS.empresas,
         method: 'POST',
         data: data as unknown as Record<string, unknown>
       });
       
-      return response.data.data;
+      return response.data;
     } catch (error) {
       console.error('Error creating empresa:', error);
       throw new Error('Error al crear empresa');
@@ -96,13 +95,13 @@ export const empresaService = {
   // Actualizar empresa
   async updateEmpresa(id: number, data: UpdateEmpresaRequest): Promise<Empresa> {
     try {
-      const response = await ApiService.fetchData<SingleEmpresaResponse>({
+      const response = await ApiService.fetchData<Empresa>({
         url: ENDPOINTS.empresaById(id),
         method: 'PUT',
         data: data as unknown as Record<string, unknown>
       });
       
-      return response.data.data;
+      return response.data;
     } catch (error) {
       console.error('Error updating empresa:', error);
       throw new Error('Error al actualizar empresa');
@@ -127,12 +126,12 @@ export const empresaService = {
   // Buscar empresas
   async searchEmpresas(query: string): Promise<Empresa[]> {
     try {
-      const response = await ApiService.fetchData<EmpresaResponse>({
+      const response = await ApiService.fetchData<Empresa[]>({
         url: `${ENDPOINTS.searchEmpresas}?q=${encodeURIComponent(query)}`,
         method: 'GET'
       });
       
-      return response.data?.data || [];
+      return Array.isArray(response.data) ? response.data : [];
     } catch (error) {
       console.error('Error searching empresas:', error);
       throw new Error('Error al buscar empresas');

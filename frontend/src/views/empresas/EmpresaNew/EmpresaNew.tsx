@@ -23,9 +23,11 @@ import { createEmpresaSchema, CreateEmpresaFormData } from '../schemas';
 const EmpresaNew: React.FC = () => {
   const navigate = useNavigate();
   const { createEmpresa } = useEmpresa();
-  const { clientes, loading: clientesLoading } = useClientes();
+  const { clientes, loading: clientesLoading, error: clientesError } = useClientes();
   
   const [error, setError] = useState<string | null>(null);
+
+
 
   const {
     control,
@@ -46,8 +48,6 @@ const EmpresaNew: React.FC = () => {
   });
 
   const onSubmit = async (data: CreateEmpresaFormData) => {
-    console.log('Datos a enviar:', data);
-    
     try {
       setError(null);
       await createEmpresa(data);
@@ -143,6 +143,17 @@ const EmpresaNew: React.FC = () => {
                   <h3 className="text-sm font-medium text-blue-900 mb-3">
                     Cliente Asociado *
                   </h3>
+                  
+                  {clientesError && (
+                    <Alert
+                      type="danger"
+                      title="Error al cargar clientes"
+                      className="mb-3"
+                    >
+                      {clientesError}
+                    </Alert>
+                  )}
+                  
                   <FormItem
                     invalid={Boolean(errors.clienteId)}
                     errorMessage={errors.clienteId?.message}

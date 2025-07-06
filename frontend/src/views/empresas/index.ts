@@ -12,3 +12,6 @@ export * from './services/empresaService';
 export { default as EmpresasView } from './EmpresasView';
 export { default as EmpresaEdit } from './EmpresaEdit';
 export { default as EmpresaNew } from './EmpresaNew';
+
+// Export default para lazy loading
+export { default } from './EmpresasView';

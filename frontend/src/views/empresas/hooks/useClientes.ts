@@ -19,11 +19,16 @@ export function useClientes() {
         setLoading(true);
         setError(null);
         
+        console.log('=== FETCHING CLIENTES ===');
+        
         // Obtener personas con tipo CLIENTE
         const response = await ApiService.fetchData<Cliente[]>({
           url: '/personas?tipo=CLIENTE',
           method: 'GET'
         });
+        
+        console.log('Response clientes:', response);
+        console.log('Clientes data:', response.data);
         
         setClientes(response.data);
       } catch (err) {

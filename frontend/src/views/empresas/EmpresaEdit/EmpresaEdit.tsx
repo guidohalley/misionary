@@ -44,6 +44,7 @@ const EmpresaEdit: React.FC = () => {
       telefono: '',
       email: '',
       direccion: '',
+      clienteId: undefined as any,
       activo: true,
     },
   });
@@ -59,7 +60,6 @@ const EmpresaEdit: React.FC = () => {
         const empresa = await fetchEmpresaById(parseInt(id));
         setCurrentEmpresa(empresa);
         
-        console.log('Empresa cargada para editar:', empresa);
         reset({
           nombre: empresa.nombre,
           razonSocial: empresa.razonSocial || '',
@@ -67,6 +67,7 @@ const EmpresaEdit: React.FC = () => {
           telefono: empresa.telefono || '',
           email: empresa.email || '',
           direccion: empresa.direccion || '',
+          clienteId: empresa.clienteId,
           activo: empresa.activo,
         });
       } catch (err) {
@@ -80,14 +81,12 @@ const EmpresaEdit: React.FC = () => {
     loadEmpresa();
   }, [id, fetchEmpresaById, reset]);
 
-  const onSubmit = async (data: UpdateEmpresaFormData) => {
+  const onSubmit = async (data: any) => {
     if (!id) return;
 
-    console.log('Datos a enviar:', data);
-    
     try {
       setError(null);
-      await updateEmpresa(parseInt(id), data);
+      await updateEmpresa(parseInt(id), data as UpdateEmpresaFormData);
       
       toast.push(
         <Notification title="Éxito" type="success">
@@ -206,6 +205,39 @@ const EmpresaEdit: React.FC = () => {
 
             <FormContainer>
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                {/* Cliente Asociado */}
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h3 className="text-sm font-medium text-blue-900 mb-3">
+                    Cliente Asociado *
+                  </h3>
+                  <FormItem
+                    invalid={Boolean(errors.clienteId)}
+                    errorMessage={errors.clienteId?.message}
+                  >
+                    <Controller
+                      name="clienteId"
+                      control={control}
+                      render={({ field }) => {
+                        const clienteOptions = clientes.map(cliente => ({
+                          value: cliente.id,
+                          label: `${cliente.nombre} (${cliente.email})`
+                        }));
+                        
+                        return (
+                          <Select
+                            placeholder="Selecciona un cliente"
+                            options={clienteOptions}
+                            isLoading={clientesLoading}
+                            className="w-full"
+                            value={field.value}
+                            onChange={(option: any) => field.onChange(option?.value)}
+                          />
+                        );
+                      }}
+                    />
+                  </FormItem>
+                </div>
+
                 {/* Información básica */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <FormItem

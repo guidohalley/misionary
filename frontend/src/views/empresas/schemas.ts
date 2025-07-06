@@ -15,7 +15,7 @@ export const createEmpresaSchema = z.object({
   
   cuit: z
     .string()
-    .regex(/^\d{2}-\d{8}-\d{1}$/, 'El CUIT debe tener el formato XX-XXXXXXXX-X')
+    .max(20, 'El CUIT no puede exceder 20 caracteres')
     .optional()
     .or(z.literal('')),
   
@@ -60,7 +60,7 @@ export const updateEmpresaSchema = z.object({
   
   cuit: z
     .string()
-    .regex(/^\d{2}-\d{8}-\d{1}$/, 'El CUIT debe tener el formato XX-XXXXXXXX-X')
+    .max(20, 'El CUIT no puede exceder 20 caracteres')
     .optional()
     .or(z.literal('')),
   
@@ -75,13 +75,17 @@ export const updateEmpresaSchema = z.object({
     .email('Debe ser un email válido')
     .optional()
     .or(z.literal('')),
-  
-  direccion: z
+   direccion: z
     .string()
     .max(300, 'La dirección no puede exceder 300 caracteres')
     .optional()
     .or(z.literal('')),
   
+  clienteId: z
+    .number()
+    .int('El ID del cliente debe ser un número entero')
+    .min(1, 'Debe seleccionar un cliente válido'),
+
   activo: z.boolean(),
 });
 

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Empresa, EmpresaFilters, CreateEmpresaRequest, UpdateEmpresaRequest } from '../types';
-import * as empresaService from '../service';
+import { empresaService } from '../service';
 
 export function useEmpresa() {
   const [empresas, setEmpresas] = useState<Empresa[]>([]);
@@ -15,7 +15,8 @@ export function useEmpresa() {
       const data = await empresaService.fetchEmpresas(filters);
       setEmpresas(data);
     } catch (err) {
-      setError('Error al cargar las empresas');
+      const errorMessage = err instanceof Error ? err.message : 'Error al cargar las empresas';
+      setError(errorMessage);
       console.error('Error fetching empresas:', err);
     } finally {
       setLoading(false);
@@ -30,7 +31,7 @@ export function useEmpresa() {
     fetchEmpresas();
   }, [fetchEmpresas]);
 
-  const createEmpresa = async (data: CreateEmpresaRequest) => {
+  const createEmpresa = useCallback(async (data: CreateEmpresaRequest) => {
     try {
       setLoading(true);
       setError(null);
@@ -38,15 +39,16 @@ export function useEmpresa() {
       setEmpresas(prev => [...prev, newEmpresa]);
       return newEmpresa;
     } catch (err) {
-      setError('Error al crear la empresa');
+      const errorMessage = err instanceof Error ? err.message : 'Error al crear la empresa';
+      setError(errorMessage);
       console.error('Error creating empresa:', err);
       throw err;
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const updateEmpresa = async (id: number, data: UpdateEmpresaRequest) => {
+  const updateEmpresa = useCallback(async (id: number, data: UpdateEmpresaRequest) => {
     try {
       setLoading(true);
       setError(null);
@@ -56,30 +58,32 @@ export function useEmpresa() {
       ));
       return updatedEmpresa;
     } catch (err) {
-      setError('Error al actualizar la empresa');
+      const errorMessage = err instanceof Error ? err.message : 'Error al actualizar la empresa';
+      setError(errorMessage);
       console.error('Error updating empresa:', err);
       throw err;
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const deleteEmpresa = async (id: number) => {
+  const deleteEmpresa = useCallback(async (id: number) => {
     try {
       setLoading(true);
       setError(null);
       await empresaService.deleteEmpresa(id);
       setEmpresas(prev => prev.filter(empresa => empresa.id !== id));
     } catch (err) {
-      setError('Error al eliminar la empresa');
+      const errorMessage = err instanceof Error ? err.message : 'Error al eliminar la empresa';
+      setError(errorMessage);
       console.error('Error deleting empresa:', err);
       throw err;
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const fetchEmpresaById = async (id: number) => {
+  const fetchEmpresaById = useCallback(async (id: number) => {
     try {
       setLoading(true);
       setError(null);
@@ -87,13 +91,14 @@ export function useEmpresa() {
       setSelectedEmpresa(empresa);
       return empresa;
     } catch (err) {
-      setError('Error al cargar la empresa');
+      const errorMessage = err instanceof Error ? err.message : 'Error al cargar la empresa';
+      setError(errorMessage);
       console.error('Error fetching empresa by id:', err);
       throw err;
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   return {
     empresas,
