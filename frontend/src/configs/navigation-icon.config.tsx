@@ -14,7 +14,7 @@ import {
     HiOutlineCalculator,
     HiOutlineReceiptTax,
     HiOutlineClipboardList,
-    HiOutlineHashtag, // Usamos este en lugar de HiOutlinePercent
+    HiOutlineHashtag,
     HiOutlineClipboardCheck,
     HiOutlineUserAdd,
     HiOutlineOfficeBuilding,
@@ -22,12 +22,22 @@ import {
     HiOutlineCurrencyDollar,
     HiOutlineGlobe,
     HiOutlineRefresh,
+    HiOutlineDatabase,
+    HiOutlineCollection,
+    HiOutlineChartBar,
+    HiOutlineLightningBolt,
+    HiOutlineDocumentAdd,
+    HiOutlineReceiptRefund,
+    HiOutlineChartPie,
+    HiOutlineCash,
+    HiOutlineTrendingUp,
 } from 'react-icons/hi'
 import type { JSX } from 'react'
 
 export type NavigationIcons = Record<string, JSX.Element>
 
 const navigationIcon: NavigationIcons = {
+    // === ICONOS BÁSICOS ===
     home: <HiOutlineHome />,
     users: <HiOutlineUsers />,
     product: <HiOutlineCube />,
@@ -39,17 +49,37 @@ const navigationIcon: NavigationIcons = {
     calculator: <HiOutlineCalculator />,
     invoice: <HiOutlineReceiptTax />,
     receipt: <HiOutlineClipboardList />,
-    percentage: <HiOutlineHashtag />, // Cambiado a HiOutlineHashtag
-    presupuesto: <HiOutlineClipboardCheck />, // Icono específico para presupuestos
-    fileText: <HiOutlineClipboardCheck />, // Alias para compatibilidad
-    userAdd: <HiOutlineUserAdd />, // Nuevo cliente
-    buildingAdd: <HiOutlineOfficeBuilding />, // Nuevo proveedor
-    userPlus: <HiOutlineUserCircle />, // Nuevo usuario interno
-    // Iconos para monedas
-    currency: <HiOutlineCurrencyDollar />, // Monedas
-    exchange: <HiOutlineRefresh />, // Tipos de cambio
-    globe: <HiOutlineGlobe />, // Configuración multi-moneda
-    // Iconos del template original (mantener por compatibilidad)
+    percentage: <HiOutlineHashtag />,
+    presupuesto: <HiOutlineClipboardCheck />,
+    
+    // === ICONOS PARA CATÁLOGOS ===
+    database: <HiOutlineDatabase />,
+    package: <HiOutlineCollection />,
+    chartBar: <HiOutlineChartBar />,
+    
+    // === ICONOS PARA OPERACIONES RÁPIDAS ===
+    lightning: <HiOutlineLightningBolt />,
+    userAdd: <HiOutlineUserAdd />,
+    buildingAdd: <HiOutlineOfficeBuilding />,
+    documentAdd: <HiOutlineDocumentAdd />,
+    receiptAdd: <HiOutlineReceiptRefund />,
+    userPlus: <HiOutlineUserCircle />,
+    
+    // === ICONOS PARA FACTURACIÓN ===
+    receiptTax: <HiOutlineReceiptTax />,
+    
+    // === ICONOS PARA FINANZAS ===
+    chartLine: <HiOutlineChartPie />,
+    cash: <HiOutlineCash />,
+    trendingUp: <HiOutlineTrendingUp />,
+    
+    // === ICONOS PARA CONFIGURACIÓN ===
+    currency: <HiOutlineCurrencyDollar />,
+    exchange: <HiOutlineRefresh />,
+    globe: <HiOutlineGlobe />,
+    
+    // === ICONOS DEL TEMPLATE ORIGINAL (mantener por compatibilidad) ===
+    fileText: <HiOutlineClipboardCheck />,
     singleMenu: <HiOutlineViewGridAdd />,
     collapseMenu: <HiOutlineTemplate />,
     groupSingleMenu: <HiOutlineDesktopComputer />,
