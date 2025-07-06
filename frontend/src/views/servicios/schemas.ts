@@ -17,6 +17,11 @@ export const servicioSchema = z.object({
   proveedorId: z.number()
     .int('Debe seleccionar un proveedor')
     .positive('Debe seleccionar un proveedor válido'),
+    
+  monedaId: z.number()
+    .int('Debe seleccionar una moneda')
+    .positive('Debe seleccionar una moneda válida')
+    .default(1), // ARS por defecto
 });
 
 // Schema para creación
@@ -28,5 +33,11 @@ export const updateServicioSchema = servicioSchema.partial();
 export type CreateServicioFormData = z.infer<typeof createServicioSchema>;
 export type UpdateServicioFormData = z.infer<typeof updateServicioSchema>;
 
-// Tipo genérico para formularios
-export type ServicioFormData = CreateServicioFormData;
+// Tipo genérico para formularios que incluye monedaId
+export type ServicioFormData = {
+  nombre: string;
+  descripcion: string;
+  precio: number;
+  proveedorId: number;
+  monedaId: number;
+};

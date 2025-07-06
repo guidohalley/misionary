@@ -6,11 +6,16 @@ export class ProductoService {
     nombre: string;
     precio: number;
     proveedorId: number;
+    monedaId?: number;
   }) {
     return prisma.producto.create({
-      data,
+      data: {
+        ...data,
+        monedaId: data.monedaId || 1 // ARS por defecto
+      },
       include: {
-        proveedor: true
+        proveedor: true,
+        moneda: true
       }
     });
   }
@@ -20,6 +25,7 @@ export class ProductoService {
       where: { id },
       include: {
         proveedor: true,
+        moneda: true,
         items: {
           include: {
             presupuesto: true
@@ -34,7 +40,8 @@ export class ProductoService {
       where: { id },
       data,
       include: {
-        proveedor: true
+        proveedor: true,
+        moneda: true
       }
     });
   }
@@ -50,7 +57,8 @@ export class ProductoService {
     return prisma.producto.findMany({
       where,
       include: {
-        proveedor: true
+        proveedor: true,
+        moneda: true
       }
     });
   }

@@ -1,3 +1,14 @@
+import { Persona } from '../persona/types';
+
+// Tipo local para Moneda (sin dependencia de @prisma/client)
+export interface Moneda {
+  id: number;
+  codigo: string;
+  nombre: string;
+  simbolo: string;
+  activo: boolean;
+}
+
 // Tipos que coinciden con el backend/prisma
 export interface Servicio {
   id: number;
@@ -5,12 +16,9 @@ export interface Servicio {
   descripcion: string;
   precio: number;
   proveedorId: number;
-  proveedor?: {
-    id: number;
-    nombre: string;
-    email: string;
-    tipo: string;
-  };
+  proveedor: Persona;
+  monedaId: number;
+  moneda: Moneda;
   createdAt: string;
   updatedAt: string;
 }
@@ -21,6 +29,13 @@ export interface CreateServicioDTO {
   descripcion: string;
   precio: number;
   proveedorId: number;
+  monedaId: number;
 }
 
-export interface UpdateServicioDTO extends Partial<CreateServicioDTO> {}
+export interface UpdateServicioDTO {
+  nombre?: string;
+  descripcion?: string;
+  precio?: number;
+  proveedorId?: number;
+  monedaId?: number;
+}

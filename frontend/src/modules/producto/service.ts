@@ -1,5 +1,6 @@
 import ApiService from '@/services/ApiService';
-import { Producto, CreateProductoDTO, UpdateProductoDTO } from './types';
+import { Producto, CreateProductoDTO, UpdateProductoDTO, Moneda } from './types';
+import { Persona } from '../persona/types';
 
 export async function fetchProductos(): Promise<Producto[]> {
   const response = await ApiService.fetchData<Producto[]>({
@@ -21,7 +22,7 @@ export async function createProducto(data: CreateProductoDTO): Promise<Producto>
   const response = await ApiService.fetchData<Producto>({
     url: '/productos',
     method: 'POST',
-    data
+    data: data as unknown as Record<string, unknown>
   });
   return response.data;
 }
@@ -30,7 +31,7 @@ export async function updateProducto(id: number, data: UpdateProductoDTO): Promi
   const response = await ApiService.fetchData<Producto>({
     url: `/productos/${id}`,
     method: 'PUT',
-    data
+    data: data as unknown as Record<string, unknown>
   });
   return response.data;
 }
@@ -48,4 +49,17 @@ export async function fetchProductosByProveedor(proveedorId: number): Promise<Pr
     method: 'GET'
   });
   return response.data;
+}
+
+// ================================
+// DATOS AUXILIARES
+// ================================
+
+export async function fetchMonedas(): Promise<Moneda[]> {
+  const response = await ApiService.fetchData<{success: boolean, data: Moneda[], message: string}>({
+    url: '/monedas',
+    method: 'GET'
+  });
+  // La API devuelve { success, data, message }
+  return response.data.data;
 }

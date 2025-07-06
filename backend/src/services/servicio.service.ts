@@ -4,9 +4,13 @@ import type { Servicio } from '@prisma/client';
 export class ServicioService {
   static async create(data: any): Promise<Servicio> {
     return await prisma.servicio.create({
-      data,
+      data: {
+        ...data,
+        monedaId: data.monedaId || 1 // ARS por defecto
+      },
       include: {
         proveedor: true,
+        moneda: true,
       },
     });
   }
@@ -16,6 +20,7 @@ export class ServicioService {
       where: { id },
       include: {
         proveedor: true,
+        moneda: true,
       },
     });
   }
@@ -25,6 +30,7 @@ export class ServicioService {
       where: proveedorId ? { proveedorId } : {},
       include: {
         proveedor: true,
+        moneda: true,
       },
       orderBy: {
         createdAt: 'desc',
@@ -38,6 +44,7 @@ export class ServicioService {
       data,
       include: {
         proveedor: true,
+        moneda: true,
       },
     });
   }

@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Producto, CreateProductoDTO, UpdateProductoDTO } from '../types';
+import { Producto, CreateProductoDTO, UpdateProductoDTO, Moneda } from '../types';
+import { Persona } from '../../persona/types';
 import * as productoService from '../service';
+import { fetchPersonas } from '../../persona/service';
 
 export function useProducto(proveedorId?: number) {
   const [productos, setProductos] = useState<Producto[]>([]);
@@ -93,3 +95,52 @@ export function useProducto(proveedorId?: number) {
 }
 
 export default useProducto;
+
+export function useProductoAuxiliarData() {
+  const [monedas, setMonedas] = useState<Moneda[]>([]);
+  const [proveedores, setProveedores] = useState<Persona[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadMonedas = async () => {
+    try {
+      setLoading(true);
+      const data = await productoService.fetchMonedas();
+      setMonedas(Array.isArray(data) ? data : []);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al cargar monedas');
+      setMonedas([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadProveedores = async () => {
+    try {
+      setLoading(true);
+      const data = await fetchPersonas();
+      // Filtrar solo los proveedores
+      const proveedoresList = data.filter(p => p.tipo === 'PROVEEDOR');
+      setProveedores(Array.isArray(proveedoresList) ? proveedoresList : []);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al cargar proveedores');
+      setProveedores([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadMonedas();
+    loadProveedores();
+  }, []);
+
+  return {
+    monedas,
+    proveedores,
+    loading,
+    error,
+    loadMonedas,
+    loadProveedores
+  };
+}

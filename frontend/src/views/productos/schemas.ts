@@ -21,6 +21,11 @@ export const productoSchema = z.object({
   proveedorId: z.number()
     .int('Debe seleccionar un proveedor')
     .positive('Debe seleccionar un proveedor válido'),
+    
+  monedaId: z.number()
+    .int('Debe seleccionar una moneda')
+    .positive('Debe seleccionar una moneda válida')
+    .default(1), // ARS por defecto
 });
 
 // Schema para creación
@@ -32,5 +37,10 @@ export const updateProductoSchema = productoSchema.partial();
 export type CreateProductoFormData = z.infer<typeof createProductoSchema>;
 export type UpdateProductoFormData = z.infer<typeof updateProductoSchema>;
 
-// Tipo genérico para formularios
-export type ProductoFormData = CreateProductoFormData;
+// Tipo genérico para formularios que incluye monedaId
+export type ProductoFormData = {
+  nombre: string;
+  precio: number;
+  proveedorId: number;
+  monedaId: number;
+};

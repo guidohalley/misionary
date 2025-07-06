@@ -1,31 +1,32 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useForm, Controller } from 'react-hook-form';
-import { Producto, CreateProductoDTO, UpdateProductoDTO } from '../types';
+import { Servicio, CreateServicioDTO, UpdateServicioDTO } from '../types';
 import { Input, Button, Select, FormItem, FormContainer } from '@/components/ui';
 import MoneyInput from '@/components/shared/MoneyInput';
-import { useProductoAuxiliarData } from '../hooks/useProducto';
+import { useServicioAuxiliarData } from '../hooks/useServicio';
 
-interface ProductoFormProps {
-  initialValues?: Producto;
-  onSubmit: (data: CreateProductoDTO | UpdateProductoDTO) => void;
+interface ServicioFormProps {
+  initialValues?: Servicio;
+  onSubmit: (data: CreateServicioDTO | UpdateServicioDTO) => void;
   onCancel?: () => void;
 }
 
-export function ProductoForm({
+export function ServicioForm({
   initialValues,
   onSubmit,
   onCancel,
-}: ProductoFormProps) {
-  const { monedas, proveedores, loading: loadingAuxiliar } = useProductoAuxiliarData();
+}: ServicioFormProps) {
+  const { monedas, proveedores, loading: loadingAuxiliar } = useServicioAuxiliarData();
 
   const { 
     control, 
     handleSubmit, 
     watch,
     formState: { errors },
-  } = useForm<CreateProductoDTO | UpdateProductoDTO>({
+  } = useForm<CreateServicioDTO | UpdateServicioDTO>({
     defaultValues: initialValues || {
       nombre: '',
+      descripcion: '',
       precio: 0,
       proveedorId: undefined,
       monedaId: 1, // ARS por defecto
@@ -48,10 +49,10 @@ export function ProductoForm({
   return (
     <FormContainer>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        {/* Información básica del producto */}
+        {/* Información básica del servicio */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormItem
-            label="Nombre del Producto"
+            label="Nombre del Servicio"
             invalid={Boolean(errors.nombre)}
             errorMessage={errors.nombre?.message}
             className="md:col-span-2"
@@ -63,7 +64,7 @@ export function ProductoForm({
               render={({ field }) => (
                 <Input 
                   {...field} 
-                  placeholder="Ej: Hosting Web Premium"
+                  placeholder="Ej: Consultoría SEO"
                 />
               )}
             />
@@ -114,6 +115,27 @@ export function ProductoForm({
           </FormItem>
         </div>
 
+        {/* Descripción del servicio */}
+        <div className="border-t pt-6">
+          <FormItem
+            label="Descripción"
+            invalid={Boolean(errors.descripcion)}
+            errorMessage={errors.descripcion?.message}
+          >
+            <Controller
+              name="descripcion"
+              control={control}
+              rules={{ required: 'La descripción es requerida' }}
+              render={({ field }) => (
+                <Input 
+                  {...field} 
+                  placeholder="Describe detalladamente el servicio que se ofrece..."
+                />
+              )}
+            />
+          </FormItem>
+        </div>
+
         {/* Campo de precio con MoneyInput */}
         <div className="border-t pt-6">
           <FormItem
@@ -157,7 +179,7 @@ export function ProductoForm({
             type="submit"
             loading={loadingAuxiliar}
           >
-            {initialValues ? 'Actualizar Producto' : 'Crear Producto'}
+            {initialValues ? 'Actualizar Servicio' : 'Crear Servicio'}
           </Button>
         </div>
       </form>
@@ -165,4 +187,4 @@ export function ProductoForm({
   );
 }
 
-export default ProductoForm;
+export default ServicioForm;
