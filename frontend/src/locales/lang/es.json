@@ -28,28 +28,40 @@
     "productos": "Productos",
     "servicios": "Servicios",
     "presupuestos": "Presupuestos",
-    "gestion": {
+    "catalogos": {
+      "title": "Catálogos",
+      "productos": "Productos",
+      "servicios": "Servicios",
+      "precios": "Gestión de Precios"
+    },
+    "comercial": {
       "title": "Gestión Comercial",
       "clientes": "Clientes",
-      "nuevoCliente": "Nuevo Cliente",
       "proveedores": "Proveedores",
+      "presupuestos": "Presupuestos"
+    },
+    "operaciones": {
+      "title": "Operaciones Rápidas",
+      "nuevoCliente": "Nuevo Cliente",
       "nuevoProveedor": "Nuevo Proveedor",
-      "nuevoInterno": "Nuevo Usuario Interno",
-      "servicios": "Servicios"
+      "nuevoPresupuesto": "Nuevo Presupuesto",
+      "nuevoGasto": "Nuevo Gasto",
+      "nuevoUsuario": "Nuevo Usuario Interno"
     },
     "facturacion": {
       "title": "Facturación",
       "facturas": "Facturas",
-      "recibos": "Recibos",
-      "impuestos": "Impuestos",
-      "monedas": "Monedas"
+      "recibos": "Recibos"
     },
     "finanzas": {
-      "title": "Finanzas y Costos",
+      "title": "Finanzas y Control",
       "gastos": "Gastos Operativos",
-      "nuevoGasto": "Nuevo Gasto",
-      "rentabilidad": "Análisis de Rentabilidad",
-      "historialPrecios": "Gestión de Precios"
+      "rentabilidad": "Análisis de Rentabilidad"
+    },
+    "configuracion": {
+      "title": "Configuración",
+      "monedas": "Monedas",
+      "impuestos": "Impuestos"
     }
   }
 }

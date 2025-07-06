@@ -3,13 +3,9 @@ import ScrollBar from '@/components/ui/ScrollBar'
 import {
     SIDE_NAV_WIDTH,
     SIDE_NAV_COLLAPSED_WIDTH,
-    NAV_MODE_DARK,
     NAV_MODE_THEMED,
-    NAV_MODE_TRANSPARENT,
-    SIDE_NAV_CONTENT_GUTTER,
-    LOGO_X_GUTTER,
 } from '@/constants/theme.constant'
-import Logo from '@/components/template/Logo'
+import MsnrLogo from '@/components/template/MsnrLogo'
 import navigationConfig from '@/configs/navigation.config'
 import VerticalMenuContent from '@/components/template/VerticalMenuContent'
 import useResponsive from '@/utils/hooks/useResponsive'
@@ -50,18 +46,6 @@ const SideNav = () => {
         return `side-nav-${navMode}`
     }
 
-    const logoMode = () => {
-        if (navMode === NAV_MODE_THEMED) {
-            return NAV_MODE_DARK
-        }
-
-        if (navMode === NAV_MODE_TRANSPARENT) {
-            return mode
-        }
-
-        return navMode
-    }
-
     const menuContent = (
         <VerticalMenuContent
             navMode={navMode}
@@ -87,14 +71,8 @@ const SideNav = () => {
                     )}
                 >
                     <div className="side-nav-header">
-                        <Logo
-                            mode={logoMode()}
+                        <MsnrLogo
                             type={sideNavCollapse ? 'streamline' : 'full'}
-                            className={
-                                sideNavCollapse
-                                    ? SIDE_NAV_CONTENT_GUTTER
-                                    : LOGO_X_GUTTER
-                            }
                         />
                     </div>
                     {sideNavCollapse ? (

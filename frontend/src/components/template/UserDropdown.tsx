@@ -2,6 +2,7 @@ import Avatar from '@/components/ui/Avatar'
 import Dropdown from '@/components/ui/Dropdown'
 import withHeaderItem from '@/utils/hoc/withHeaderItem'
 import useAuth from '@/utils/hooks/useAuth'
+import { useAppSelector } from '@/store'
 import { Link } from 'react-router-dom'
 import classNames from 'classnames'
 import { HiOutlineLogout, HiOutlineUser } from 'react-icons/hi'
@@ -18,13 +19,29 @@ const dropdownItemList: DropdownList[] = []
 
 const _UserDropdown = ({ className }: CommonProps) => {
     const { signOut } = useAuth()
+    
+    // Obtener datos del usuario desde Redux
+    const user = useAppSelector((state) => state.auth.user)
+    const session = useAppSelector((state) => state.auth.session)
+    const userName = user?.userName || 'Usuario'
+    const userEmail = user?.email || 'usuario@ejemplo.com'
+    const userAuthority = user?.authority?.[0] || 'USER'
+    
+    // Debug - log para verificar datos
+    console.log('UserDropdown - Usuario actual:', user)
+    console.log('UserDropdown - Sesión actual:', session)
+
+    const handleSignOut = () => {
+        console.log('UserDropdown - Cerrando sesión...')
+        signOut()
+    }
 
     const UserAvatar = (
-        <div className={classNames(className, 'flex items-center gap-2')}>
+        <div className={classNames(className, 'flex items-center gap-2 cursor-pointer')}>
             <Avatar size={32} shape="circle" icon={<HiOutlineUser />} />
             <div className="hidden md:block">
-                <div className="text-xs capitalize">admin</div>
-                <div className="font-bold">User01</div>
+                <div className="text-xs capitalize text-gray-600 dark:text-gray-400">{userAuthority.toLowerCase()}</div>
+                <div className="font-bold text-gray-900 dark:text-gray-100">{userName}</div>
             </div>
         </div>
     )
@@ -41,9 +58,9 @@ const _UserDropdown = ({ className }: CommonProps) => {
                         <Avatar shape="circle" icon={<HiOutlineUser />} />
                         <div>
                             <div className="font-bold text-gray-900 dark:text-gray-100">
-                                User01
+                                {userName}
                             </div>
-                            <div className="text-xs">user01@mail.com</div>
+                            <div className="text-xs text-gray-600 dark:text-gray-400">{userEmail}</div>
                         </div>
                     </div>
                 </Dropdown.Item>
@@ -71,12 +88,12 @@ const _UserDropdown = ({ className }: CommonProps) => {
                 <Dropdown.Item
                     eventKey="Sign Out"
                     className="gap-2"
-                    onClick={signOut}
+                    onClick={handleSignOut}
                 >
                     <span className="text-xl opacity-50">
                         <HiOutlineLogout />
                     </span>
-                    <span>Sign Out</span>
+                    <span>Cerrar Sesión</span>
                 </Dropdown.Item>
             </Dropdown>
         </div>

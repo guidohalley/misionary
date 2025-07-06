@@ -1,0 +1,15 @@
+<svg width="120" height="40" viewBox="0 0 120 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Logo principal - Círculo con iniciales MSNR -->
+  <circle cx="20" cy="20" r="18" fill="#6366f1" stroke="#4f46e5" stroke-width="2"/>
+  <text x="20" y="25" font-family="Arial, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" fill="white">
+    MSNR
+  </text>
+  
+  <!-- Texto Misionary -->
+  <text x="45" y="16" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#1f2937">
+    Misionary
+  </text>
+  <text x="45" y="28" font-family="Arial, sans-serif" font-size="8" font-weight="normal" fill="#6b7280">
+    Business Solutions
+  </text>
+</svg>

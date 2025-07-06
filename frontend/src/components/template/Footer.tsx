@@ -11,29 +11,10 @@ type FooterProps = {
 
 const FooterContent = () => {
     return (
-        <div className="flex items-center justify-between flex-auto w-full">
-            <span>
-                Copyright &copy; {`${new Date().getFullYear()}`}{' '}
-                <span className="font-semibold">{`${APP_NAME}`}</span> All
-                rights reserved.
+        <div className="flex items-center justify-center flex-auto w-full">
+            <span className="text-sm text-gray-600 dark:text-gray-400">
+                © {new Date().getFullYear()} - Powered by <span className="font-semibold text-indigo-600 dark:text-indigo-400">MSNR</span>
             </span>
-            <div className="">
-                <a
-                    className="text-gray"
-                    href="/#"
-                    onClick={(e) => e.preventDefault()}
-                >
-                    Term & Conditions
-                </a>
-                <span className="mx-2 text-muted"> | </span>
-                <a
-                    className="text-gray"
-                    href="/#"
-                    onClick={(e) => e.preventDefault()}
-                >
-                    Privacy & Policy
-                </a>
-            </div>
         </div>
     )
 }
