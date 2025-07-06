@@ -15,7 +15,8 @@
             "title": "Billing",
             "facturas": "Invoices",
             "recibos": "Receipts",
-            "impuestos": "Taxes"
+            "impuestos": "Taxes",
+            "monedas": "Currencies"
         },
         "singleMenuItem": "Single menu item",
         "collapseMenu": {

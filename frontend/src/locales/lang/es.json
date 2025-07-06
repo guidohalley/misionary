@@ -41,7 +41,8 @@
       "title": "Facturación",
       "facturas": "Facturas",
       "recibos": "Recibos",
-      "impuestos": "Impuestos"
+      "impuestos": "Impuestos",
+      "monedas": "Monedas"
     }
   }
 }

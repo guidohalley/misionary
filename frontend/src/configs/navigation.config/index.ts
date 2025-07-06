@@ -167,6 +167,16 @@ const navigationConfig: NavigationTree[] = [
                 authority: [],
                 subMenu: [],
             },
+            {
+                key: 'facturacion.monedas',
+                path: '/monedas',
+                title: 'Monedas',
+                translateKey: 'nav.facturacion.monedas',
+                icon: 'currency',
+                type: NAV_ITEM_TYPE_ITEM,
+                authority: [],
+                subMenu: [],
+            },
         ],
     },
 ]

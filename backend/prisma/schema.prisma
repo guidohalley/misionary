@@ -37,7 +37,45 @@ enum EstadoFactura {
   ANULADA
 }
 
+enum CodigoMoneda {
+  ARS
+  USD
+  EUR
+}
+
 // ─────────────────── MODELOS ─────────────────── 
+
+// NUEVO: Sistema Multi-Moneda
+model Moneda {
+  id         Int            @id @default(autoincrement())
+  codigo     CodigoMoneda   @unique
+  nombre     String
+  simbolo    String
+  activo     Boolean        @default(true)
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+
+  // Relaciones
+  tiposCambio      TipoCambio[]      @relation("MonedaOrigen")
+  tiposCambioDestino TipoCambio[]    @relation("MonedaDestino")
+  productos        Producto[]
+  servicios        Servicio[]
+  presupuestos     Presupuesto[]
+  facturas         Factura[]
+}
+
+model TipoCambio {
+  id         Int          @id @default(autoincrement())
+  monedaDesdeId Int
+  monedaHaciaId Int
+  monedaDesde   Moneda      @relation("MonedaOrigen", fields: [monedaDesdeId], references: [id])
+  monedaHacia   Moneda      @relation("MonedaDestino", fields: [monedaHaciaId], references: [id])
+  valor         Decimal     @db.Decimal(15,4) // 1200.5000
+  fecha         DateTime    @db.Date
+  createdAt     DateTime    @default(now())
+  
+  @@unique([monedaDesdeId, monedaHaciaId, fecha])
+}
 
 model Persona {
   id           Int            @id @default(autoincrement())
@@ -61,9 +99,11 @@ model Persona {
 model Producto {
   id          Int        @id @default(autoincrement())
   nombre      String
-  precio      Float
+  precio      Decimal    @db.Decimal(15,2)  // Cambio de Float a Decimal para mayor precisión
+  monedaId    Int        @default(1)        // 1 = ARS por defecto
   proveedorId Int
   proveedor   Persona    @relation(fields: [proveedorId], references: [id])
+  moneda      Moneda     @relation(fields: [monedaId], references: [id])
   items       Item[]
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
@@ -73,27 +113,32 @@ model Servicio {
   id          Int        @id @default(autoincrement())
   nombre      String
   descripcion String
-  precio      Float
+  precio      Decimal    @db.Decimal(15,2)  // Cambio de Float a Decimal para mayor precisión
+  monedaId    Int        @default(1)        // 1 = ARS por defecto
   proveedorId Int
   proveedor   Persona    @relation(fields: [proveedorId], references: [id])
+  moneda      Moneda     @relation(fields: [monedaId], references: [id])
   items       Item[]
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 }
 
 model Presupuesto {
-  id            Int                     @id @default(autoincrement())
-  clienteId     Int
-  cliente       Persona                 @relation("ClientePresupuestos", fields: [clienteId], references: [id])
-  items         Item[]
-  subtotal      Float
-  impuestos     Float
-  total         Float
-  estado        EstadoPresupuesto       @default(BORRADOR)
-  factura       Factura?
+  id                   Int                     @id @default(autoincrement())
+  clienteId            Int
+  cliente              Persona                 @relation("ClientePresupuestos", fields: [clienteId], references: [id])
+  items                Item[]
+  subtotal             Decimal                 @db.Decimal(15,2)  // Cambio de Float a Decimal
+  impuestos            Decimal                 @db.Decimal(15,2)  // Cambio de Float a Decimal
+  total                Decimal                 @db.Decimal(15,2)  // Cambio de Float a Decimal
+  monedaId             Int                     @default(1)        // 1 = ARS por defecto
+  tipoCambioFecha      DateTime?               // Para recordar el tipo de cambio usado
+  estado               EstadoPresupuesto       @default(BORRADOR)
+  factura              Factura?
   presupuestoImpuestos PresupuestoImpuesto[]
-  createdAt     DateTime                @default(now())
-  updatedAt     DateTime                @updatedAt
+  moneda               Moneda                  @relation(fields: [monedaId], references: [id])
+  createdAt            DateTime                @default(now())
+  updatedAt            DateTime                @updatedAt
 }
 
 model Item {
@@ -105,21 +150,24 @@ model Item {
   servicioId     Int?
   servicio       Servicio?   @relation(fields: [servicioId], references: [id])
   cantidad       Int
-  precioUnitario Float
+  precioUnitario Decimal     @db.Decimal(15,2)  // Cambio de Float a Decimal
 }
 
 model Factura {
   id                 Int            @id @default(autoincrement())
   numero             String         @unique
-  presupuestoId      Int           @unique
-  presupuesto        Presupuesto   @relation(fields: [presupuestoId], references: [id])
+  presupuestoId      Int            @unique
+  presupuesto        Presupuesto    @relation(fields: [presupuestoId], references: [id])
   fecha              DateTime
-  subtotal           Float
-  impuestos          Float
-  total              Float
+  subtotal           Decimal        @db.Decimal(15,2)  // Cambio de Float a Decimal
+  impuestos          Decimal        @db.Decimal(15,2)  // Cambio de Float a Decimal
+  total              Decimal        @db.Decimal(15,2)  // Cambio de Float a Decimal
+  monedaId           Int            @default(1)        // 1 = ARS por defecto
+  tipoCambioFecha    DateTime?      // Para recordar el tipo de cambio usado
   estado             EstadoFactura
   impuestoAplicadoId Int
-  impuestoAplicado   Impuesto      @relation(fields: [impuestoAplicadoId], references: [id])
+  impuestoAplicado   Impuesto       @relation(fields: [impuestoAplicadoId], references: [id])
+  moneda             Moneda         @relation(fields: [monedaId], references: [id])
   createdAt          DateTime       @default(now())
   updatedAt          DateTime       @updatedAt
 }
@@ -129,7 +177,7 @@ model Recibo {
   personaId  Int
   persona    Persona   @relation(fields: [personaId], references: [id])
   concepto   String
-  monto      Float
+  monto      Decimal   @db.Decimal(15,2)  // Cambio de Float a Decimal
   fecha      DateTime
   metodoPago String
   createdAt  DateTime  @default(now())
@@ -139,7 +187,7 @@ model Recibo {
 model Impuesto {
   id          Int                      @id @default(autoincrement())
   nombre      String                   @unique
-  porcentaje  Float
+  porcentaje  Decimal                  @db.Decimal(5,2)  // Cambio de Float a Decimal para porcentajes
   activo      Boolean                  @default(true)
   descripcion String?
   facturas    Factura[]
@@ -154,7 +202,7 @@ model PresupuestoImpuesto {
   presupuesto   Presupuesto @relation(fields: [presupuestoId], references: [id])
   impuestoId    Int
   impuesto      Impuesto    @relation(fields: [impuestoId], references: [id])
-  monto         Float
+  monto         Decimal     @db.Decimal(15,2)  // Cambio de Float a Decimal
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 

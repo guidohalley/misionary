@@ -19,6 +19,9 @@ import {
     HiOutlineUserAdd,
     HiOutlineOfficeBuilding,
     HiOutlineUserCircle,
+    HiOutlineCurrencyDollar,
+    HiOutlineGlobe,
+    HiOutlineRefresh,
 } from 'react-icons/hi'
 import type { JSX } from 'react'
 
@@ -42,6 +45,10 @@ const navigationIcon: NavigationIcons = {
     userAdd: <HiOutlineUserAdd />, // Nuevo cliente
     buildingAdd: <HiOutlineOfficeBuilding />, // Nuevo proveedor
     userPlus: <HiOutlineUserCircle />, // Nuevo usuario interno
+    // Iconos para monedas
+    currency: <HiOutlineCurrencyDollar />, // Monedas
+    exchange: <HiOutlineRefresh />, // Tipos de cambio
+    globe: <HiOutlineGlobe />, // Configuración multi-moneda
     // Iconos del template original (mantener por compatibilidad)
     singleMenu: <HiOutlineViewGridAdd />,
     collapseMenu: <HiOutlineTemplate />,

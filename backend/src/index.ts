@@ -10,6 +10,7 @@ import servicioRoutes from './routes/servicio.routes';
 import presupuestoRoutes from './routes/presupuesto.routes';
 import facturaRoutes from './routes/factura.routes';
 import impuestoRoutes from './routes/impuesto.routes';
+import monedaRoutes from './routes/moneda.routes';
 
 const app = express();
 
@@ -27,6 +28,7 @@ app.use('/api/servicios', servicioRoutes);
 app.use('/api/presupuestos', presupuestoRoutes);
 app.use('/api/facturas', facturaRoutes);
 app.use('/api/impuestos', impuestoRoutes);
+app.use('/api/monedas', monedaRoutes);
 
 // Error handling
 import { errorHandler } from './middleware/error';
