@@ -218,6 +218,16 @@ const navigationConfig: NavigationTree[] = [
                 authority: [],
                 subMenu: [],
             },
+            {
+                key: 'finanzas.historial-precios',
+                path: '/historial-precios',
+                title: 'Gestión de Precios',
+                translateKey: 'nav.finanzas.historialPrecios',
+                icon: 'chartBar',
+                type: NAV_ITEM_TYPE_ITEM,
+                authority: [],
+                subMenu: [],
+            },
         ],
     },
 ]

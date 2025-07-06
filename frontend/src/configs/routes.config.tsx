@@ -26,6 +26,7 @@ const PresupuestoView = lazy(() => import('@/views/presupuestos/PresupuestoView'
 const MonedaView = lazy(() => import('@/views/moneda'));
 const GastosView = lazy(() => import('@/views/gastos'));
 const GastoNew = lazy(() => import('@/views/gastos/GastoNew'));
+const HistorialPrecioView = lazy(() => import('@/views/historialPrecio'));
 
 const publicRoutes = [
   {
@@ -155,6 +156,11 @@ const protectedRoutes = [
     key: 'gasto-new',
     path: '/gastos/new',
     component: GastoNew,
+  },
+  {
+    key: 'historial-precios',
+    path: '/historial-precios',
+    component: HistorialPrecioView,
   }
 ];
 

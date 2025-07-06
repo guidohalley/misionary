@@ -11,6 +11,7 @@ import presupuestoRoutes from './routes/presupuesto.routes';
 import facturaRoutes from './routes/factura.routes';
 import impuestoRoutes from './routes/impuesto.routes';
 import monedaRoutes from './routes/moneda.routes';
+import historialPrecioRoutes from './routes/historialPrecio.routes';
 import { gastoRoutes } from './routes/gasto.routes';
 
 const app = express();
@@ -30,6 +31,7 @@ app.use('/api/presupuestos', presupuestoRoutes);
 app.use('/api/facturas', facturaRoutes);
 app.use('/api/impuestos', impuestoRoutes);
 app.use('/api/monedas', monedaRoutes);
+app.use('/api/historial-precios', historialPrecioRoutes);
 app.use('/api/gastos-operativos', gastoRoutes);
 
 // Error handling

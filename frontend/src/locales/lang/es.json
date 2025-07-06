@@ -48,7 +48,8 @@
       "title": "Finanzas y Costos",
       "gastos": "Gastos Operativos",
       "nuevoGasto": "Nuevo Gasto",
-      "rentabilidad": "Análisis de Rentabilidad"
+      "rentabilidad": "Análisis de Rentabilidad",
+      "historialPrecios": "Gestión de Precios"
     }
   }
 }
