@@ -8,8 +8,12 @@ import {
   Item 
 } from '../types';
 import { Persona } from '@/modules/persona/types';
+import { Impuesto } from '@/modules/impuesto/types';
+import { Moneda } from '@/modules/moneda/types';
 import { fetchPersonas } from '@/modules/persona/service';
-import { Input, Button, Select, FormItem, FormContainer, Dialog, Card } from '@/components/ui';
+import { useImpuesto } from '@/modules/impuesto/hooks/useImpuesto';
+import { useMoneda } from '@/modules/moneda/hooks/useMoneda';
+import { Input, Button, Select, FormItem, FormContainer, Dialog, Card, Checkbox } from '@/components/ui';
 import ItemList from './ItemList';
 import ItemForm from './ItemForm';
 
@@ -29,6 +33,16 @@ export function PresupuestoForm({
   const [showItemForm, setShowItemForm] = useState(false);
   const [editingItemIndex, setEditingItemIndex] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
+  const [impuestosSeleccionados, setImpuestosSeleccionados] = useState<number[]>(
+    initialValues?.presupuestoImpuestos?.map(pi => pi.impuestoId) || []
+  );
+  
+  const { getActiveImpuestos } = useImpuesto();
+  const { monedas } = useMoneda();
+  const [impuestosActivos, setImpuestosActivos] = useState<Impuesto[]>([]);
+  
+  // Filtrar monedas activas
+  const monedasActivas = monedas.filter(m => m.activo);
 
   const {
     control,
@@ -43,42 +57,59 @@ export function PresupuestoForm({
       subtotal: 0,
       impuestos: 0,
       total: 0,
+      monedaId: 1, // ARS por defecto
+      impuestosSeleccionados: [],
     },
   });
 
-  // Cargar clientes
+  // Cargar clientes e impuestos
   useEffect(() => {
-    const loadClientes = async () => {
+    const loadData = async () => {
       try {
         setLoading(true);
-        const data = await fetchPersonas();
-        // Filtrar solo los clientes
-        const clientesList = data.filter(p => p.tipo === 'CLIENTE');
+        
+        // Cargar clientes
+        const personasData = await fetchPersonas();
+        const clientesList = personasData.filter(p => p.tipo === 'CLIENTE');
         setClientes(clientesList);
+        
+        // Cargar impuestos activos
+        const impuestosData = await getActiveImpuestos();
+        setImpuestosActivos(impuestosData);
+        
       } catch (error) {
-        console.error('Error cargando clientes:', error);
+        console.error('Error cargando datos:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    loadClientes();
-  }, []);
+    loadData();
+  }, [getActiveImpuestos]);
 
-  // Calcular totales cuando cambian los items
+  // Calcular totales cuando cambian los items o impuestos seleccionados
   useEffect(() => {
     const subtotal = items.reduce((acc, item) => {
       return acc + (item.cantidad * item.precioUnitario);
     }, 0);
     
-    const impuestos = subtotal * 0.21; // 21% IVA
-    const total = subtotal + impuestos;
+    // Calcular impuestos basado en los seleccionados
+    const totalImpuestos = impuestosSeleccionados.reduce((acc, impuestoId) => {
+      const impuesto = impuestosActivos.find(i => i.id === impuestoId);
+      if (impuesto) {
+        return acc + (subtotal * impuesto.porcentaje / 100);
+      }
+      return acc;
+    }, 0);
+    
+    const total = subtotal + totalImpuestos;
 
     setValue('items', items);
     setValue('subtotal', subtotal);
-    setValue('impuestos', impuestos);
+    setValue('impuestos', totalImpuestos);
     setValue('total', total);
-  }, [items, setValue]);
+    setValue('impuestosSeleccionados', impuestosSeleccionados);
+  }, [items, impuestosSeleccionados, impuestosActivos, setValue]);
 
   const handleAddItem = (item: CreateItemDTO) => {
     if (editingItemIndex !== null) {
@@ -103,9 +134,24 @@ export function PresupuestoForm({
     setItems(prev => prev.filter((_, i) => i !== index));
   };
 
+  const handleToggleImpuesto = (impuestoId: number) => {
+    setImpuestosSeleccionados(prev => {
+      if (prev.includes(impuestoId)) {
+        return prev.filter(id => id !== impuestoId);
+      } else {
+        return [...prev, impuestoId];
+      }
+    });
+  };
+
   const clientesOptions = clientes.map(c => ({
     value: c.id,
     label: c.nombre,
+  }));
+
+  const monedasOptions = monedasActivas.map(m => ({
+    value: m.id,
+    label: `${m.nombre} (${m.simbolo})`,
   }));
 
   return (
@@ -113,25 +159,48 @@ export function PresupuestoForm({
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <Card>
           <div className="p-4">
-            <FormItem
-              label="Cliente"
-              invalid={Boolean(errors.clienteId)}
-              errorMessage={errors.clienteId?.message}
-            >
-              <Controller
-                name="clienteId"
-                control={control}
-                rules={{ required: 'Debe seleccionar un cliente' }}
-                render={({ field }) => (
-                  <Select
-                    options={clientesOptions}
-                    value={clientesOptions.find(option => option.value === field.value)}
-                    onChange={option => field.onChange(option?.value)}
-                    isLoading={loading}
-                  />
-                )}
-              />
-            </FormItem>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormItem
+                label="Cliente"
+                invalid={Boolean(errors.clienteId)}
+                errorMessage={errors.clienteId?.message}
+              >
+                <Controller
+                  name="clienteId"
+                  control={control}
+                  rules={{ required: 'Debe seleccionar un cliente' }}
+                  render={({ field }) => (
+                    <Select
+                      options={clientesOptions}
+                      value={clientesOptions.find(option => option.value === field.value)}
+                      onChange={option => field.onChange(option?.value)}
+                      isLoading={loading}
+                      placeholder="Seleccionar cliente..."
+                    />
+                  )}
+                />
+              </FormItem>
+
+              <FormItem
+                label="Moneda"
+                invalid={Boolean(errors.monedaId)}
+                errorMessage={errors.monedaId?.message}
+              >
+                <Controller
+                  name="monedaId"
+                  control={control}
+                  rules={{ required: 'Debe seleccionar una moneda' }}
+                  render={({ field }) => (
+                    <Select
+                      options={monedasOptions}
+                      value={monedasOptions.find(option => option.value === field.value)}
+                      onChange={option => field.onChange(option?.value)}
+                      placeholder="Seleccionar moneda..."
+                    />
+                  )}
+                />
+              </FormItem>
+            </div>
           </div>
         </Card>
 
@@ -155,6 +224,31 @@ export function PresupuestoForm({
               onEdit={handleEditItem}
               onDelete={handleDeleteItem}
             />
+
+            {/* Selección de Impuestos */}
+            <div className="mt-6 pt-4 border-t">
+              <h4 className="text-md font-semibold mb-3">Impuestos a Aplicar</h4>
+              {impuestosActivos.length > 0 ? (
+                <div className="space-y-2">
+                  {impuestosActivos.map(impuesto => (
+                    <div key={impuesto.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        checked={impuestosSeleccionados.includes(impuesto.id)}
+                        onChange={() => handleToggleImpuesto(impuesto.id)}
+                      />
+                      <span className="text-sm">
+                        {impuesto.nombre} ({impuesto.porcentaje}%)
+                        {impuesto.descripcion && (
+                          <span className="text-gray-500 ml-1">- {impuesto.descripcion}</span>
+                        )}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500 text-sm">No hay impuestos activos configurados</p>
+              )}
+            </div>
 
             <div className="mt-4 space-y-2">
               <div className="flex justify-between">

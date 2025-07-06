@@ -1,6 +1,8 @@
 import { Persona } from '../persona/types';
 import { Producto } from '../producto/types';
 import { Servicio } from '../servicio/types';
+import { Moneda } from '../moneda/types';
+import { Impuesto } from '../impuesto/types';
 import { EstadoPresupuesto } from '../../views/presupuestos/schemas';
 
 export interface Item {
@@ -14,6 +16,16 @@ export interface Item {
   precioUnitario: number;
 }
 
+export interface PresupuestoImpuesto {
+  id: number;
+  presupuestoId: number;
+  impuestoId: number;
+  impuesto: Impuesto;
+  monto: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Presupuesto {
   id: number;
   clienteId: number;
@@ -23,6 +35,10 @@ export interface Presupuesto {
   impuestos: number;
   total: number;
   estado: EstadoPresupuesto;
+  monedaId: number;
+  moneda: Moneda;
+  presupuestoImpuestos: PresupuestoImpuesto[];
+  tipoCambioFecha?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -40,6 +56,8 @@ export interface CreatePresupuestoDTO {
   subtotal: number;
   impuestos: number;
   total: number;
+  impuestosSeleccionados?: number[];
+  monedaId?: number;
 }
 
 export interface UpdatePresupuestoDTO {
@@ -49,6 +67,8 @@ export interface UpdatePresupuestoDTO {
   impuestos?: number;
   total?: number;
   estado?: EstadoPresupuesto;
+  impuestosSeleccionados?: number[];
+  monedaId?: number;
 }
 
 export const estadoPresupuestoOptions = [

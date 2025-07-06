@@ -35,6 +35,15 @@ export const presupuestoSchema = z.object({
   items: z.array(itemSchema)
     .min(1, 'Debe agregar al menos un item'),
   
+  impuestosSeleccionados: z.array(z.number())
+    .min(1, 'Debe seleccionar al menos un impuesto')
+    .optional(),
+  
+  monedaId: z.number()
+    .int('Debe seleccionar una moneda')
+    .positive('Debe seleccionar una moneda válida')
+    .optional(),
+  
   estado: z.nativeEnum(EstadoPresupuesto).optional(),
 });
 

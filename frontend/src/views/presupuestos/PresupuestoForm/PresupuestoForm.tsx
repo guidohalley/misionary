@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useForm, Controller, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Card, Button, FormItem, FormContainer, Input, Select, Notification, toast } from '@/components/ui';
+import { Card, Button, FormItem, FormContainer, Input, Select, Notification, toast, Checkbox } from '@/components/ui';
 import { HiOutlinePlus, HiOutlineTrash } from 'react-icons/hi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { presupuestoSchema } from '../schemas';
@@ -9,6 +9,10 @@ import type { PresupuestoFormData, ItemFormData } from '../types';
 import { usePersona } from '@/modules/persona/hooks/usePersona';
 import { useProducto } from '@/modules/producto/hooks/useProducto';
 import { useServicio } from '@/modules/servicio/hooks/useServicio';
+import { useMoneda } from '@/modules/moneda/hooks/useMoneda';
+import { useImpuesto } from '@/modules/impuesto/hooks/useImpuesto';
+import { usePresupuestoCalculations } from '../hooks/usePresupuestoCalculations';
+import { Impuesto } from '@/modules/impuesto/types';
 
 interface PresupuestoFormProps {
   initialData?: PresupuestoFormData;
@@ -24,9 +28,15 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
   isEdit = false,
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [impuestosSeleccionados, setImpuestosSeleccionados] = useState<Impuesto[]>([]);
+  
   const { personas, refreshPersonas } = usePersona();
   const { productos, refreshProductos } = useProducto();
   const { servicios, refreshServicios } = useServicio();
+  const { monedas, refreshMonedas } = useMoneda();
+  const { getActiveImpuestos } = useImpuesto();
+  
+  const [impuestosDisponibles, setImpuestosDisponibles] = useState<Impuesto[]>([]);
   
   const {
     control,
@@ -40,6 +50,8 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
     defaultValues: initialData || {
       clienteId: undefined,
       items: [{ cantidad: 1, precioUnitario: 0 }],
+      impuestosSeleccionados: [],
+      monedaId: 1, // ARS por defecto
     },
   });
 
@@ -50,11 +62,30 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
 
   const watchItems = watch("items");
 
+  // Usar el hook de cálculos con los impuestos seleccionados
+  const { subtotal, impuestos, total, detalleImpuestos } = usePresupuestoCalculations(
+    watchItems, 
+    impuestosSeleccionados
+  );
+
   useEffect(() => {
     refreshPersonas();
     refreshProductos();
     refreshServicios();
-  }, [refreshPersonas, refreshProductos, refreshServicios]);
+    refreshMonedas();
+    
+    // Cargar impuestos activos
+    const loadImpuestos = async () => {
+      try {
+        const impuestosActivos = await getActiveImpuestos();
+        setImpuestosDisponibles(impuestosActivos);
+      } catch (error) {
+        console.error('Error cargando impuestos:', error);
+      }
+    };
+    
+    loadImpuestos();
+  }, [refreshPersonas, refreshProductos, refreshServicios, refreshMonedas, getActiveImpuestos]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('es-AR', {
@@ -69,38 +100,19 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
     }
   }, [initialData, reset]);
 
-  // Calcular totales automáticamente
-  const calcularTotales = () => {
-    const subtotal = watchItems?.reduce((sum, item) => {
-      const cantidad = item?.cantidad || 0;
-      const precio = item?.precioUnitario || 0;
-      return sum + (cantidad * precio);
-    }, 0) || 0;
-
-    const impuestos = subtotal * 0.21; // 21% IVA
-    const total = subtotal + impuestos;
-
-    return { subtotal, impuestos, total };
-  };
-
-  const { subtotal, impuestos, total } = calcularTotales();
-
   const handleFormSubmit = async (data: PresupuestoFormData) => {
     try {
       setIsSubmitting(true);
       
-      // Calcular totales para enviar al backend
-      const totalesCalculados = calcularTotales();
-      
-      // Agregar totales calculados
+      // Agregar totales calculados e impuestos seleccionados
       const dataWithTotals = {
         ...data,
-        subtotal: totalesCalculados.subtotal,
-        impuestos: totalesCalculados.impuestos,
-        total: totalesCalculados.total,
+        subtotal,
+        impuestos,
+        total,
+        impuestosSeleccionados: impuestosSeleccionados.map(imp => imp.id),
         items: data.items.map(item => ({
           ...item,
-          // Asegurar que precioUnitario sea el correcto del producto/servicio seleccionado
           precioUnitario: item.precioUnitario
         }))
       };
@@ -143,6 +155,11 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
     label: cliente.nombre
   }));
 
+  const monedaOptions = monedas.map(moneda => ({
+    value: moneda.id,
+    label: `${moneda.nombre} (${moneda.simbolo})`
+  }));
+
   const productoOptions = productos.map(producto => ({
     value: producto.id,
     label: `${producto.nombre} - ${formatPrice(producto.precio)}`,
@@ -154,6 +171,14 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
     label: `${servicio.nombre} - ${formatPrice(servicio.precio)}`,
     precio: servicio.precio
   }));
+
+  const handleImpuestoToggle = (impuesto: Impuesto, checked: boolean) => {
+    if (checked) {
+      setImpuestosSeleccionados(prev => [...prev, impuesto]);
+    } else {
+      setImpuestosSeleccionados(prev => prev.filter(imp => imp.id !== impuesto.id));
+    }
+  };
 
   return (
     <motion.div
@@ -188,13 +213,72 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
                       {...field}
                       options={clienteOptions}
                       placeholder="Selecciona un cliente"
-                      disabled={isSubmitting}
+                      isDisabled={isSubmitting}
                       onChange={(option) => field.onChange(option?.value)}
                       value={clienteOptions.find(option => option.value === field.value)}
                     />
                   )}
                 />
               </FormItem>
+            </div>
+
+            {/* Configuración del presupuesto */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              {/* Moneda */}
+              <FormItem
+                label="Moneda"
+                invalid={!!errors.monedaId}
+                errorMessage={errors.monedaId?.message}
+              >
+                <Controller
+                  name="monedaId"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      {...field}
+                      options={monedaOptions}
+                      placeholder="Selecciona una moneda"
+                      isDisabled={isSubmitting}
+                      onChange={(option) => field.onChange(option?.value)}
+                      value={monedaOptions.find(option => option.value === field.value)}
+                    />
+                  )}
+                />
+              </FormItem>
+
+              {/* Impuestos */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  Impuestos a Aplicar
+                </label>
+                <div className="space-y-2 max-h-32 overflow-y-auto">
+                  {impuestosDisponibles.map((impuesto) => (
+                    <div key={impuesto.id} className="flex items-center">
+                      <Checkbox
+                        checked={impuestosSeleccionados.some(imp => imp.id === impuesto.id)}
+                        onChange={(checked) => handleImpuestoToggle(impuesto, checked)}
+                        disabled={isSubmitting}
+                      />
+                      <label className="ml-2 text-sm text-gray-700">
+                        {impuesto.nombre} ({impuesto.porcentaje}%)
+                        {impuesto.descripcion && (
+                          <span className="text-gray-500 text-xs block">
+                            {impuesto.descripcion}
+                          </span>
+                        )}
+                      </label>
+                    </div>
+                  ))}
+                  {impuestosDisponibles.length === 0 && (
+                    <p className="text-sm text-gray-500">No hay impuestos configurados</p>
+                  )}
+                </div>
+                {impuestosSeleccionados.length === 0 && (
+                  <p className="text-sm text-red-600 mt-1">
+                    Debe seleccionar al menos un impuesto
+                  </p>
+                )}
+              </div>
             </div>
 
             {/* Items */}
@@ -259,11 +343,11 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
                               {...field}
                               options={[{ value: '', label: 'Sin producto' }, ...productoOptions]}
                               placeholder="Seleccionar producto"
-                              disabled={isSubmitting || !!watchItems?.[index]?.servicioId}
+                              isDisabled={isSubmitting || !!watchItems?.[index]?.servicioId}
                               onChange={(option) => {
                                 field.onChange(option?.value || undefined);
                                 // Auto-completar precio si selecciona producto
-                                if (option?.precio) {
+                                if (option && 'precio' in option && option.precio) {
                                   setValue(`items.${index}.precioUnitario`, option.precio);
                                   // Limpiar servicio si selecciona producto
                                   setValue(`items.${index}.servicioId`, undefined);
@@ -289,11 +373,11 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
                               {...field}
                               options={[{ value: '', label: 'Sin servicio' }, ...servicioOptions]}
                               placeholder="Seleccionar servicio"
-                              disabled={isSubmitting || !!watchItems?.[index]?.productoId}
+                              isDisabled={isSubmitting || !!watchItems?.[index]?.productoId}
                               onChange={(option) => {
                                 field.onChange(option?.value || undefined);
                                 // Auto-completar precio si selecciona servicio
-                                if (option?.precio) {
+                                if (option && 'precio' in option && option.precio) {
                                   setValue(`items.${index}.precioUnitario`, option.precio);
                                   // Limpiar producto si selecciona servicio
                                   setValue(`items.${index}.productoId`, undefined);
@@ -386,15 +470,29 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
                   <span className="text-gray-600">Subtotal:</span>
                   <span className="font-medium">{formatPrice(subtotal)}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">IVA (21%):</span>
-                  <span className="font-medium">{formatPrice(impuestos)}</span>
-                </div>
+                
+                {detalleImpuestos.map((detalle) => (
+                  <div key={detalle.impuesto.id} className="flex justify-between">
+                    <span className="text-gray-600">
+                      {detalle.impuesto.nombre} ({detalle.impuesto.porcentaje}%):
+                    </span>
+                    <span className="font-medium">{formatPrice(detalle.monto)}</span>
+                  </div>
+                ))}
+                
                 <div className="flex justify-between text-lg font-bold border-t pt-2">
                   <span>Total:</span>
                   <span className="text-green-600">{formatPrice(total)}</span>
                 </div>
               </div>
+              
+              {impuestosSeleccionados.length === 0 && (
+                <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                  <p className="text-sm text-yellow-800">
+                    ⚠️ No se han seleccionado impuestos. El total no incluye impuestos.
+                  </p>
+                </div>
+              )}
             </div>
 
             <div className="flex justify-end space-x-4">

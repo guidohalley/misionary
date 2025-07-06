@@ -13,6 +13,8 @@ export class PresupuestoService {
     subtotal: number;
     impuestos: number;
     total: number;
+    impuestosSeleccionados?: number[];
+    monedaId?: number;
   }) {
     try {
       console.log('PresupuestoService.create - Input data:', JSON.stringify(data, null, 2));
@@ -61,25 +63,85 @@ export class PresupuestoService {
       
       const presupuesto = await prisma.presupuesto.create({
         data: {
-          ...data,
+          clienteId: data.clienteId,
+          subtotal: data.subtotal,
+          impuestos: data.impuestos,
+          total: data.total,
+          monedaId: data.monedaId || 1,
           estado: EstadoPresupuesto.BORRADOR,
           items: {
             create: data.items
-          }
+          },
+          presupuestoImpuestos: data.impuestosSeleccionados ? {
+            create: data.impuestosSeleccionados.map(impuestoId => ({
+              impuestoId,
+              monto: 0 // Se calculará después con el porcentaje real
+            }))
+          } : undefined
         },
         include: {
           cliente: true,
+          moneda: true,
           items: {
             include: {
               producto: true,
               servicio: true
+            }
+          },
+          presupuestoImpuestos: {
+            include: {
+              impuesto: true
+            }
+          }
+        }
+      });
+
+      // Si hay impuestos seleccionados, calcular y actualizar los montos
+      if (data.impuestosSeleccionados && data.impuestosSeleccionados.length > 0) {
+        for (const impuestoId of data.impuestosSeleccionados) {
+          const impuesto = await prisma.impuesto.findUnique({
+            where: { id: impuestoId }
+          });
+          
+          if (impuesto) {
+            const montoImpuesto = (data.subtotal * Number(impuesto.porcentaje)) / 100;
+            await prisma.presupuestoImpuesto.update({
+              where: {
+                presupuestoId_impuestoId: {
+                  presupuestoId: presupuesto.id,
+                  impuestoId: impuestoId
+                }
+              },
+              data: {
+                monto: montoImpuesto
+              }
+            });
+          }
+        }
+      }
+      
+      // Obtener el presupuesto actualizado con los montos de impuestos
+      const presupuestoFinal = await prisma.presupuesto.findUnique({
+        where: { id: presupuesto.id },
+        include: {
+          cliente: true,
+          moneda: true,
+          items: {
+            include: {
+              producto: true,
+              servicio: true
+            }
+          },
+          presupuestoImpuestos: {
+            include: {
+              impuesto: true
             }
           }
         }
       });
       
       console.log('Presupuesto creado exitosamente:', presupuesto.id);
-      return presupuesto;
+      return presupuestoFinal || presupuesto;
     } catch (error) {
       console.error('Error en PresupuestoService.create:', error);
       throw error;
@@ -91,10 +153,16 @@ export class PresupuestoService {
       where: { id },
       include: {
         cliente: true,
+        moneda: true,
         items: {
           include: {
             producto: true,
             servicio: true
+          }
+        },
+        presupuestoImpuestos: {
+          include: {
+            impuesto: true
           }
         },
         factura: true
@@ -108,10 +176,16 @@ export class PresupuestoService {
       data,
       include: {
         cliente: true,
+        moneda: true,
         items: {
           include: {
             producto: true,
             servicio: true
+          }
+        },
+        presupuestoImpuestos: {
+          include: {
+            impuesto: true
           }
         }
       }
@@ -140,10 +214,16 @@ export class PresupuestoService {
       where,
       include: {
         cliente: true,
+        moneda: true,
         items: {
           include: {
             producto: true,
             servicio: true
+          }
+        },
+        presupuestoImpuestos: {
+          include: {
+            impuesto: true
           }
         }
       }
