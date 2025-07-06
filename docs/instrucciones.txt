@@ -15,10 +15,60 @@
 - Password: admin123
 
 ### 🚀 **PRÓXIMOS PASOS - DESARROLLO INCREMENTAL:**
-**FASE 1: CRUD PRODUCTOS (SIGUIENTE)**
-**FASE 2: CRUD PERSONAS**
-**FASE 3: CRUD PRESUPUESTOS**
-**FASE 4: CRUD FACTURAS**
+
+**🔥 NUEVA ESTRATEGIA DE PRIORIDADES PARA AGENCIA DE MARKETING:**
+
+**ENFOQUE MULTI-MONEDA COMO BASE FUNDAMENTAL**
+
+En el contexto económico argentino, donde coexisten múltiples monedas (Pesos, USD, EUR) y existe alta volatilidad, es fundamental establecer un sistema multi-moneda como base antes de implementar cualquier otra funcionalidad avanzada.
+
+**PRIORIDAD 1: GESTIÓN MULTI-MONEDA (BASE FUNDAMENTAL)**
+- Sistema de múltiples monedas (ARS, USD, EUR)
+- Tabla de tipos de cambio históricos
+- Conversión automática entre monedas
+- Reportes financieros consolidados
+- Presupuestos y facturas en moneda específica
+- **JUSTIFICACIÓN**: Base fundamental que permite análisis financiero real, especialmente crítico en Argentina donde muchos servicios se cotizan en USD pero se pagan en pesos
+
+**PRIORIDAD 2: COSTOS OPERATIVOS Y ANÁLISIS DE RENTABILIDAD**
+- Registro de gastos operativos por categoría
+- Asignación de costos a proyectos/clientes
+- Cálculo automático de márgenes reales
+- Dashboard de rentabilidad por cliente/proyecto
+- Integración con sistema multi-moneda
+- **JUSTIFICACIÓN**: Permite conocer la rentabilidad real considerando todos los costos, fundamental para tomar decisiones comerciales correctas
+
+**PRIORIDAD 3: PRECIOS DINÁMICOS CON MULTI-MONEDA**
+- Historial de precios por moneda
+- Actualización masiva por inflación/devaluación
+- Versionado de presupuestos al cambiar tipos de cambio
+- Alertas de precios desactualizados por volatilidad
+- **JUSTIFICACIÓN**: Una vez establecida la base multi-moneda, los precios dinámicos se vuelven mucho más útiles y precisos
+
+**PRIORIDAD 4: CONTRATOS RECURRENTES MULTI-MONEDA**
+- Contratos en moneda específica con cláusulas de ajuste
+- Renovación con actualización de tipos de cambio
+- Proyección de ingresos en moneda base
+- Alertas de renovación y reajuste
+- **JUSTIFICACIÓN**: Los contratos son más predecibles cuando están en una base monetaria sólida
+
+**PRIORIDAD 5: SERVICIOS COMPUESTOS CON COSTOS REALES**
+- Paquetes con costos detallados por componente
+- Márgenes calculados sobre costos reales
+- Asignación de proveedores con sus respectivos costos
+- **JUSTIFICACIÓN**: Más efectivo cuando se conocen los costos reales de cada componente
+
+**PRIORIDAD 6: SEGUIMIENTO DE PAGOS MULTI-MONEDA**
+- Pagos en diferentes monedas
+- Conversión automática al tipo de cambio del día
+- Seguimiento de diferencias de cambio
+- **JUSTIFICACIÓN**: Completar el ciclo financiero con la precisión multi-moneda
+
+**PRIORIDAD 7: DASHBOARD GERENCIAL INTEGRAL**
+- Métricas en moneda base con conversiones
+- Análisis de rentabilidad real por moneda
+- Proyecciones considerando costos operativos
+- **JUSTIFICACIÓN**: Dashboard realmente útil solo cuando tiene datos financieros precisos y completos
 
 ---
 
@@ -564,7 +614,7 @@ frontend/src/
 │           └── usePersona.ts          # Hook principal con lógica de negocio
 ├── views/                             # LÓGICA DE UI
 │   └── personas/
-│       ├── types.ts                   # Re-exports + tipos específicos de UI
+│       ├── types.ts                   # Re-exports desde modules/
 │       ├── schemas.ts                 # Validación Zod + enums locales
 │       ├── hooks/
 │       │   └── index.ts               # Hooks específicos de UI (filtros, etc.)
@@ -756,4 +806,405 @@ docker exec -it misionary-postgres-1 psql -U postgres -d misionary
 
 ---
 
-**🎉 ENTORNO COMPLETAMENTE FUNCIONAL - READY FOR DEVELOPMENT! 🎉**
+## 📊 **ANÁLISIS DEL SCHEMA Y NUEVO ORDEN DE IMPLEMENTACIÓN MULTI-MONEDA**
+
+### **🔍 ANÁLISIS DEL SCHEMA ACTUAL:**
+
+**MODELOS EXISTENTES:**
+- ✅ `Persona` (Cliente/Proveedor/Interno) - COMPLETO
+- ✅ `Producto` (con precio y proveedor) - BÁSICO
+- ✅ `Servicio` (con precio y proveedor) - BÁSICO  
+- ✅ `Presupuesto` (con estados y items) - FUNCIONAL
+- ✅ `Item` (productos/servicios en presupuestos) - FUNCIONAL
+- ✅ `Factura` (vinculada a presupuestos) - BÁSICO
+- ✅ `Impuesto` (con porcentajes) - FUNCIONAL
+
+**LIMITACIONES CRÍTICAS PARA AGENCIA EN ARGENTINA:**
+- ❌ **NO hay gestión multi-moneda** (ARS/USD/EUR)
+- ❌ **NO hay tipos de cambio históricos**
+- ❌ **NO hay registro de costos operativos**
+- ❌ **NO hay análisis de rentabilidad real**
+- ❌ **NO hay historial de precios** en Producto/Servicio
+- ❌ **NO hay modelo Contrato** para recurrencia
+- ❌ **NO hay servicios compuestos** (paquetes)
+- ❌ **NO hay seguimiento de pagos detallado**
+
+### **🎯 NUEVO ORDEN DE IMPLEMENTACIÓN (ENFOQUE MULTI-MONEDA):**
+
+**1️⃣ PRIORIDAD MÁXIMA: GESTIÓN MULTI-MONEDA**
+```sql
+-- NUEVAS TABLAS FUNDAMENTALES:
+- Moneda (id, codigo, nombre, simbolo, activo)
+- TipoCambio (id, monedaDesde, monedaHacia, valor, fecha)
+-- MODIFICAR TABLAS EXISTENTES:
+- Producto: agregar monedaId
+- Servicio: agregar monedaId
+- Presupuesto: agregar monedaId, tipoCambioFecha
+- Factura: agregar monedaId, tipoCambioFecha
+```
+**JUSTIFICACIÓN**: Base fundamental para economía argentina - permite análisis financiero real en contexto inflacionario/devaluatorio
+
+**2️⃣ SEGUNDA PRIORIDAD: COSTOS OPERATIVOS Y RENTABILIDAD**
+```sql
+-- NUEVAS TABLAS:
+- GastoOperativo (id, concepto, monto, monedaId, fecha, categoria)
+- AsignacionGastoProyecto (id, gastoId, presupuestoId, porcentaje, montoAsignado)
+```
+**JUSTIFICACIÓN**: Permite conocer rentabilidad real considerando todos los costos operativos por moneda
+
+**3️⃣ TERCERA PRIORIDAD: PRECIOS DINÁMICOS MULTI-MONEDA**
+```sql
+-- NUEVA TABLA:
+- HistorialPrecio (id, productoId/servicioId, monedaId, precio, fechaDesde, fechaHasta, motivoCambio)
+```
+**JUSTIFICACIÓN**: Una vez establecida la base multi-moneda, los precios dinámicos se vuelven realmente útiles
+
+**4️⃣ CUARTA PRIORIDAD: CONTRATOS RECURRENTES MULTI-MONEDA**
+```sql
+-- NUEVAS TABLAS:
+- Contrato (id, clienteId, presupuestoId, monedaId, fechaInicio, fechaFin, montoRecurrente, clausulaAjuste)
+- FacturaContrato (id, contratoId, facturaId, periodo)
+```
+**JUSTIFICACIÓN**: Contratos en moneda específica con cláusulas de ajuste por devaluación/inflación
+
+**5️⃣ QUINTA PRIORIDAD: SERVICIOS COMPUESTOS CON COSTOS**
+```sql
+-- NUEVAS TABLAS:
+- ServicioCompuesto (id, nombre, monedaId)
+- ComponenteServicio (id, servicioCompuestoId, servicioId, cantidad, porcentajeMargen, proveedorId)
+```
+**JUSTIFICACIÓN**: Paquetes con márgenes calculados sobre costos reales en moneda específica
+
+**6️⃣ SEXTA PRIORIDAD: SEGUIMIENTO DE PAGOS MULTI-MONEDA**
+```sql
+-- NUEVA TABLA:
+- Pago (id, facturaId, monedaId, monto, tipoCambio, montoBase, fechaPago, metodoPago)
+```
+**JUSTIFICACIÓN**: Completar el ciclo financiero con conversiones automáticas y seguimiento de diferencias de cambio
+
+### **📊 PROPUESTA DE NUEVAS TABLAS PARA GESTIÓN MULTI-MONEDA Y COSTOS:**
+
+```sql
+-- 1. GESTIÓN MULTI-MONEDA
+model Moneda {
+  id         Int    @id @default(autoincrement())
+  codigo     String @unique // ARS, USD, EUR
+  nombre     String // Peso Argentino, Dólar, Euro
+  simbolo    String // $, USD, €
+  activo     Boolean @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relaciones
+  tiposCambio TipoCambio[]
+  presupuestos Presupuesto[]
+  facturas    Factura[]
+  productos   Producto[]
+  servicios   Servicio[]
+  gastosOperativos GastoOperativo[]
+  pagos       Pago[]
+}
+
+model TipoCambio {
+  id         Int    @id @default(autoincrement())
+  monedaDesde String // USD
+  monedaHacia String // ARS
+  valor      Decimal @db.Decimal(15,4) // 1200.5000
+  fecha      DateTime
+  createdAt  DateTime @default(now())
+  
+  @@unique([monedaDesde, monedaHacia, fecha])
+}
+
+-- 2. COSTOS OPERATIVOS
+model GastoOperativo {
+  id           Int    @id @default(autoincrement())
+  concepto     String
+  descripcion  String?
+  monto        Decimal @db.Decimal(15,2)
+  monedaId     Int
+  fecha        DateTime
+  categoria    String // Oficina, Servicios, Personal, Marketing, etc.
+  esRecurrente Boolean @default(false)
+  frecuencia   String? // Mensual, Anual, etc.
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relaciones
+  moneda       Moneda @relation(fields: [monedaId], references: [id])
+  asignacionesProyecto AsignacionGastoProyecto[]
+}
+
+model AsignacionGastoProyecto {
+  id              Int    @id @default(autoincrement())
+  gastoId         Int
+  presupuestoId   Int
+  porcentaje      Decimal @db.Decimal(5,2) // 25.50%
+  montoAsignado   Decimal @db.Decimal(15,2)
+  createdAt       DateTime @default(now())
+
+  // Relaciones
+  gasto           GastoOperativo @relation(fields: [gastoId], references: [id])
+  presupuesto     Presupuesto @relation(fields: [presupuestoId], references: [id])
+
+  @@unique([gastoId, presupuestoId])
+}
+
+-- 3. HISTORIAL DE PRECIOS MULTI-MONEDA
+model HistorialPrecio {
+  id          Int    @id @default(autoincrement())
+  productoId  Int?
+  servicioId  Int?
+  monedaId    Int
+  precio      Decimal @db.Decimal(15,2)
+  fechaDesde  DateTime
+  fechaHasta  DateTime?
+  motivoCambio String? // Inflación, Devaluación, Promoción
+  activo      Boolean @default(true)
+  createdAt   DateTime @default(now())
+
+  // Relaciones
+  producto    Producto? @relation(fields: [productoId], references: [id])
+  servicio    Servicio? @relation(fields: [servicioId], references: [id])
+  moneda      Moneda @relation(fields: [monedaId], references: [id])
+}
+
+-- 4. CONTRATOS RECURRENTES
+model Contrato {
+  id              Int    @id @default(autoincrement())
+  clienteId       Int
+  presupuestoId   Int // Presupuesto base
+  monedaId        Int
+  fechaInicio     DateTime
+  fechaFin        DateTime
+  frecuencia      String // Mensual, Trimestral, Anual
+  montoRecurrente Decimal @db.Decimal(15,2)
+  clausulaAjuste  String? // Ejemplo: "Ajuste por IPC + 5%"
+  estado          String @default("ACTIVO") // ACTIVO, PAUSADO, FINALIZADO
+  renovacionAuto  Boolean @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relaciones
+  cliente         Persona @relation("ContratoCliente", fields: [clienteId], references: [id])
+  presupuesto     Presupuesto @relation(fields: [presupuestoId], references: [id])
+  moneda          Moneda @relation(fields: [monedaId], references: [id])
+  facturasGeneradas FacturaContrato[]
+}
+
+model FacturaContrato {
+  id          Int    @id @default(autoincrement())
+  contratoId  Int
+  facturaId   Int
+  periodo     String // "2024-01", "2024-Q1"
+  generadaEn  DateTime @default(now())
+
+  // Relaciones
+  contrato    Contrato @relation(fields: [contratoId], references: [id])
+  factura     Factura @relation(fields: [facturaId], references: [id])
+
+  @@unique([contratoId, periodo])
+}
+
+-- 5. SERVICIOS COMPUESTOS
+model ServicioCompuesto {
+  id          Int    @id @default(autoincrement())
+  nombre      String
+  descripcion String?
+  monedaId    Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relaciones
+  moneda      Moneda @relation(fields: [monedaId], references: [id])
+  componentes ComponenteServicio[]
+}
+
+model ComponenteServicio {
+  id                  Int    @id @default(autoincrement())
+  servicioCompuestoId Int
+  servicioId          Int
+  cantidad            Int @default(1)
+  porcentajeMargen    Decimal @db.Decimal(5,2) // 20.00%
+  proveedorId         Int?
+  orden               Int @default(0)
+
+  // Relaciones
+  servicioCompuesto   ServicioCompuesto @relation(fields: [servicioCompuestoId], references: [id])
+  servicio            Servicio @relation(fields: [servicioId], references: [id])
+  proveedor           Persona? @relation("ComponenteProveedor", fields: [proveedorId], references: [id])
+}
+
+-- 6. PAGOS MULTI-MONEDA
+model Pago {
+  id          Int    @id @default(autoincrement())
+  facturaId   Int
+  monedaId    Int
+  monto       Decimal @db.Decimal(15,2)
+  tipoCambio  Decimal? @db.Decimal(15,4) // Tipo de cambio al momento del pago
+  montoBase   Decimal? @db.Decimal(15,2) // Monto convertido a moneda base
+  fechaPago   DateTime
+  metodoPago  String // Efectivo, Transferencia, Cheque, etc.
+  referencia  String? // Número de transferencia, cheque, etc.
+  observaciones String?
+  createdAt   DateTime @default(now())
+
+  // Relaciones
+  factura     Factura @relation(fields: [facturaId], references: [id])
+  moneda      Moneda @relation(fields: [monedaId], references: [id])
+}
+```
+
+**🔧 MODIFICACIONES A TABLAS EXISTENTES:**
+
+```sql
+-- Agregar monedaId a tablas existentes
+model Producto {
+  // ...campos existentes...
+  monedaId    Int @default(1) // 1 = ARS por defecto
+  
+  // ...relaciones existentes...
+  moneda      Moneda @relation(fields: [monedaId], references: [id])
+  historialPrecios HistorialPrecio[]
+}
+
+model Servicio {
+  // ...campos existentes...
+  monedaId    Int @default(1) // 1 = ARS por defecto
+  
+  // ...relaciones existentes...
+  moneda      Moneda @relation(fields: [monedaId], references: [id])
+  historialPrecios HistorialPrecio[]
+  componentes ComponenteServicio[]
+}
+
+model Presupuesto {
+  // ...campos existentes...
+  monedaId    Int @default(1)
+  tipoCambioFecha DateTime? // Para recordar el tipo de cambio usado
+  
+  // ...relaciones existentes...
+  moneda      Moneda @relation(fields: [monedaId], references: [id])
+  contratos   Contrato[]
+  asignacionesGasto AsignacionGastoProyecto[]
+}
+
+model Factura {
+  // ...campos existentes...
+  monedaId    Int @default(1)
+  tipoCambioFecha DateTime?
+  
+  // ...relaciones existentes...
+  moneda      Moneda @relation(fields: [monedaId], references: [id])
+  pagos       Pago[]
+  facturasContrato FacturaContrato[]
+}
+
+model Persona {
+  // ...campos existentes...
+  
+  // ...relaciones existentes...
+  contratos   Contrato[] @relation("ContratoCliente")
+  componentesComoProveedor ComponenteServicio[] @relation("ComponenteProveedor")
+}
+```
+
+### **🚀 RECOMENDACIÓN FINAL ACTUALIZADA:**
+
+**EMPEZAR POR GESTIÓN MULTI-MONEDA** porque:
+1. Es la base fundamental para análisis financiero real en Argentina
+2. Permite manejar la volatilidad del peso argentino
+3. Una vez implementado, todas las demás funcionalidades se benefician automáticamente
+4. Resuelve el problema más crítico de la agencia: cotizar en USD y cobrar en pesos
+
+¿Procedemos con la implementación de Gestión Multi-Moneda como nueva base del sistema?
+
+---
+
+## **📋 PRÓXIMOS PASOS CONCRETOS PARA IMPLEMENTACIÓN MULTI-MONEDA:**
+
+**FASE 1: PREPARACIÓN DEL SCHEMA (1-2 días)**
+1. Crear migración para tabla `Moneda` con datos iniciales (ARS, USD, EUR)
+2. Crear migración para tabla `TipoCambio` 
+3. Agregar campo `monedaId` a tablas existentes (Producto, Servicio, Presupuesto, Factura)
+4. Ejecutar migraciones y seed con datos de prueba
+
+**FASE 2: BACKEND API MULTI-MONEDA (2-3 días)**
+1. Crear servicio de tipos de cambio (moneda.service.ts)
+2. Crear controlador de monedas (moneda.controller.ts)
+3. Crear rutas de API para gestión de monedas y tipos de cambio
+4. Actualizar controladores existentes para soportar multi-moneda
+5. Crear middleware de conversión automática
+
+**FASE 3: FRONTEND MULTI-MONEDA (3-4 días)**
+1. Crear componente selector de moneda
+2. Crear hooks para conversión de monedas
+3. Actualizar formularios de productos/servicios para incluir moneda
+4. Actualizar formularios de presupuestos con selector de moneda
+5. Crear pantalla de gestión de tipos de cambio
+6. Actualizar todos los displays de precios para mostrar moneda
+
+**FASE 4: COSTOS OPERATIVOS (2-3 días)**
+1. Crear tabla `GastoOperativo` y `AsignacionGastoProyecto`
+2. Crear controladores y servicios para gastos operativos
+3. Crear pantallas de registro de gastos
+4. Crear pantalla de asignación de gastos a proyectos
+5. Crear reportes de rentabilidad por proyecto
+
+**FASE 5: TESTING Y REFINAMIENTO (1-2 días)**
+1. Testing de conversiones automáticas
+2. Testing de formularios multi-moneda
+3. Testing de reportes consolidados
+4. Ajustes de UX y performance
+
+**TOTAL ESTIMADO: 9-14 días de desarrollo**
+
+### **🔧 COMANDOS DE DESARROLLO PARA MULTI-MONEDA:**
+
+```bash
+# Crear nueva migración para multi-moneda
+cd backend
+npx prisma migrate dev --name "add_multimoneda_support"
+
+# Actualizar types después de cambios en schema
+npx prisma generate
+
+# Seed con datos de monedas iniciales
+npm run db:seed
+
+# Testing de endpoints multi-moneda
+curl -X GET http://localhost:3001/api/monedas
+curl -X GET http://localhost:3001/api/tipos-cambio/USD/ARS
+```
+
+### **📊 MÉTRICAS DE ÉXITO PARA MULTI-MONEDA:**
+
+**TÉCNICAS:**
+- [ ] Todos los precios se almacenan con su moneda específica
+- [ ] Conversiones automáticas funcionan correctamente
+- [ ] Reportes consolidados muestran totales en moneda base
+- [ ] Performance no se degrada con las conversiones
+
+**COMERCIALES:**
+- [ ] Presupuestos se pueden cotizar en USD y facturar en ARS
+- [ ] Seguimiento de diferencias de cambio por proyecto
+- [ ] Análisis de rentabilidad considerando fluctuaciones monetarias
+- [ ] Alertas de precios desactualizados por devaluación
+
+**UX:**
+- [ ] Selector de moneda intuitivo en todos los formularios
+- [ ] Displays de precios claros con símbolo de moneda
+- [ ] Conversiones en tiempo real visibles al usuario
+- [ ] Configuración simple de tipos de cambio diarios
+
+¿Comenzamos con la Fase 1: Preparación del Schema para Multi-Moneda?
+
+---
+
+**🎯 ESTADO ACTUAL DEL PROYECTO:**
+- ✅ Gestión de personas (clientes/proveedores/internos) COMPLETADA
+- ✅ Arquitectura de formularios específicos IMPLEMENTADA  
+- ✅ Documentación actualizada con nuevo enfoque COMPLETADA
+- 🔄 **SIGUIENTE**: Implementación sistema multi-moneda (Fase 1)
+
+El sistema está listo para dar el salto hacia una gestión financiera real adaptada al contexto argentino.
