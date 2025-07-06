@@ -28,8 +28,8 @@ const _UserDropdown = ({ className }: CommonProps) => {
     const userAuthority = user?.authority?.[0] || 'USER'
     
     // Debug - log para verificar datos
-    console.log('UserDropdown - Usuario actual:', user)
-    console.log('UserDropdown - Sesión actual:', session)
+    // console.log('UserDropdown - Usuario actual:', user)
+    // console.log('UserDropdown - Sesión actual:', session)
 
     const handleSignOut = () => {
         console.log('UserDropdown - Cerrando sesión...')

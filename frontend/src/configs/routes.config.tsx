@@ -28,6 +28,9 @@ const MonedaView = lazy(() => import('@/views/moneda'));
 const GastosView = lazy(() => import('@/views/gastos'));
 const GastoNew = lazy(() => import('@/views/gastos/GastoNew'));
 const HistorialPrecioView = lazy(() => import('@/views/historialPrecio'));
+const EmpresasView = lazy(() => import('@/views/empresas'));
+const EmpresaNew = lazy(() => import('@/views/empresas/EmpresaNew'));
+const EmpresaEdit = lazy(() => import('@/views/empresas/EmpresaEdit'));
 
 const publicRoutes = [
   {
@@ -162,6 +165,21 @@ const protectedRoutes = [
     key: 'historial-precios',
     path: '/historial-precios',
     component: HistorialPrecioView,
+  },
+  {
+    key: 'empresas',
+    path: '/empresas',
+    component: EmpresasView,
+  },
+  {
+    key: 'empresa-new',
+    path: '/empresas/new',
+    component: EmpresaNew,
+  },
+  {
+    key: 'empresa-edit',
+    path: '/empresas/edit/:id',
+    component: EmpresaEdit,
   }
 ];
 

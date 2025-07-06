@@ -81,6 +81,16 @@ const navigationConfig: NavigationTree[] = [
                 subMenu: [],
             },
             {
+                key: 'comercial.empresas',
+                path: '/empresas',
+                title: 'Empresas',
+                translateKey: 'nav.comercial.empresas',
+                icon: 'building',
+                type: NAV_ITEM_TYPE_ITEM,
+                authority: [],
+                subMenu: [],
+            },
+            {
                 key: 'comercial.proveedores',
                 path: '/personas?tipo=PROVEEDOR',
                 title: 'Proveedores',
@@ -116,8 +126,8 @@ const navigationConfig: NavigationTree[] = [
             {
                 key: 'operaciones.nuevo-cliente',
                 path: '/personas/cliente/new',
-                title: 'Nuevo Cliente',
-                translateKey: 'nav.operaciones.nuevoCliente',
+                title: 'Nuevo Cliente con Empresa',
+                translateKey: 'nav.operaciones.nuevoClienteConEmpresa',
                 icon: 'userAdd',
                 type: NAV_ITEM_TYPE_ITEM,
                 authority: [],

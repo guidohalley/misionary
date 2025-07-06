@@ -37,12 +37,14 @@
     "comercial": {
       "title": "Gestión Comercial",
       "clientes": "Clientes",
+      "empresas": "Empresas",
       "proveedores": "Proveedores",
       "presupuestos": "Presupuestos"
     },
     "operaciones": {
       "title": "Operaciones Rápidas",
       "nuevoCliente": "Nuevo Cliente",
+      "nuevoClienteConEmpresa": "Nuevo Cliente con Empresa",
       "nuevoProveedor": "Nuevo Proveedor",
       "nuevoPresupuesto": "Nuevo Presupuesto",
       "nuevoGasto": "Nuevo Gasto",
