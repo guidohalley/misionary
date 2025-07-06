@@ -111,3 +111,8 @@ const PersonasView: React.FC = () => {
 };
 
 export default PersonasView;
+
+// Exportar también los formularios específicos
+export { default as ClienteForm } from './ClienteForm';
+export { default as ProveedorForm } from './ProveedorForm';
+export { default as InternoForm } from './InternoForm';

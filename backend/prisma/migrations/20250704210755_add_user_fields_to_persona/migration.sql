@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "Persona" ADD COLUMN     "activo" BOOLEAN NOT NULL DEFAULT true,
+ADD COLUMN     "esUsuario" BOOLEAN NOT NULL DEFAULT false,
+ALTER COLUMN "password" DROP NOT NULL;

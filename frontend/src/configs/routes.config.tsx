@@ -6,6 +6,10 @@ const LoginView = lazy(() => import('@/views/auth/LoginView'));
 const PersonasView = lazy(() => import('@/views/personas'));
 const PersonaNew = lazy(() => import('@/views/personas/PersonaNew'));
 const PersonaEdit = lazy(() => import('@/views/personas/PersonaEdit'));
+const PersonaTypeSelector = lazy(() => import('@/views/personas/PersonaTypeSelector'));
+const ClienteNew = lazy(() => import('@/views/personas/ClienteNew'));
+const ProveedorNew = lazy(() => import('@/views/personas/ProveedorNew'));
+const InternoNew = lazy(() => import('@/views/personas/InternoNew'));
 const ProductosView = lazy(() => import('@/views/productos'));
 const ProductoNew = lazy(() => import('@/views/productos/ProductoNew'));
 const ProductoEdit = lazy(() => import('@/views/productos/ProductoEdit'));
@@ -40,8 +44,28 @@ const protectedRoutes = [
     component: PersonasView,
   },
   {
-    key: 'persona-new',
+    key: 'persona-type-selector',
     path: '/personas/new',
+    component: PersonaTypeSelector,
+  },
+  {
+    key: 'cliente-new',
+    path: '/personas/cliente/new',
+    component: ClienteNew,
+  },
+  {
+    key: 'proveedor-new',
+    path: '/personas/proveedor/new',
+    component: ProveedorNew,
+  },
+  {
+    key: 'interno-new',
+    path: '/personas/interno/new',
+    component: InternoNew,
+  },
+  {
+    key: 'persona-new-legacy',
+    path: '/personas/new-legacy',
     component: PersonaNew,
   },
   {

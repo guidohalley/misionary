@@ -31,7 +31,10 @@
     "gestion": {
       "title": "Gestión Comercial",
       "clientes": "Clientes",
+      "nuevoCliente": "Nuevo Cliente",
       "proveedores": "Proveedores",
+      "nuevoProveedor": "Nuevo Proveedor",
+      "nuevoInterno": "Nuevo Usuario Interno",
       "servicios": "Servicios"
     },
     "facturacion": {

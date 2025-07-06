@@ -8,6 +8,9 @@ export interface Persona {
   cvu?: string;
   roles: RolUsuario[];
   email: string;
+  password?: string;  // Opcional - solo para usuarios del sistema
+  activo: boolean;
+  esUsuario: boolean;  // Define si puede acceder al sistema
   createdAt: string;
   updatedAt: string;
 }
@@ -18,8 +21,10 @@ export interface CreatePersonaDTO {
   telefono?: string;
   cvu?: string;
   roles: RolUsuario[];
-  password: string;
+  password?: string;  // Opcional según el tipo
   email: string;
+  activo?: boolean;
+  esUsuario?: boolean;  // Se determina automáticamente
 }
 
 export interface UpdatePersonaDTO {
@@ -29,6 +34,9 @@ export interface UpdatePersonaDTO {
   cvu?: string;
   roles?: RolUsuario[];
   email?: string;
+  password?: string;
+  activo?: boolean;
+  esUsuario?: boolean;
 }
 
 export const tipoPersonaOptions = [

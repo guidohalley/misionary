@@ -16,6 +16,9 @@ import {
     HiOutlineClipboardList,
     HiOutlineHashtag, // Usamos este en lugar de HiOutlinePercent
     HiOutlineClipboardCheck,
+    HiOutlineUserAdd,
+    HiOutlineOfficeBuilding,
+    HiOutlineUserCircle,
 } from 'react-icons/hi'
 import type { JSX } from 'react'
 
@@ -36,6 +39,9 @@ const navigationIcon: NavigationIcons = {
     percentage: <HiOutlineHashtag />, // Cambiado a HiOutlineHashtag
     presupuesto: <HiOutlineClipboardCheck />, // Icono específico para presupuestos
     fileText: <HiOutlineClipboardCheck />, // Alias para compatibilidad
+    userAdd: <HiOutlineUserAdd />, // Nuevo cliente
+    buildingAdd: <HiOutlineOfficeBuilding />, // Nuevo proveedor
+    userPlus: <HiOutlineUserCircle />, // Nuevo usuario interno
     // Iconos del template original (mantener por compatibilidad)
     singleMenu: <HiOutlineViewGridAdd />,
     collapseMenu: <HiOutlineTemplate />,

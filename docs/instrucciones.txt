@@ -290,6 +290,263 @@ docker exec misionary-backend-1 npx prisma db seed
 
 ### 🚀 **PRÓXIMA FASE: DESARROLLO INCREMENTAL DE CRUDS**
 
+#### **✅ FASE COMPLETADA: CRUD PERSONAS - IMPLEMENTACIÓN EXITOSA CON FORMULARIOS ESPECÍFICOS**
+
+**🎉 ESTADO: 100% FUNCIONAL - CREAR, LISTAR, EDITAR, ELIMINAR + FORMULARIOS ESPECÍFICOS**
+
+**🔥 NUEVA FUNCIONALIDAD: FORMULARIOS ESPECÍFICOS POR TIPO DE PERSONA**
+
+**SEPARACIÓN COMPLETA DE LÓGICA DE NEGOCIO:**
+
+```
+Tipos de Persona y sus Características:
+
+1. 📋 CLIENTES:
+   - Solo información de contacto (nombre, email, teléfono, CVU)
+   - NO tienen acceso al sistema (esUsuario: false)
+   - NO tienen contraseña
+   - NO tienen roles de usuario
+   - Para gestión de presupuestos y facturas únicamente
+
+2. 🏢 PROVEEDORES:
+   - Información de contacto + credenciales de acceso
+   - SÍ tienen acceso al sistema (esUsuario: true)
+   - SÍ tienen contraseña (hasheda en backend)
+   - Rol fijo: PROVEEDOR
+   - Pueden gestionar sus productos/servicios
+
+3. 👥 USUARIOS INTERNOS:
+   - Información de contacto + credenciales de acceso
+   - SÍ tienen acceso al sistema (esUsuario: true)
+   - SÍ tienen contraseña (hasheda en backend)
+   - Roles administrativos: ADMIN y/o CONTADOR
+   - Acceso completo según roles asignados
+```
+
+**ARQUITECTURA DE FORMULARIOS IMPLEMENTADA:**
+
+```
+views/personas/
+├── schemas.ts                           # ✅ SEPARACIÓN DE SCHEMAS
+│   ├── clienteSchema                   # Solo datos básicos
+│   ├── proveedorSchema                 # Datos + contraseña + rol PROVEEDOR
+│   └── internoSchema                   # Datos + contraseña + roles ADMIN/CONTADOR
+│
+├── ClienteForm/                        # ✅ FORMULARIO ESPECÍFICO CLIENTES
+│   ├── ClienteForm.tsx                 # Solo campos básicos, sin contraseña
+│   └── index.ts
+│
+├── ProveedorForm/                      # ✅ FORMULARIO ESPECÍFICO PROVEEDORES
+│   ├── ProveedorForm.tsx               # Campos básicos + contraseña + rol automático
+│   └── index.ts
+│
+├── InternoForm/                        # ✅ FORMULARIO ESPECÍFICO INTERNOS
+│   ├── InternoForm.tsx                 # Campos básicos + contraseña + selección roles
+│   └── index.ts
+│
+├── ClienteNew/                         # ✅ PÁGINA CREAR CLIENTE
+│   ├── ClienteNew.tsx                  # Usa ClienteForm
+│   └── index.ts
+│
+├── ProveedorNew/                       # ✅ PÁGINA CREAR PROVEEDOR
+│   ├── ProveedorNew.tsx                # Usa ProveedorForm
+│   └── index.ts
+│
+├── InternoNew/                         # ✅ PÁGINA CREAR USUARIO INTERNO
+│   ├── InternoNew.tsx                  # Usa InternoForm
+│   └── index.ts
+│
+└── PersonaTypeSelector/                # ✅ SELECTOR DE TIPO
+    ├── PersonaTypeSelector.tsx         # Página de selección elegante
+    └── index.ts
+```
+
+**BACKEND LOGIC AUTOMÁTICA IMPLEMENTADA:**
+
+```typescript
+// backend/src/controllers/persona.controller.ts
+
+switch (tipo) {
+  case 'CLIENTE':
+    newPersona.esUsuario = false;     // No acceso al sistema
+    newPersona.roles = [];            // Sin roles
+    // password ignorado
+    break;
+    
+  case 'PROVEEDOR':
+    newPersona.esUsuario = true;      // Con acceso al sistema
+    newPersona.roles = ['PROVEEDOR']; // Rol fijo
+    newPersona.password = await bcrypt.hash(password, 10); // Hash password
+    break;
+    
+  case 'INTERNO':
+    newPersona.esUsuario = true;      // Con acceso al sistema
+    newPersona.roles = roles;         // Roles seleccionados (ADMIN/CONTADOR)
+    newPersona.password = await bcrypt.hash(password, 10); // Hash password
+    break;
+}
+```
+
+**RUTAS CONFIGURADAS:**
+
+```typescript
+// configs/routes.config.tsx
+{
+  key: 'persona-type-selector',
+  path: '/personas/new',           // Selector de tipo
+  component: PersonaTypeSelector,
+},
+{
+  key: 'cliente-new',
+  path: '/personas/cliente/new',   // Crear cliente específico
+  component: ClienteNew,
+},
+{
+  key: 'proveedor-new',
+  path: '/personas/proveedor/new', // Crear proveedor específico
+  component: ProveedorNew,
+},
+{
+  key: 'interno-new',
+  path: '/personas/interno/new',   // Crear usuario interno específico
+  component: InternoNew,
+},
+```
+
+**NAVEGACIÓN MEJORADA:**
+
+```typescript
+// configs/navigation.config/index.ts
+subMenu: [
+  {
+    key: 'gestion.clientes',
+    path: '/personas?tipo=CLIENTE',     // Lista clientes
+    title: 'Clientes',
+  },
+  {
+    key: 'gestion.clientes.nuevo',
+    path: '/personas/cliente/new',      // Crear cliente
+    title: 'Nuevo Cliente',
+  },
+  {
+    key: 'gestion.proveedores',
+    path: '/personas?tipo=PROVEEDOR',   // Lista proveedores
+    title: 'Proveedores',
+  },
+  {
+    key: 'gestion.proveedores.nuevo',
+    path: '/personas/proveedor/new',    // Crear proveedor
+    title: 'Nuevo Proveedor',
+  },
+  {
+    key: 'gestion.usuarios.interno',
+    path: '/personas/interno/new',      // Crear usuario interno
+    title: 'Nuevo Usuario Interno',
+    authority: ['ADMIN'],               // Solo para administradores
+  },
+]
+```
+
+**VALIDACIONES ZOD ESPECÍFICAS:**
+
+```typescript
+// views/personas/schemas.ts
+
+// ✅ CLIENTE: Solo datos básicos
+export const clienteSchema = z.object({
+  nombre: z.string().min(2),
+  email: z.string().email(),
+  telefono: z.string().optional(),
+  cvu: z.string().optional(),
+  tipo: z.literal(TipoPersona.CLIENTE),
+  esUsuario: z.literal(false),          // Forzado a false
+  roles: z.array(z.nativeEnum(RolUsuario)).default([]), // Sin roles
+  activo: z.boolean().default(true),
+});
+
+// ✅ PROVEEDOR: Datos básicos + contraseña + rol fijo
+export const proveedorSchema = z.object({
+  // ...campos básicos...
+  password: z.string().min(6),          // Contraseña requerida
+  tipo: z.literal(TipoPersona.PROVEEDOR),
+  esUsuario: z.literal(true),           // Forzado a true
+  roles: z.array(z.literal(RolUsuario.PROVEEDOR)).default([RolUsuario.PROVEEDOR]), // Rol fijo
+});
+
+// ✅ INTERNO: Datos básicos + contraseña + roles administrativos
+export const internoSchema = z.object({
+  // ...campos básicos...
+  password: z.string().min(6),          // Contraseña requerida
+  roles: z.array(z.enum([RolUsuario.ADMIN, RolUsuario.CONTADOR]))
+    .min(1, 'Debe seleccionar al menos un rol administrativo'), // Roles seleccionables
+  tipo: z.literal(TipoPersona.INTERNO),
+  esUsuario: z.literal(true),           // Forzado a true
+});
+```
+
+**UX MEJORADA:**
+
+1. **Selector de Tipo Elegante**: Página con cards interactivas que explican cada tipo
+2. **Formularios Contextuales**: Campos específicos según el tipo de persona
+3. **Validación en Tiempo Real**: Zod + React Hook Form en todos los formularios
+4. **Animaciones Suaves**: Framer Motion en todas las transiciones
+5. **Feedback Visual**: Notificaciones de éxito/error claramente diferenciadas
+6. **Navegación Intuitiva**: Breadcrumbs y botones de retorno en todas las páginas
+
+**ARQUITECTURA HÍBRIDA MANTENIDA:**
+
+```
+frontend/src/
+├── modules/                           # LÓGICA DE NEGOCIO
+│   └── persona/
+│       ├── types.ts                   # Tipos de dominio
+│       ├── service.ts                 # Llamadas a API
+│       └── hooks/usePersona.ts        # Hook principal
+├── views/                             # LÓGICA DE UI
+│   └── personas/
+│       ├── schemas.ts                 # Validación específica por tipo
+│       ├── types.ts                   # Re-exports + tipos UI
+│       ├── [TipoForm]/               # Formularios específicos
+│       ├── [TipoNew]/                # Páginas de creación específicas
+│       └── PersonaTypeSelector/       # Selector de tipo
+```
+
+**TECNOLOGÍAS INTEGRADAS Y FUNCIONANDO:**
+- ✅ **Framer Motion**: Animaciones en todas las vistas
+- ✅ **React Hook Form**: Gestión de formularios específicos
+- ✅ **Zod**: Validación diferenciada por tipo
+- ✅ **DataTable**: Listado con filtros por tipo
+- ✅ **Componentes UI**: Badge, Tag, Tooltip, Button, Dialog integrados
+
+**COMANDOS PARA PROBAR LA FUNCIONALIDAD:**
+
+```bash
+# 1. Iniciar el entorno
+docker-compose up -d
+
+# 2. Acceder a la aplicación
+# http://localhost:3000
+# Login: admin@misionary.com / admin123
+
+# 3. Navegar a:
+# - Gestión Comercial > Nuevo Cliente    (/personas/cliente/new)
+# - Gestión Comercial > Nuevo Proveedor  (/personas/proveedor/new)
+# - Gestión Comercial > Nuevo Usuario Interno (/personas/interno/new)
+# - O usar el selector: /personas/new
+
+# 4. Verificar en backend que se crean correctamente:
+docker exec misionary-backend-1 npm run db:studio
+```
+
+**PRÓXIMOS PASOS RECOMENDADOS:**
+
+1. **✅ COMPLETADO**: Formularios específicos por tipo de persona
+2. **✅ COMPLETADO**: Navegación mejorada con opciones específicas
+3. **✅ COMPLETADO**: Validaciones diferenciadas por tipo
+4. **🔄 SIGUIENTE**: Filtros en PersonaList por tipo de persona
+5. **🔄 SIGUIENTE**: Páginas de edición específicas por tipo
+6. **🔄 SIGUIENTE**: CRUD Productos (usar estructura de personas como template)
+
 #### **✅ FASE COMPLETADA: CRUD PERSONAS - EJEMPLO DE IMPLEMENTACIÓN EXITOSA**
 
 **🎉 ESTADO: 100% FUNCIONAL - CREAR, LISTAR, EDITAR, ELIMINAR**

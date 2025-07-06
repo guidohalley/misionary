@@ -1,26 +1,39 @@
 import React from 'react';
 import { useForm, Controller } from 'react-hook-form';
-import { Persona, CreatePersonaDTO, UpdatePersonaDTO, tipoPersonaOptions, rolUsuarioOptions, PersonaFormProps } from '../types';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Input, Button, Select, FormItem, FormContainer } from '@/components/ui';
+import { createPersonaSchema, updatePersonaSchema, CreatePersonaFormData, UpdatePersonaFormData } from '../schemas';
+import { tipoPersonaOptions, rolUsuarioOptions } from '../types';
+
+interface PersonaFormProps {
+  initialValues?: UpdatePersonaFormData;
+  onSubmit: (data: CreatePersonaFormData | UpdatePersonaFormData) => void;
+  onCancel: () => void;
+}
 
 export function PersonaForm({
   initialValues,
   onSubmit,
   onCancel,
 }: PersonaFormProps) {
+  const isEdit = !!initialValues;
+  const schema = isEdit ? updatePersonaSchema : createPersonaSchema;
+  
   const { 
     control, 
     handleSubmit, 
     formState: { errors },
-  } = useForm<CreatePersonaDTO | UpdatePersonaDTO>({
+    watch,
+  } = useForm<CreatePersonaFormData | UpdatePersonaFormData>({
+    resolver: zodResolver(schema),
     defaultValues: initialValues || {
       nombre: '',
       email: '',
+      password: '',
       telefono: '',
       cvu: '',
       tipo: undefined,
       roles: [],
-      ...(initialValues ? {} : { password: '' }),
     },
   });
 
@@ -68,19 +81,21 @@ export function PersonaForm({
             label="Contraseña"
             invalid={Boolean(errors.password)}
             errorMessage={errors.password?.message}
+            asterisk={watch('tipo') === 'INTERNO' || watch('tipo') === 'PROVEEDOR'}
           >
             <Controller
               name="password"
               control={control}
-              rules={{ 
-                required: 'La contraseña es requerida',
-                minLength: {
-                  value: 6,
-                  message: 'La contraseña debe tener al menos 6 caracteres'
-                }
-              }}
               render={({ field }) => (
-                <Input {...field} type="password" />
+                <Input 
+                  {...field} 
+                  type="password" 
+                  placeholder={
+                    watch('tipo') === 'CLIENTE' 
+                      ? 'Contraseña (opcional para clientes)'
+                      : 'Contraseña requerida'
+                  }
+                />
               )}
             />
           </FormItem>

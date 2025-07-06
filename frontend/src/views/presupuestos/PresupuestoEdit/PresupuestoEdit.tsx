@@ -55,30 +55,28 @@ const PresupuestoEdit: React.FC = () => {
   }
 
   if (error) {
-    return (
-      <div className="text-center py-8">
-        <p className="text-red-600">Error: {error}</p>
-        <button 
-          onClick={() => navigate('/presupuestos')}
-          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        >
-          Volver a Presupuestos
-        </button>
-      </div>
+    return (        <div className="text-center py-8">
+          <p className="text-red-600 mb-4">Error: {error}</p>
+          <button 
+            onClick={() => navigate('/presupuestos')}
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Volver a Presupuestos
+          </button>
+        </div>
     );
   }
 
   if (!selectedPresupuesto) {
-    return (
-      <div className="text-center py-8">
-        <p className="text-gray-600">Presupuesto no encontrado</p>
-        <button 
-          onClick={() => navigate('/presupuestos')}
-          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        >
-          Volver a Presupuestos
-        </button>
-      </div>
+    return (        <div className="text-center py-8">
+          <p className="text-gray-600 mb-4">Presupuesto no encontrado</p>
+          <button 
+            onClick={() => navigate('/presupuestos')}
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Volver a Presupuestos
+          </button>
+        </div>
     );
   }
 

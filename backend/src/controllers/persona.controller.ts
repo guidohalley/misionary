@@ -5,16 +5,38 @@ import bcrypt from 'bcrypt';
 export class PersonaController {
   static async create(req: Request, res: Response) {
     try {
-      const { password, ...rest } = req.body;
-      const hashedPassword = await bcrypt.hash(password, 10);
+      const { password, tipo, roles, ...rest } = req.body;
+      
+      // Determinar si es usuario del sistema según el tipo
+      const esUsuario = tipo === 'INTERNO' || tipo === 'PROVEEDOR';
+      
+      // Determinar roles automáticamente según el tipo
+      let rolesFinales = [];
+      if (tipo === 'CLIENTE') {
+        rolesFinales = []; // Clientes no tienen roles
+      } else if (tipo === 'PROVEEDOR') {
+        rolesFinales = ['PROVEEDOR']; // Proveedores automáticamente tienen rol PROVEEDOR
+      } else if (tipo === 'INTERNO') {
+        rolesFinales = roles || ['ADMIN']; // Internos pueden tener ADMIN o CONTADOR
+      }
+      
+      let hashedPassword = null;
+      if (password && esUsuario) {
+        hashedPassword = await bcrypt.hash(password, 10);
+      }
       
       const persona = await PersonaService.create({
         ...rest,
-        password: hashedPassword
+        tipo,
+        roles: rolesFinales,
+        password: hashedPassword,
+        esUsuario,
+        activo: true
       });
       
       res.status(201).json(persona);
     } catch (error) {
+      console.error('Error en PersonaController.create:', error);
       res.status(500).json({ error: 'Error al crear la persona' });
     }
   }
@@ -28,21 +50,39 @@ export class PersonaController {
         return res.status(404).json({ error: 'Persona no encontrada' });
       }
       
-      res.json(persona);
+      return res.json(persona);
     } catch (error) {
-      res.status(500).json({ error: 'Error al buscar la persona' });
+      console.error('Error en PersonaController.findById:', error);
+      return res.status(500).json({ error: 'Error al buscar la persona' });
     }
   }
 
   static async update(req: Request, res: Response) {
     try {
       const id = parseInt(req.params.id);
-      const { password, ...rest } = req.body;
+      const { password, tipo, roles, ...rest } = req.body;
       
       console.log('Datos recibidos para actualizar persona:', { id, body: req.body });
       
       let updateData: any = rest;
-      if (password) {
+      
+      // Si se está cambiando el tipo, actualizar esUsuario y roles
+      if (tipo) {
+        updateData.tipo = tipo;
+        updateData.esUsuario = tipo === 'INTERNO' || tipo === 'PROVEEDOR';
+        
+        // Actualizar roles según el tipo
+        if (tipo === 'CLIENTE') {
+          updateData.roles = [];
+        } else if (tipo === 'PROVEEDOR') {
+          updateData.roles = ['PROVEEDOR'];
+        } else if (tipo === 'INTERNO') {
+          updateData.roles = roles || ['ADMIN'];
+        }
+      }
+      
+      // Solo procesar contraseña si se proporciona y es un usuario del sistema
+      if (password && (updateData.tipo === 'INTERNO' || updateData.tipo === 'PROVEEDOR')) {
         const hashedPassword = await bcrypt.hash(password, 10);
         updateData.password = hashedPassword;
       }

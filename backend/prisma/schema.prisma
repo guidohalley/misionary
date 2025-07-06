@@ -46,8 +46,10 @@ model Persona {
   telefono     String?
   cvu          String?
   roles        RolUsuario[]
-  password     String
+  password     String?        // Opcional - solo para usuarios del sistema
   email        String         @unique
+  activo       Boolean        @default(true)
+  esUsuario    Boolean        @default(false)  // Define si puede acceder al sistema
   productos    Producto[]
   servicios    Servicio[]
   presupuestos Presupuesto[]  @relation("ClientePresupuestos")
