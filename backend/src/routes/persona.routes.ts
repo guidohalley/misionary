@@ -31,4 +31,9 @@ router.delete('/:id',
   PersonaController.delete
 );
 
+router.post('/cliente-con-empresa', 
+  [auth, checkRole([RolUsuario.ADMIN])], 
+  PersonaController.createClienteWithEmpresa
+);
+
 export default router;

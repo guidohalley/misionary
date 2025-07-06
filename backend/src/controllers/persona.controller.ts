@@ -117,4 +117,30 @@ export class PersonaController {
       res.status(500).json({ error: 'Error al obtener las personas' });
     }
   }
+
+  static async createClienteWithEmpresa(req: Request, res: Response) {
+    try {
+      const { cliente, empresa } = req.body;
+      
+      // Preparar datos del cliente
+      const clienteData = {
+        ...cliente,
+        tipo: 'CLIENTE' as const,
+        roles: [] as any[],
+        esUsuario: false,
+        activo: true
+      };
+
+      // Hashear password si se proporciona
+      if (cliente.password) {
+        clienteData.password = await bcrypt.hash(cliente.password, 10);
+      }
+
+      const result = await PersonaService.createClienteWithEmpresa(clienteData, empresa);
+      res.status(201).json(result);
+    } catch (error) {
+      console.error('Error en PersonaController.createClienteWithEmpresa:', error);
+      res.status(500).json({ error: 'Error al crear el cliente con empresa' });
+    }
+  }
 }

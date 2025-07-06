@@ -89,12 +89,32 @@ export function usePersona() {
     }
   }, [personas]);
 
+  const createClienteWithEmpresa = async (data: {
+    cliente: CreatePersonaDTO;
+    empresa?: any;
+  }) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const result = await personaService.createClienteWithEmpresa(data);
+      // Agregar el nuevo cliente a la lista
+      setPersonas(prev => [...prev, result.cliente]);
+      return result;
+    } catch (err) {
+      setError('Error al crear el cliente con empresa');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     personas,
     loading,
     error,
     selectedPersona,
     createPersona,
+    createClienteWithEmpresa,
     updatePersona,
     deletePersona,
     selectPersona,

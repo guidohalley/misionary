@@ -44,6 +44,53 @@ export const clienteSchema = z.object({
   activo: z.boolean().default(true),
 });
 
+// 🏢 SCHEMA PARA EMPRESA
+export const empresaSchema = z.object({
+  nombre: z.string()
+    .min(2, 'El nombre de la empresa debe tener al menos 2 caracteres')
+    .max(100, 'El nombre de la empresa no puede exceder 100 caracteres'),
+  
+  razonSocial: z.string()
+    .min(2, 'La razón social debe tener al menos 2 caracteres')
+    .max(200, 'La razón social no puede exceder 200 caracteres')
+    .optional()
+    .or(z.literal('')),
+  
+  cuit: z.string()
+    .regex(/^\d{2}-\d{8}-\d{1}$/, 'El CUIT debe tener el formato XX-XXXXXXXX-X')
+    .optional()
+    .or(z.literal('')),
+  
+  telefono: z.string()
+    .min(10, 'El teléfono debe tener al menos 10 dígitos')
+    .optional()
+    .or(z.literal('')),
+  
+  email: z.string()
+    .email('Email inválido')
+    .optional()
+    .or(z.literal('')),
+  
+  direccion: z.string()
+    .max(500, 'La dirección no puede exceder 500 caracteres')
+    .optional()
+    .or(z.literal('')),
+  
+  activo: z.boolean().default(true),
+});
+
+// 🏢📋 SCHEMA PARA CLIENTE CON EMPRESA
+export const clienteConEmpresaSchema = z.object({
+  cliente: clienteSchema.omit({ tipo: true, roles: true, esUsuario: true, activo: true }).extend({
+    tipo: z.literal(TipoPersona.CLIENTE),
+    roles: z.array(z.nativeEnum(RolUsuario)).default([]),
+    esUsuario: z.literal(false),
+    activo: z.boolean().default(true),
+  }),
+  empresa: empresaSchema.optional(),
+  crearEmpresa: z.boolean().default(false)
+});
+
 // 🏢 SCHEMA PARA PROVEEDORES (datos + acceso al sistema)
 export const proveedorSchema = z.object({
   nombre: z.string()
@@ -131,6 +178,8 @@ export const updateInternoSchema = internoSchema.partial().extend({
 export type ClienteFormData = z.infer<typeof clienteSchema>;
 export type ProveedorFormData = z.infer<typeof proveedorSchema>;
 export type InternoFormData = z.infer<typeof internoSchema>;
+export type EmpresaFormData = z.infer<typeof empresaSchema>;
+export type ClienteConEmpresaFormData = z.infer<typeof clienteConEmpresaSchema>;
 
 export type UpdateClienteFormData = z.infer<typeof updateClienteSchema>;
 export type UpdateProveedorFormData = z.infer<typeof updateProveedorSchema>;

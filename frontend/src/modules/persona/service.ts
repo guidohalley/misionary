@@ -41,3 +41,15 @@ export async function deletePersona(id: number): Promise<void> {
     method: 'DELETE'
   });
 }
+
+export async function createClienteWithEmpresa(data: {
+  cliente: CreatePersonaDTO;
+  empresa?: any;
+}): Promise<{ cliente: Persona; empresa?: any }> {
+  const response = await ApiService.fetchData<{ cliente: Persona; empresa?: any }>({
+    url: '/personas/cliente-con-empresa',
+    method: 'POST',
+    data
+  });
+  return response.data;
+}

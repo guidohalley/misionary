@@ -57,6 +57,29 @@ model Persona {
   productos               Producto[]
   recibos                 Recibo[]
   servicios               Servicio[]
+  empresas                Empresa[]         @relation("ClienteEmpresas")
+}
+
+model Empresa {
+  id          Int       @id @default(autoincrement())
+  nombre      String
+  razonSocial String?
+  cuit        String?   @unique
+  telefono    String?
+  email       String?
+  direccion   String?
+  clienteId   Int
+  activo      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relaciones
+  cliente     Persona   @relation("ClienteEmpresas", fields: [clienteId], references: [id], onDelete: Cascade)
+  presupuestos Presupuesto[] @relation("EmpresaPresupuestos")
+  facturas    Factura[] @relation("EmpresaFacturas")
+
+  @@index([clienteId])
+  @@index([activo])
 }
 
 model Producto {
@@ -95,6 +118,7 @@ model Servicio {
 model Presupuesto {
   id                   Int                       @id @default(autoincrement())
   clienteId            Int
+  empresaId            Int?
   subtotal             Decimal                   @db.Decimal(15, 2)
   impuestos            Decimal                   @db.Decimal(15, 2)
   total                Decimal                   @db.Decimal(15, 2)
@@ -107,6 +131,7 @@ model Presupuesto {
   factura              Factura?
   items                Item[]
   cliente              Persona                   @relation("ClientePresupuestos", fields: [clienteId], references: [id])
+  empresa              Empresa?                  @relation("EmpresaPresupuestos", fields: [empresaId], references: [id])
   moneda               Moneda                    @relation(fields: [monedaId], references: [id])
   presupuestoImpuestos PresupuestoImpuesto[]
 }
@@ -127,6 +152,7 @@ model Factura {
   id                 Int           @id @default(autoincrement())
   numero             String        @unique
   presupuestoId      Int           @unique
+  empresaId          Int?
   fecha              DateTime
   subtotal           Decimal       @db.Decimal(15, 2)
   impuestos          Decimal       @db.Decimal(15, 2)
@@ -137,6 +163,7 @@ model Factura {
   updatedAt          DateTime      @updatedAt
   monedaId           Int           @default(1)
   tipoCambioFecha    DateTime?
+  empresa            Empresa?      @relation("EmpresaFacturas", fields: [empresaId], references: [id])
   impuestoAplicado   Impuesto      @relation(fields: [impuestoAplicadoId], references: [id])
   moneda             Moneda        @relation(fields: [monedaId], references: [id])
   presupuesto        Presupuesto   @relation(fields: [presupuestoId], references: [id])

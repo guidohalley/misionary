@@ -8,6 +8,7 @@ const PersonaNew = lazy(() => import('@/views/personas/PersonaNew'));
 const PersonaEdit = lazy(() => import('@/views/personas/PersonaEdit'));
 const PersonaTypeSelector = lazy(() => import('@/views/personas/PersonaTypeSelector'));
 const ClienteNew = lazy(() => import('@/views/personas/ClienteNew'));
+const ClienteConEmpresaNew = lazy(() => import('@/views/personas/ClienteConEmpresaNew'));
 const ProveedorNew = lazy(() => import('@/views/personas/ProveedorNew'));
 const InternoNew = lazy(() => import('@/views/personas/InternoNew'));
 const ProductosView = lazy(() => import('@/views/productos'));
@@ -55,7 +56,7 @@ const protectedRoutes = [
   {
     key: 'cliente-new',
     path: '/personas/cliente/new',
-    component: ClienteNew,
+    component: ClienteConEmpresaNew,
   },
   {
     key: 'proveedor-new',

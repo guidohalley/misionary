@@ -1,5 +1,6 @@
 import prisma from '../config/prisma';
 import { Persona, TipoPersona, RolUsuario } from '@prisma/client';
+import { EmpresaService } from './empresa.service';
 
 export class PersonaService {
   static async create(data: {
@@ -56,8 +57,46 @@ export class PersonaService {
       where,
       include: {
         productos: true,
-        servicios: true
+        servicios: true,
+        empresas: true
       }
     });
+  }
+
+  static async createClienteWithEmpresa(clienteData: {
+    nombre: string;
+    tipo: TipoPersona;
+    telefono?: string;
+    cvu?: string;
+    roles: RolUsuario[];
+    password: string;
+    email: string;
+  }, empresaData?: {
+    nombre: string;
+    razonSocial?: string;
+    cuit?: string;
+    telefono?: string;
+    email?: string;
+    direccion?: string;
+  }) {
+    // Crear el cliente primero
+    const cliente = await prisma.persona.create({
+      data: clienteData
+    });
+
+    // Si se proporcionan datos de empresa, crear la empresa
+    if (empresaData) {
+      const empresa = await EmpresaService.create({
+        ...empresaData,
+        clienteId: cliente.id
+      });
+
+      return {
+        cliente,
+        empresa
+      };
+    }
+
+    return { cliente };
   }
 }
