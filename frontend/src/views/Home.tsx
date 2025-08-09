@@ -1,5 +1,7 @@
 import { Card, Button } from '@/components/ui'
+import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
+import { FiFilePlus, FiPlusCircle, FiUserPlus, FiTruck } from 'react-icons/fi'
 import Chart from '@/components/shared/Chart'
 import { useDashboardKpis, useGastosPorCategoria } from '@/modules/dashboard/hooks'
 
@@ -10,50 +12,85 @@ const Home = () => {
 
     return (
         <div className="container mx-auto px-4 py-6">
-            <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
+            <div className="mb-5">
+                <h1 className="text-2xl font-extrabold tracking-tight text-msgray-950">Dashboard</h1>
+                <p className="text-sm text-msgray-500">Resumen operativo y atajos a tus acciones frecuentes</p>
+            </div>
 
             {error && (
                 <div className="mb-4 text-red-600">{error}</div>
             )}
 
             {/* Acciones rápidas */}
-            <div className="flex flex-wrap gap-2 mb-4">
-                <Button size="sm" className="bg-misionary-600 hover:bg-misionary-700 text-white" onClick={() => navigate('/presupuestos/new')}>Nuevo Presupuesto</Button>
-                <Button size="sm" className="bg-misionary-600 hover:bg-misionary-700 text-white" onClick={() => navigate('/gastos/new')}>Nuevo Gasto</Button>
-                <Button size="sm" className="bg-misionary-600 hover:bg-misionary-700 text-white" onClick={() => navigate('/personas/cliente/new')}>Nuevo Cliente</Button>
-                <Button size="sm" className="bg-misionary-600 hover:bg-misionary-700 text-white" onClick={() => navigate('/personas/proveedor/new')}>Nuevo Proveedor</Button>
-            </div>
+            <motion.div 
+                className="flex flex-wrap gap-2 mb-6"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.25 }}
+            >
+                <Button size="sm" className="bg-msgray-950 hover:bg-msgray-900 text-white transition-colors shadow-sm hover:shadow focus:ring-2 focus:ring-msgray-700"
+                    onClick={() => navigate('/presupuestos/new')}
+                >
+                    <FiFilePlus className="mr-2" /> Nuevo Presupuesto
+                </Button>
+                <Button size="sm" className="bg-msgray-950 hover:bg-msgray-900 text-white transition-colors shadow-sm hover:shadow focus:ring-2 focus:ring-msgray-700"
+                    onClick={() => navigate('/gastos/new')}
+                >
+                    <FiPlusCircle className="mr-2" /> Nuevo Gasto
+                </Button>
+                <Button size="sm" className="bg-msgray-950 hover:bg-msgray-900 text-white transition-colors shadow-sm hover:shadow focus:ring-2 focus:ring-msgray-700"
+                    onClick={() => navigate('/personas/cliente/new')}
+                >
+                    <FiUserPlus className="mr-2" /> Nuevo Cliente
+                </Button>
+                <Button size="sm" className="bg-msgray-950 hover:bg-msgray-900 text-white transition-colors shadow-sm hover:shadow focus:ring-2 focus:ring-msgray-700"
+                    onClick={() => navigate('/personas/proveedor/new')}
+                >
+                    <FiTruck className="mr-2" /> Nuevo Proveedor
+                </Button>
+            </motion.div>
 
             {/* KPIs */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                        <Card className="p-4 border-misionary-200/60">
+                    <motion.div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6" initial="hidden" animate="show"
+                        variants={{ hidden: {}, show: { transition: { staggerChildren: 0.06 } } }}
+                    >
+                        <motion.div variants={{ hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}>
+                        <Card className="p-4 border-misionary-200/60 rounded-xl shadow-sm hover:shadow-md transition-shadow">
                     <div className="text-sm text-gray-600">Ingresos últimos 30 días</div>
                             <div className="mt-2 text-3xl font-extrabold text-misionary-700">
                         {loading ? '—' : Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(Object.values(ingresosPorMoneda)[0]?.total || 0)}
                     </div>
                     <div className="text-xs text-gray-500">Sin conversión FX</div>
                 </Card>
+                        </motion.div>
 
-                        <Card className="p-4 border-misionary-200/60">
+                        <motion.div variants={{ hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}>
+                        <Card className="p-4 border-misionary-200/60 rounded-xl shadow-sm hover:shadow-md transition-shadow">
                     <div className="text-sm text-gray-600">Clientes activos</div>
                     <div className="mt-2 text-3xl font-extrabold text-gray-900">
                         {loading ? '—' : clientesActivosCount}
                     </div>
                     <div className="text-xs text-gray-500">Total de clientes con estado activo</div>
                 </Card>
+                        </motion.div>
 
-                        <Card className="p-4 border-misionary-200/60">
+                        <motion.div variants={{ hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}>
+                        <Card className="p-4 border-misionary-200/60 rounded-xl shadow-sm hover:shadow-md transition-shadow">
                     <div className="text-sm text-gray-600">Gastos últimos 30 días</div>
                     <div className="mt-2 text-3xl font-extrabold text-rose-700">
                         {loading ? '—' : Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(totalGastos)}
                     </div>
                     <div className="text-xs text-gray-500">Suma de gastos operativos (sin conversión FX)</div>
                 </Card>
-            </div>
+                        </motion.div>
+            </motion.div>
 
             {/* Secciones */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Card className="p-4">
+            <motion.div className="grid grid-cols-1 md:grid-cols-2 gap-4" initial="hidden" animate="show"
+                variants={{ hidden: {}, show: { transition: { staggerChildren: 0.08 } } }}
+            >
+                <motion.div variants={{ hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}>
+                <Card className="p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow">
                     <div className="text-sm font-semibold mb-2">Gastos por categoría</div>
                     {gastosCat.loading && <div>Cargando…</div>}
                     {!gastosCat.loading && gastosCat.dataset.length === 0 && (
@@ -72,9 +109,11 @@ const Home = () => {
                             }}
                         />
                     )}
-                </Card>
+        </Card>
+        </motion.div>
 
-                        <Card className="p-4">
+            <motion.div variants={{ hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}>
+            <Card className="p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow">
                             <div className="text-sm font-semibold mb-2">Empresas registradas</div>
                             <div className="text-4xl font-black text-gray-900">{loading ? '—' : empresasCount}</div>
                             <div className="text-xs text-gray-500 mt-1">Total de empresas activas y desactivadas</div>
@@ -86,7 +125,8 @@ const Home = () => {
                                 </div>
                             )}
                         </Card>
-            </div>
+            </motion.div>
+        </motion.div>
         </div>
     )
 }
