@@ -15,12 +15,12 @@ export async function fetchPresupuestos(params?: Record<string, string>): Promis
 
 export async function fetchGastos(params?: Record<string, string>): Promise<GastoDTO[]> {
   const query = params ? '?' + new URLSearchParams(params).toString() : ''
-  const res = await ApiService.fetchData<{ success?: boolean, data: GastoDTO[] }>({ url: `/gastos${query}`, method: 'GET' })
+  const res = await ApiService.fetchData<{ success?: boolean, data: GastoDTO[] }>({ url: `/gastos-operativos${query}`, method: 'GET' })
   return (res.data as any)?.data || (res.data as unknown as GastoDTO[])
 }
 
 export async function fetchGastosResumen(params?: Record<string, string>) {
   const query = params ? '?' + new URLSearchParams(params).toString() : ''
-  const res = await ApiService.fetchData<{ success?: boolean, data: GastoResumenCategoriaDTO[] }>({ url: `/gastos/resumen${query}`, method: 'GET' })
+  const res = await ApiService.fetchData<{ success?: boolean, data: GastoResumenCategoriaDTO[] }>({ url: `/gastos-operativos/resumen${query}`, method: 'GET' })
   return (res.data as any)?.data || (res.data as unknown as GastoResumenCategoriaDTO[])
 }
