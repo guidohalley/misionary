@@ -16,7 +16,7 @@ const HeaderActionsStart = () => {
 const HeaderActionsEnd = () => {
     return (
         <>
-            <SidePanel />
+            {/* SidePanel removido temporalmente */}
             <UserDropdown hoverable={false} />
         </>
     )

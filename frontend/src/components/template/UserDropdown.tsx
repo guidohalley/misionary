@@ -36,12 +36,26 @@ const _UserDropdown = ({ className }: CommonProps) => {
         signOut()
     }
 
+    // Iniciales a partir del nombre o email
+    const initials = (userName || userEmail)
+        .split(/\s|@/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((s) => s[0]?.toUpperCase())
+        .join('') || 'US'
+
     const UserAvatar = (
         <div className={classNames(className, 'flex items-center gap-2 cursor-pointer')}>
-            <Avatar size={32} shape="circle" icon={<HiOutlineUser />} />
-            <div className="hidden md:block">
-                <div className="text-xs capitalize text-gray-600 dark:text-gray-400">{userAuthority.toLowerCase()}</div>
-                <div className="font-bold text-gray-900 dark:text-gray-100">{userName}</div>
+            <Avatar
+                size={32}
+                shape="circle"
+                className="bg-msgray-600 text-white font-semibold"
+            >
+                {initials}
+            </Avatar>
+            <div className="hidden md:block leading-tight">
+                <div className="text-[11px] uppercase tracking-wide text-gray-600 dark:text-gray-400">{userAuthority.toLowerCase()}</div>
+                <div className="font-bold text-gray-900 dark:text-gray-100 mt-0.5">{userName}</div>
             </div>
         </div>
     )
@@ -55,12 +69,16 @@ const _UserDropdown = ({ className }: CommonProps) => {
             >
                 <Dropdown.Item variant="header">
                     <div className="py-2 px-3 flex items-center gap-2">
-                        <Avatar shape="circle" icon={<HiOutlineUser />} />
-                        <div>
-                            <div className="font-bold text-gray-900 dark:text-gray-100">
+                        <Avatar shape="circle" className="bg-msgray-600 text-white font-semibold">
+                            {initials}
+                        </Avatar>
+                        <div className="leading-tight">
+                            <div className="text-[11px] uppercase tracking-wide text-gray-600 dark:text-gray-400">{userAuthority.toLowerCase()}</div>
+                            <div className="font-bold text-gray-900 dark:text-gray-100 mt-0.5">
                                 {userName}
                             </div>
-                            <div className="text-xs text-gray-600 dark:text-gray-400">{userEmail}</div>
+                            <div className="text-xs text-gray-600 dark:text-gray-400">{userEmail}
+                            </div>
                         </div>
                     </div>
                 </Dropdown.Item>

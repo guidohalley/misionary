@@ -81,28 +81,26 @@ function useAuth() {
     };
 
     const signOut = async () => {
+        console.log('🔑 useAuth - Cerrando sesión');
         try {
-            console.log('🔑 useAuth - Cerrando sesión');
+            // Aunque falle el endpoint, continuamos el flujo de logout
             await AuthService.logout();
-            
-            // Actualizar Redux
-            dispatch(signOutSuccess());
-            dispatch(setUser({
-                avatar: '',
-                userName: '',
-                email: '',
-                authority: [],
-            }));
-            
-            navigate(appConfig.unAuthenticatedEntryPath);
-            return { status: 'success' as const };
         } catch (error) {
-            // console.error('🔑 useAuth - Error en signOut:', error);
-            return {
-                status: 'failed' as const,
-                message: (error as Error).message
-            };
+            console.warn('🔑 useAuth - Logout API falló, continuando limpieza local');
         }
+
+        // Actualizar Redux SIEMPRE
+        dispatch(signOutSuccess());
+        dispatch(setUser({
+            avatar: '',
+            userName: '',
+            email: '',
+            authority: [],
+        }));
+
+        // Redirigir SIEMPRE a la ruta pública (login)
+        navigate(appConfig.unAuthenticatedEntryPath, { replace: true });
+        return { status: 'success' as const };
     };
 
     return {

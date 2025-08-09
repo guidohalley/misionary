@@ -58,14 +58,9 @@ class AuthService {
     }
 
     static async logout(): Promise<void> {
-        try {
-            await ApiService.fetchData({
-                url: '/auth/logout',
-                method: 'post',
-            });
-        } finally {
-            this.clearAuthData();
-        }
+        // No dependemos del backend para cerrar sesión; limpiamos localmente.
+        this.clearAuthData();
+        return Promise.resolve();
     }
 
     private static storeAuthData(response: AuthResponse): void {

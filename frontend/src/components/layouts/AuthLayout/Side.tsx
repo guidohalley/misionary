@@ -37,18 +37,20 @@ const Side = ({ children, content, ...rest }: SideProps) => {
                                 className="border-2 border-[#E9FC87] shadow-[0_0_0_3px_rgba(233,252,135,0.25)] overflow-hidden"
                                 shape="circle"
                                 size={64}
-                                src="/img/avatars/guido.png"
+                                src="/img/avatars/santi.png"
                                 imgPosition="top"
-                                alt="Guido"
+                                alt="Santi"
+                                
                             />
                             <Avatar
                                 className="border-2 border-[#E9FC87] shadow-[0_0_0_3px_rgba(233,252,135,0.25)] overflow-hidden"
                                 shape="circle"
                                 size={64}
-                                src="/img/avatars/santi.png"
+                                src="/img/avatars/guido.png"
                                 imgPosition="top"
-                                alt="Santi"
+                                alt="Guido"
                             />
+  
                             <div className="text-[#F2F2F2]">
                                 <div className="font-semibold text-base tracking-wide">
                                     Santiago Feltan & Guido Halley
