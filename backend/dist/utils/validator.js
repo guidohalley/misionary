@@ -10,10 +10,13 @@ const validate = (validations) => {
         if (errors.isEmpty()) {
             return next();
         }
-        const formattedErrors = errors.array().map(error => ({
-            field: error.param,
-            message: error.msg
-        }));
+        const formattedErrors = errors.array().map((error) => {
+            var _a, _b, _c;
+            return ({
+                field: (_b = (_a = error.param) !== null && _a !== void 0 ? _a : error.path) !== null && _b !== void 0 ? _b : 'unknown',
+                message: (_c = error.msg) !== null && _c !== void 0 ? _c : 'Invalid value'
+            });
+        });
         throw new http_error_1.HttpError(400, 'Error de validación').withDetails(formattedErrors);
     };
 };

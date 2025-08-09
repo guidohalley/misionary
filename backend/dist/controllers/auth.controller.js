@@ -4,7 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthController = void 0;
-const bcryptjs_1 = __importDefault(require("bcryptjs"));
+const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const prisma_1 = __importDefault(require("../config/prisma"));
 const config_1 = require("../config/config");
@@ -18,7 +18,7 @@ class AuthController {
             if (existingUser) {
                 return res.status(400).json({ error: 'El email ya está registrado' });
             }
-            const hashedPassword = await bcryptjs_1.default.hash(password, 10);
+            const hashedPassword = await bcrypt_1.default.hash(password, 10);
             const user = await prisma_1.default.persona.create({
                 data: {
                     email,
@@ -28,7 +28,9 @@ class AuthController {
                     roles: roles
                 }
             });
-            const token = jsonwebtoken_1.default.sign({ id: user.id }, config_1.config.jwtSecret, { expiresIn: config_1.config.jwtExpiresIn });
+            const secret = config_1.config.jwtSecret;
+            const expiresIn = config_1.config.jwtExpiresIn;
+            const token = jsonwebtoken_1.default.sign({ id: user.id }, secret, { expiresIn });
             res.status(201).json({ user, token });
         }
         catch (error) {
@@ -44,11 +46,16 @@ class AuthController {
             if (!user) {
                 return res.status(401).json({ error: 'Credenciales inválidas' });
             }
-            const isValidPassword = await bcryptjs_1.default.compare(password, user.password);
+            if (!user.password) {
+                return res.status(401).json({ error: 'Credenciales inválidas' });
+            }
+            const isValidPassword = await bcrypt_1.default.compare(password, user.password);
             if (!isValidPassword) {
                 return res.status(401).json({ error: 'Credenciales inválidas' });
             }
-            const token = jsonwebtoken_1.default.sign({ id: user.id }, config_1.config.jwtSecret, { expiresIn: config_1.config.jwtExpiresIn });
+            const secret = config_1.config.jwtSecret;
+            const expiresIn = config_1.config.jwtExpiresIn;
+            const token = jsonwebtoken_1.default.sign({ id: user.id }, secret, { expiresIn });
             res.json({ user, token });
         }
         catch (error) {

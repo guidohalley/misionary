@@ -10,6 +10,7 @@ import {
 } from '../controllers/moneda.controller';
 import { auth } from '../middleware/auth';
 import { checkRole } from '../middleware/checkRole';
+import { asyncHandler } from '../utils/asyncHandler';
 
 const router = Router();
 
@@ -19,13 +20,13 @@ const router = Router();
  * GET /api/monedas
  * Obtener todas las monedas activas
  */
-router.get('/', MonedaController.getAllMonedas);
+router.get('/', asyncHandler(MonedaController.getAllMonedas));
 
 /**
  * GET /api/monedas/:codigo
  * Obtener una moneda por código
  */
-router.get('/:codigo', validarCodigoMoneda, MonedaController.getMonedaByCodigo);
+router.get('/:codigo', validarCodigoMoneda, asyncHandler(MonedaController.getMonedaByCodigo));
 
 /**
  * GET /api/monedas/tipo-cambio/:monedaDesde/:monedaHacia
@@ -34,7 +35,7 @@ router.get('/:codigo', validarCodigoMoneda, MonedaController.getMonedaByCodigo);
 router.get(
   '/tipo-cambio/:monedaDesde/:monedaHacia',
   validarTipoCambioParams,
-  MonedaController.getTipoCambioActual
+  asyncHandler(MonedaController.getTipoCambioActual)
 );
 
 /**
@@ -44,7 +45,7 @@ router.get(
 router.get(
   '/historial/:monedaDesde/:monedaHacia',
   validarHistorialQuery,
-  MonedaController.getHistorialTipoCambio
+  asyncHandler(MonedaController.getHistorialTipoCambio)
 );
 
 // ─────────────────── RUTAS PROTEGIDAS (requieren autenticación) ─────────────────── 
@@ -57,7 +58,7 @@ router.post(
   '/convertir',
   auth,
   validarConversionBody,
-  MonedaController.convertirMoneda
+  asyncHandler(MonedaController.convertirMoneda)
 );
 
 // ─────────────────── RUTAS ADMINISTRATIVAS (solo ADMIN/CONTADOR) ─────────────────── 
@@ -71,7 +72,7 @@ router.post(
   auth,
   checkRole(['ADMIN', 'CONTADOR']),
   validarTipoCambioBody,
-  MonedaController.upsertTipoCambio
+  asyncHandler(MonedaController.upsertTipoCambio)
 );
 
 /**
@@ -83,7 +84,7 @@ router.post(
   auth,
   checkRole(['ADMIN', 'CONTADOR']),
   validarActualizacionMasiva,
-  MonedaController.actualizarTiposCambioMasivo
+  asyncHandler(MonedaController.actualizarTiposCambioMasivo)
 );
 
 export default router;

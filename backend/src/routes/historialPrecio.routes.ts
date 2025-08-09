@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { HistorialPrecioController, validarIdNumerico, validarMonedaId, validarActualizacionPrecio, validarActualizacionMasiva, validarFechas } from '../controllers/historialPrecio.controller';
+import { asyncHandler } from '../utils/asyncHandler';
 import { auth } from '../middleware/auth';
 import { checkRole } from '../middleware/checkRole';
 
@@ -13,7 +14,7 @@ router.get(
   '/producto/:id',
   auth,
   validarIdNumerico,
-  HistorialPrecioController.getHistorialProducto
+  asyncHandler(HistorialPrecioController.getHistorialProducto)
 );
 
 /**
@@ -24,7 +25,7 @@ router.get(
   '/servicio/:id',
   auth,
   validarIdNumerico,
-  HistorialPrecioController.getHistorialServicio
+  asyncHandler(HistorialPrecioController.getHistorialServicio)
 );
 
 /**
@@ -36,7 +37,7 @@ router.get(
   auth,
   validarIdNumerico,
   validarMonedaId,
-  HistorialPrecioController.getPrecioActualProducto
+  asyncHandler(HistorialPrecioController.getPrecioActualProducto)
 );
 
 /**
@@ -48,7 +49,7 @@ router.get(
   auth,
   validarIdNumerico,
   validarMonedaId,
-  HistorialPrecioController.getPrecioActualServicio
+  asyncHandler(HistorialPrecioController.getPrecioActualServicio)
 );
 
 /**
@@ -61,7 +62,7 @@ router.put(
   checkRole(['ADMIN', 'CONTADOR']),
   validarIdNumerico,
   validarActualizacionPrecio,
-  HistorialPrecioController.actualizarPrecioProducto
+  asyncHandler(HistorialPrecioController.actualizarPrecioProducto)
 );
 
 /**
@@ -74,7 +75,7 @@ router.put(
   checkRole(['ADMIN', 'CONTADOR']),
   validarIdNumerico,
   validarActualizacionPrecio,
-  HistorialPrecioController.actualizarPrecioServicio
+  asyncHandler(HistorialPrecioController.actualizarPrecioServicio)
 );
 
 /**
@@ -86,7 +87,7 @@ router.post(
   auth,
   checkRole(['ADMIN']),
   validarActualizacionMasiva,
-  HistorialPrecioController.actualizacionMasiva
+  asyncHandler(HistorialPrecioController.actualizacionMasiva)
 );
 
 /**
@@ -97,7 +98,7 @@ router.get(
   '/desactualizados',
   auth,
   checkRole(['ADMIN', 'CONTADOR']),
-  HistorialPrecioController.getPreciosDesactualizados
+  asyncHandler(HistorialPrecioController.getPreciosDesactualizados)
 );
 
 /**
@@ -109,7 +110,7 @@ router.get(
   auth,
   checkRole(['ADMIN', 'CONTADOR']),
   validarFechas,
-  HistorialPrecioController.getEstadisticasCambios
+  asyncHandler(HistorialPrecioController.getEstadisticasCambios)
 );
 
 export default router;

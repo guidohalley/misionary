@@ -14,15 +14,12 @@ export const errorHandler = (
   req: Request,
   res: Response,
   _next: NextFunction
-) => {
+): void => {
   if (err instanceof ApiError) {
-    return res.status(err.statusCode).json({
-      error: err.message
-    });
+    res.status(err.statusCode).json({ error: err.message });
+    return;
   }
 
   console.error(err.stack);
-  return res.status(500).json({
-    error: 'Error interno del servidor'
-  });
+  res.status(500).json({ error: 'Error interno del servidor' });
 };

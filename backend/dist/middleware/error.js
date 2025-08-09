@@ -10,14 +10,11 @@ class ApiError extends Error {
 exports.ApiError = ApiError;
 const errorHandler = (err, req, res, _next) => {
     if (err instanceof ApiError) {
-        return res.status(err.statusCode).json({
-            error: err.message
-        });
+        res.status(err.statusCode).json({ error: err.message });
+        return;
     }
     console.error(err.stack);
-    return res.status(500).json({
-        error: 'Error interno del servidor'
-    });
+    res.status(500).json({ error: 'Error interno del servidor' });
 };
 exports.errorHandler = errorHandler;
 //# sourceMappingURL=error.js.map

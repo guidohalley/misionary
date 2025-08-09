@@ -1,20 +1,23 @@
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction, RequestHandler } from 'express';
 import { RolUsuario } from '@prisma/client';
 import { AuthRequest } from './auth';
 
-export const checkRole = (roles: RolUsuario[]) => {
-  return async (req: AuthRequest, res: Response, next: NextFunction) => {
+export const checkRole = (roles: (RolUsuario | string)[]): RequestHandler => {
+  return (req: AuthRequest, res: Response, next: NextFunction): void => {
     try {
       const user = req.user;
-      
       if (!user || !user.roles) {
-        return res.status(403).json({ error: 'Acceso denegado' });
+        res.status(403).json({ error: 'Acceso denegado' });
+        return;
       }
 
-      const hasRole = user.roles.some((role: RolUsuario) => roles.includes(role));
-      
+      const hasRole = user.roles.some((role: RolUsuario | string) =>
+        roles.includes(role as any)
+      );
+
       if (!hasRole) {
-        return res.status(403).json({ error: 'No tienes los permisos necesarios' });
+        res.status(403).json({ error: 'No tienes los permisos necesarios' });
+        return;
       }
 
       next();

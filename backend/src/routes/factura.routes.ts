@@ -3,32 +3,33 @@ import { FacturaController } from '../controllers/factura.controller';
 import { auth } from '../middleware/auth';
 import { checkRole } from '../middleware/checkRole';
 import { RolUsuario } from '@prisma/client';
+import { asyncHandler } from '../utils/asyncHandler';
 
 const router = Router();
 
 router.post('/',
   [auth, checkRole([RolUsuario.ADMIN, RolUsuario.CONTADOR])],
-  FacturaController.create
+  asyncHandler(FacturaController.create)
 );
 
 router.get('/',
   [auth],
-  FacturaController.findAll
+  asyncHandler(FacturaController.findAll)
 );
 
 router.get('/:id',
   [auth],
-  FacturaController.findById
+  asyncHandler(FacturaController.findById)
 );
 
 router.put('/:id',
   [auth, checkRole([RolUsuario.ADMIN, RolUsuario.CONTADOR])],
-  FacturaController.update
+  asyncHandler(FacturaController.update)
 );
 
 router.post('/:id/anular',
   [auth, checkRole([RolUsuario.ADMIN])],
-  FacturaController.anular
+  asyncHandler(FacturaController.anular)
 );
 
 export default router;

@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { validationResult, ValidationChain } from 'express-validator';
+import { validationResult, ValidationChain, ValidationError } from 'express-validator';
 import { HttpError } from './http-error';
 
 export const validate = (validations: ValidationChain[]) => {
@@ -12,9 +12,9 @@ export const validate = (validations: ValidationChain[]) => {
       return next();
     }
 
-    const formattedErrors = errors.array().map(error => ({
-      field: error.param,
-      message: error.msg
+    const formattedErrors = errors.array().map((error: ValidationError | any) => ({
+      field: (error as any).param ?? (error as any).path ?? 'unknown',
+      message: (error as any).msg ?? 'Invalid value'
     }));
 
     throw new HttpError(400, 'Error de validación').withDetails(formattedErrors);

@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
+import jwt, { Secret, SignOptions } from 'jsonwebtoken';
 import prisma from '../config/prisma';
 import { config } from '../config/config';
 import { TipoPersona, RolUsuario } from '@prisma/client';
@@ -30,10 +30,12 @@ export class AuthController {
         }
       });
 
+      const secret = config.jwtSecret as Secret;
+      const expiresIn = config.jwtExpiresIn as SignOptions['expiresIn'];
       const token = jwt.sign(
         { id: user.id },
-        config.jwtSecret,
-        { expiresIn: config.jwtExpiresIn }
+        secret,
+        { expiresIn }
       );
 
       res.status(201).json({ user, token });
@@ -54,16 +56,21 @@ export class AuthController {
         return res.status(401).json({ error: 'Credenciales inválidas' });
       }
 
+      if (!user.password) {
+        return res.status(401).json({ error: 'Credenciales inválidas' });
+      }
       const isValidPassword = await bcrypt.compare(password, user.password);
 
       if (!isValidPassword) {
         return res.status(401).json({ error: 'Credenciales inválidas' });
       }
 
+      const secret = config.jwtSecret as Secret;
+      const expiresIn = config.jwtExpiresIn as SignOptions['expiresIn'];
       const token = jwt.sign(
         { id: user.id },
-        config.jwtSecret,
-        { expiresIn: config.jwtExpiresIn }
+        secret,
+        { expiresIn }
       );
 
       res.json({ user, token });

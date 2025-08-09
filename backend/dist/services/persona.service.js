@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PersonaService = void 0;
 const prisma_1 = __importDefault(require("../config/prisma"));
+const empresa_service_1 = require("./empresa.service");
 class PersonaService {
     static async create(data) {
         return prisma_1.default.persona.create({
@@ -28,10 +29,13 @@ class PersonaService {
         });
     }
     static async update(id, data) {
-        return prisma_1.default.persona.update({
+        console.log('PersonaService.update - ID:', id, 'Data:', data);
+        const result = await prisma_1.default.persona.update({
             where: { id },
             data
         });
+        console.log('PersonaService.update - Result:', result);
+        return result;
     }
     static async delete(id) {
         return prisma_1.default.persona.delete({
@@ -44,9 +48,26 @@ class PersonaService {
             where,
             include: {
                 productos: true,
-                servicios: true
+                servicios: true,
+                empresas: true
             }
         });
+    }
+    static async createClienteWithEmpresa(clienteData, empresaData) {
+        const cliente = await prisma_1.default.persona.create({
+            data: clienteData
+        });
+        if (empresaData) {
+            const empresa = await empresa_service_1.EmpresaService.create({
+                ...empresaData,
+                clienteId: cliente.id
+            });
+            return {
+                cliente,
+                empresa
+            };
+        }
+        return { cliente };
     }
 }
 exports.PersonaService = PersonaService;
