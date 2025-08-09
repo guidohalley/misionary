@@ -10,6 +10,12 @@ export interface FacturaDTO {
   presupuesto?: {
     id: number
     cliente?: { id: number; nombre: string }
+    items?: Array<{
+      cantidad: number
+      precioUnitario: number
+      producto?: { id: number; proveedorId: number; costoProveedor: number }
+      servicio?: { id: number; proveedorId: number; costoProveedor: number }
+    }>
   }
 }
 
@@ -42,4 +48,10 @@ export interface PersonaDTO {
   email?: string
   activo: boolean
   tipo: string
+}
+
+export interface EmpresaDTO {
+  id: number
+  nombre: string
+  activo: boolean
 }

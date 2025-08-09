@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
-import { fetchFacturas, fetchGastos, fetchGastosResumen, fetchPresupuestos, fetchClientes } from './service'
+import { fetchFacturas, fetchGastos, fetchGastosResumen, fetchPresupuestos, fetchClientes, fetchEmpresas } from './service'
 import type { FacturaDTO, PresupuestoDTO, GastoDTO, GastoResumenCategoriaDTO, PersonaDTO } from './types'
+import { useAppSelector } from '@/store'
 
 function isoDaysAgo(days: number) {
   const d = new Date()
@@ -15,22 +16,27 @@ export function useDashboardKpis() {
   const [presupuestos, setPresupuestos] = useState<PresupuestoDTO[]>([])
   const [gastos, setGastos] = useState<GastoDTO[]>([])
   const [clientes, setClientes] = useState<PersonaDTO[]>([])
+  const [empresasCount, setEmpresasCount] = useState<number>(0)
+
+  const currentUser = useAppSelector(s => s.auth.user)
 
   useEffect(() => {
     const load = async () => {
       try {
         setLoading(true)
         setError(null)
-        const [f, p, g, c] = await Promise.all([
+        const [f, p, g, c, e] = await Promise.all([
           fetchFacturas({ fechaDesde: isoDaysAgo(30) }),
           fetchPresupuestos({}),
           fetchGastos({ fechaDesde: isoDaysAgo(30) }),
           fetchClientes(),
+          fetchEmpresas(),
         ])
         setFacturas(f)
         setPresupuestos(p)
         setGastos(g)
         setClientes(c)
+        setEmpresasCount(e.length)
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Error cargando KPIs')
       } finally {
@@ -64,7 +70,42 @@ export function useDashboardKpis() {
 
   const totalGastos = useMemo(() => gastos.reduce((sum, g) => sum + Number(g.monto || 0), 0), [gastos])
 
-  return { loading, error, ingresosPorMoneda, pipeline, clientesActivosCount, totalGastos, clientes }
+  // Ganancia del proveedor (si el usuario actual tiene rol PROVEEDOR):
+  // Sumamos por factura: (precioUnitario - costoProveedor) * cantidad de items donde el proveedor coincide
+  const proveedorId = useMemo(() => {
+    // Nota: no tenemos id del usuario en el slice, pero AuthService guarda user en localStorage; sin embargo, el slice user no expone id.
+    // Intentamos inferir desde localStorage si no está en Redux.
+    const ls = localStorage.getItem('auth_user')
+    try {
+      const parsed = ls ? JSON.parse(ls) : null
+      return parsed?.id as number | undefined
+    } catch {
+      return undefined
+    }
+  }, [])
+
+  const tieneRolProveedor = useMemo(() => {
+    const roles: any[] = (currentUser?.authority || []) as any
+    return roles?.includes('PROVEEDOR')
+  }, [currentUser])
+
+  const gananciaProveedor30d = useMemo(() => {
+    if (!tieneRolProveedor || !proveedorId) return 0
+    let total = 0
+    for (const f of facturas) {
+      for (const it of f.presupuesto?.items || []) {
+        if (it.producto && it.producto.proveedorId === proveedorId) {
+          total += (Number(it.precioUnitario) - Number(it.producto.costoProveedor)) * Number(it.cantidad)
+        }
+        if (it.servicio && it.servicio.proveedorId === proveedorId) {
+          total += (Number(it.precioUnitario) - Number(it.servicio.costoProveedor)) * Number(it.cantidad)
+        }
+      }
+    }
+    return total
+  }, [facturas, proveedorId, tieneRolProveedor])
+
+  return { loading, error, ingresosPorMoneda, pipeline, clientesActivosCount, totalGastos, clientes, empresasCount, gananciaProveedor30d, tieneRolProveedor }
 }
 
 export function useGastosPorCategoria() {

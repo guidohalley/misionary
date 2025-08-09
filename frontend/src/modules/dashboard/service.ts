@@ -1,5 +1,5 @@
 import ApiService from '@/services/ApiService'
-import type { FacturaDTO, PresupuestoDTO, GastoResumenCategoriaDTO, GastoDTO, PersonaDTO } from './types'
+import type { FacturaDTO, PresupuestoDTO, GastoResumenCategoriaDTO, GastoDTO, PersonaDTO, EmpresaDTO } from './types'
 
 export async function fetchFacturas(params?: Record<string, string>): Promise<FacturaDTO[]> {
   const qs = params ? new URLSearchParams(params).toString() : ''
@@ -32,5 +32,10 @@ export async function fetchGastosResumen(params?: Record<string, string>) {
 export async function fetchClientes(): Promise<PersonaDTO[]> {
   // Backend expone /api/personas con filtro por tipo
   const res = await ApiService.fetchData<PersonaDTO[]>({ url: `/personas?tipo=CLIENTE`, method: 'GET' })
+  return res.data
+}
+
+export async function fetchEmpresas(): Promise<EmpresaDTO[]> {
+  const res = await ApiService.fetchData<EmpresaDTO[]>({ url: `/empresas`, method: 'GET' })
   return res.data
 }

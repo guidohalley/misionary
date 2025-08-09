@@ -1,6 +1,12 @@
 import prisma from '../config/prisma';
-import { EstadoFactura } from '@prisma/client';
 import { HttpError } from '../utils/http-error';
+
+// Usamos literales de string para estados para evitar dependencia directa del enum generado
+const ESTADO_FACTURA = {
+  EMITIDA: 'EMITIDA',
+  PAGADA: 'PAGADA',
+  ANULADA: 'ANULADA',
+} as const;
 
 export class FacturaService {
   static async create(data: {
@@ -23,7 +29,7 @@ export class FacturaService {
     return prisma.factura.create({
       data: {
         ...data,
-        estado: EstadoFactura.EMITIDA
+  estado: ESTADO_FACTURA.EMITIDA as any
       },
       include: {
         presupuesto: {
@@ -69,7 +75,7 @@ export class FacturaService {
   }
 
   static async update(id: number, data: {
-    estado?: EstadoFactura;
+    estado?: string;
     fecha?: Date;
   }) {
     return prisma.factura.update({
@@ -87,7 +93,7 @@ export class FacturaService {
   }
 
   static async findAll(filters?: {
-    estado?: EstadoFactura;
+  estado?: string;
     clienteId?: number;
     fechaDesde?: Date;
     fechaHasta?: Date;
@@ -119,7 +125,13 @@ export class FacturaService {
       include: {
         presupuesto: {
           include: {
-            cliente: true
+            cliente: true,
+            items: {
+              include: {
+                producto: true,
+                servicio: true,
+              }
+            }
           }
         },
         impuestoAplicado: true
@@ -134,7 +146,7 @@ export class FacturaService {
     return prisma.factura.update({
       where: { id },
       data: {
-        estado: EstadoFactura.ANULADA
+  estado: ESTADO_FACTURA.ANULADA as any
       }
     });
   }
