@@ -6,10 +6,10 @@ class ProductoController {
     static async create(req, res) {
         try {
             const producto = await producto_service_1.ProductoService.create(req.body);
-            res.status(201).json(producto);
+            return res.status(201).json(producto);
         }
         catch (error) {
-            res.status(500).json({ error: 'Error al crear el producto' });
+            return res.status(500).json({ error: 'Error al crear el producto' });
         }
     }
     static async findById(req, res) {
@@ -19,40 +19,40 @@ class ProductoController {
             if (!producto) {
                 return res.status(404).json({ error: 'Producto no encontrado' });
             }
-            res.json(producto);
+            return res.json(producto);
         }
         catch (error) {
-            res.status(500).json({ error: 'Error al buscar el producto' });
+            return res.status(500).json({ error: 'Error al buscar el producto' });
         }
     }
     static async update(req, res) {
         try {
             const id = parseInt(req.params.id);
             const producto = await producto_service_1.ProductoService.update(id, req.body);
-            res.json(producto);
+            return res.json(producto);
         }
         catch (error) {
-            res.status(500).json({ error: 'Error al actualizar el producto' });
+            return res.status(500).json({ error: 'Error al actualizar el producto' });
         }
     }
     static async delete(req, res) {
         try {
             const id = parseInt(req.params.id);
             await producto_service_1.ProductoService.delete(id);
-            res.status(204).send();
+            return res.status(204).send();
         }
         catch (error) {
-            res.status(500).json({ error: 'Error al eliminar el producto' });
+            return res.status(500).json({ error: 'Error al eliminar el producto' });
         }
     }
     static async findAll(req, res) {
         try {
             const { proveedorId } = req.query;
             const productos = await producto_service_1.ProductoService.findAll(proveedorId ? parseInt(proveedorId) : undefined);
-            res.json(productos);
+            return res.json(productos);
         }
         catch (error) {
-            res.status(500).json({ error: 'Error al obtener los productos' });
+            return res.status(500).json({ error: 'Error al obtener los productos' });
         }
     }
 }

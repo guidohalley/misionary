@@ -19,7 +19,7 @@ class ImpuestoController {
             });
         }
     }
-    static async findAll(req, res) {
+    static async findAll(_req, res) {
         try {
             const impuestos = await impuesto_service_1.ImpuestoService.findAll();
             res.json(impuestos);

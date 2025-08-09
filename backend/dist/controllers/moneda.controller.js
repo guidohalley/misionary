@@ -10,10 +10,10 @@ var CodigoMoneda;
     CodigoMoneda["EUR"] = "EUR";
 })(CodigoMoneda || (CodigoMoneda = {}));
 class MonedaController {
-    static async getAllMonedas(req, res) {
+    static async getAllMonedas(_req, res) {
         try {
             const monedas = await moneda_service_1.MonedaService.getAllMonedas();
-            res.json({
+            return res.json({
                 success: true,
                 data: monedas,
                 message: 'Monedas obtenidas exitosamente'
@@ -21,7 +21,7 @@ class MonedaController {
         }
         catch (error) {
             console.error('Error al obtener monedas:', error);
-            res.status(500).json({
+            return res.status(500).json({
                 success: false,
                 message: 'Error interno del servidor',
                 error: error instanceof Error ? error.message : 'Error desconocido'

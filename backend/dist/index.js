@@ -19,6 +19,7 @@ const moneda_routes_1 = __importDefault(require("./routes/moneda.routes"));
 const historialPrecio_routes_1 = __importDefault(require("./routes/historialPrecio.routes"));
 const empresa_routes_1 = __importDefault(require("./routes/empresa.routes"));
 const gasto_routes_1 = require("./routes/gasto.routes");
+const health_routes_1 = __importDefault(require("./routes/health.routes"));
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)(config_1.config.cors));
 app.use((0, helmet_1.default)());
@@ -35,6 +36,7 @@ app.use('/api/monedas', moneda_routes_1.default);
 app.use('/api/historial-precios', historialPrecio_routes_1.default);
 app.use('/api/empresas', empresa_routes_1.default);
 app.use('/api/gastos-operativos', gasto_routes_1.gastoRoutes);
+app.use('/api/health', health_routes_1.default);
 const error_1 = require("./middleware/error");
 app.use(error_1.errorHandler);
 app.listen(config_1.config.port, () => {
