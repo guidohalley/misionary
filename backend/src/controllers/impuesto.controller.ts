@@ -18,7 +18,7 @@ export class ImpuestoController {
     }
   }
 
-  static async findAll(req: Request, res: Response) {
+  static async findAll(_req: Request, res: Response) {
     try {
       const impuestos = await ImpuestoService.findAll();
       res.json(impuestos);

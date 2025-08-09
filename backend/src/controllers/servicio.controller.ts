@@ -5,10 +5,10 @@ export class ServicioController {
   static async create(req: Request, res: Response) {
     try {
       const servicio = await ServicioService.create(req.body);
-      res.status(201).json(servicio);
+  return res.status(201).json(servicio);
     } catch (error) {
       console.error('Error en ServicioController.create:', error);
-      res.status(500).json({ error: 'Error al crear el servicio' });
+  return res.status(500).json({ error: 'Error al crear el servicio' });
     }
   }
 
@@ -21,10 +21,10 @@ export class ServicioController {
         return res.status(404).json({ error: 'Servicio no encontrado' });
       }
       
-      res.json(servicio);
+  return res.json(servicio);
     } catch (error) {
       console.error('Error en ServicioController.findById:', error);
-      res.status(500).json({ error: 'Error al buscar el servicio' });
+  return res.status(500).json({ error: 'Error al buscar el servicio' });
     }
   }
 
@@ -32,10 +32,10 @@ export class ServicioController {
     try {
       const id = parseInt(req.params.id);
       const servicio = await ServicioService.update(id, req.body);
-      res.json(servicio);
+  return res.json(servicio);
     } catch (error) {
       console.error('Error en ServicioController.update:', error);
-      res.status(500).json({ error: 'Error al actualizar el servicio' });
+  return res.status(500).json({ error: 'Error al actualizar el servicio' });
     }
   }
 
@@ -43,10 +43,10 @@ export class ServicioController {
     try {
       const id = parseInt(req.params.id);
       await ServicioService.delete(id);
-      res.status(204).send();
+  return res.status(204).send();
     } catch (error) {
       console.error('Error en ServicioController.delete:', error);
-      res.status(500).json({ error: 'Error al eliminar el servicio' });
+  return res.status(500).json({ error: 'Error al eliminar el servicio' });
     }
   }
 
@@ -54,10 +54,10 @@ export class ServicioController {
     try {
       const { proveedorId } = req.query;
       const servicios = await ServicioService.findAll(proveedorId ? parseInt(proveedorId as string) : undefined);
-      res.json(servicios);
+  return res.json(servicios);
     } catch (error) {
       console.error('Error en ServicioController.findAll:', error);
-      res.status(500).json({ error: 'Error al obtener los servicios' });
+  return res.status(500).json({ error: 'Error al obtener los servicios' });
     }
   }
 }

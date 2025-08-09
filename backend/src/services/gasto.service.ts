@@ -1,4 +1,4 @@
-import { PrismaClient, GastoOperativo, AsignacionGastoProyecto, CategoriaGasto } from '@prisma/client';
+import { PrismaClient, CategoriaGasto } from '@prisma/client';
 import { HttpError } from '../utils/http-error';
 
 const prisma = new PrismaClient();

@@ -27,14 +27,14 @@ export class HistorialPrecioController {
         limit ? parseInt(limit as string) : undefined
       );
 
-      res.json({
+  return res.json({
         success: true,
         data: historial,
         message: 'Historial de precios obtenido exitosamente'
       });
     } catch (error) {
       console.error('Error al obtener historial de precios del producto:', error);
-      res.status(500).json({
+  return res.status(500).json({
         success: false,
         message: 'Error interno del servidor',
         error: error instanceof Error ? error.message : 'Error desconocido'
@@ -66,14 +66,14 @@ export class HistorialPrecioController {
         limit ? parseInt(limit as string) : undefined
       );
 
-      res.json({
+  return res.json({
         success: true,
         data: historial,
         message: 'Historial de precios obtenido exitosamente'
       });
     } catch (error) {
       console.error('Error al obtener historial de precios del servicio:', error);
-      res.status(500).json({
+  return res.status(500).json({
         success: false,
         message: 'Error interno del servidor',
         error: error instanceof Error ? error.message : 'Error desconocido'
@@ -111,14 +111,14 @@ export class HistorialPrecioController {
         });
       }
 
-      res.json({
+  return res.json({
         success: true,
         data: precioActual,
         message: 'Precio actual obtenido exitosamente'
       });
     } catch (error) {
       console.error('Error al obtener precio actual del producto:', error);
-      res.status(500).json({
+  return res.status(500).json({
         success: false,
         message: 'Error interno del servidor',
         error: error instanceof Error ? error.message : 'Error desconocido'
@@ -156,14 +156,14 @@ export class HistorialPrecioController {
         });
       }
 
-      res.json({
+  return res.json({
         success: true,
         data: precioActual,
         message: 'Precio actual obtenido exitosamente'
       });
     } catch (error) {
       console.error('Error al obtener precio actual del servicio:', error);
-      res.status(500).json({
+  return res.status(500).json({
         success: false,
         message: 'Error interno del servidor',
         error: error instanceof Error ? error.message : 'Error desconocido'
@@ -198,14 +198,14 @@ export class HistorialPrecioController {
         usuarioId
       );
 
-      res.json({
+  return res.json({
         success: true,
         data: nuevoHistorial,
         message: 'Precio del producto actualizado exitosamente'
       });
     } catch (error) {
       console.error('Error al actualizar precio del producto:', error);
-      res.status(500).json({
+  return res.status(500).json({
         success: false,
         message: 'Error interno del servidor',
         error: error instanceof Error ? error.message : 'Error desconocido'
@@ -240,14 +240,14 @@ export class HistorialPrecioController {
         usuarioId
       );
 
-      res.json({
+  return res.json({
         success: true,
         data: nuevoHistorial,
         message: 'Precio del servicio actualizado exitosamente'
       });
     } catch (error) {
       console.error('Error al actualizar precio del servicio:', error);
-      res.status(500).json({
+  return res.status(500).json({
         success: false,
         message: 'Error interno del servidor',
         error: error instanceof Error ? error.message : 'Error desconocido'
@@ -282,14 +282,14 @@ export class HistorialPrecioController {
         filtros
       );
 
-      res.json({
+  return res.json({
         success: true,
         data: resultado,
         message: `Actualización masiva completada. ${resultado.actualizados} items actualizados.`
       });
     } catch (error) {
       console.error('Error en actualización masiva:', error);
-      res.status(500).json({
+  return res.status(500).json({
         success: false,
         message: 'Error interno del servidor',
         error: error instanceof Error ? error.message : 'Error desconocido'
@@ -310,14 +310,14 @@ export class HistorialPrecioController {
         monedaId ? parseInt(monedaId as string) : undefined
       );
 
-      res.json({
+  return res.json({
         success: true,
         data: preciosDesactualizados,
         message: 'Precios desactualizados obtenidos exitosamente'
       });
     } catch (error) {
       console.error('Error al obtener precios desactualizados:', error);
-      res.status(500).json({
+  return res.status(500).json({
         success: false,
         message: 'Error interno del servidor',
         error: error instanceof Error ? error.message : 'Error desconocido'
@@ -348,14 +348,14 @@ export class HistorialPrecioController {
         monedaId ? parseInt(monedaId as string) : undefined
       );
 
-      res.json({
+  return res.json({
         success: true,
         data: estadisticas,
         message: 'Estadísticas de cambios obtenidas exitosamente'
       });
     } catch (error) {
       console.error('Error al obtener estadísticas de cambios:', error);
-      res.status(500).json({
+  return res.status(500).json({
         success: false,
         message: 'Error interno del servidor',
         error: error instanceof Error ? error.message : 'Error desconocido'

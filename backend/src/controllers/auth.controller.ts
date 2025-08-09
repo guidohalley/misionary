@@ -38,9 +38,9 @@ export class AuthController {
         { expiresIn }
       );
 
-      res.status(201).json({ user, token });
+  return res.status(201).json({ user, token });
     } catch (error) {
-      res.status(500).json({ error: 'Error al registrar usuario' });
+  return res.status(500).json({ error: 'Error al registrar usuario' });
     }
   }
 
@@ -73,9 +73,9 @@ export class AuthController {
         { expiresIn }
       );
 
-      res.json({ user, token });
+  return res.json({ user, token });
     } catch (error) {
-      res.status(500).json({ error: 'Error al iniciar sesión' });
+  return res.status(500).json({ error: 'Error al iniciar sesión' });
     }
   }
 }

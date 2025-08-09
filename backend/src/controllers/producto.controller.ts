@@ -5,9 +5,9 @@ export class ProductoController {
   static async create(req: Request, res: Response) {
     try {
       const producto = await ProductoService.create(req.body);
-      res.status(201).json(producto);
+  return res.status(201).json(producto);
     } catch (error) {
-      res.status(500).json({ error: 'Error al crear el producto' });
+  return res.status(500).json({ error: 'Error al crear el producto' });
     }
   }
 
@@ -20,9 +20,9 @@ export class ProductoController {
         return res.status(404).json({ error: 'Producto no encontrado' });
       }
       
-      res.json(producto);
+  return res.json(producto);
     } catch (error) {
-      res.status(500).json({ error: 'Error al buscar el producto' });
+  return res.status(500).json({ error: 'Error al buscar el producto' });
     }
   }
 
@@ -30,9 +30,9 @@ export class ProductoController {
     try {
       const id = parseInt(req.params.id);
       const producto = await ProductoService.update(id, req.body);
-      res.json(producto);
+  return res.json(producto);
     } catch (error) {
-      res.status(500).json({ error: 'Error al actualizar el producto' });
+  return res.status(500).json({ error: 'Error al actualizar el producto' });
     }
   }
 
@@ -40,9 +40,9 @@ export class ProductoController {
     try {
       const id = parseInt(req.params.id);
       await ProductoService.delete(id);
-      res.status(204).send();
+  return res.status(204).send();
     } catch (error) {
-      res.status(500).json({ error: 'Error al eliminar el producto' });
+  return res.status(500).json({ error: 'Error al eliminar el producto' });
     }
   }
 
@@ -50,9 +50,9 @@ export class ProductoController {
     try {
       const { proveedorId } = req.query;
       const productos = await ProductoService.findAll(proveedorId ? parseInt(proveedorId as string) : undefined);
-      res.json(productos);
+  return res.json(productos);
     } catch (error) {
-      res.status(500).json({ error: 'Error al obtener los productos' });
+  return res.status(500).json({ error: 'Error al obtener los productos' });
     }
   }
 }

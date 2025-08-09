@@ -14,17 +14,17 @@ export class MonedaController {
    * Obtener todas las monedas activas
    * GET /api/monedas
    */
-  static async getAllMonedas(req: Request, res: Response) {
+  static async getAllMonedas(_req: Request, res: Response) {
     try {
       const monedas = await MonedaService.getAllMonedas();
-      res.json({
+      return res.json({
         success: true,
         data: monedas,
         message: 'Monedas obtenidas exitosamente'
       });
     } catch (error) {
       console.error('Error al obtener monedas:', error);
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: 'Error interno del servidor',
         error: error instanceof Error ? error.message : 'Error desconocido'
