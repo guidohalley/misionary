@@ -1,4 +1,5 @@
 import { Card } from '@/components/ui'
+import Chart from '@/components/shared/Chart'
 import { useDashboardKpis, useGastosPorCategoria } from '@/modules/dashboard/hooks'
 
 const Home = () => {
@@ -14,23 +15,23 @@ const Home = () => {
             )}
 
             {/* KPIs */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <Card className="p-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <Card className="p-4 border-misionary-200/60">
                     <div className="text-sm text-gray-600">Ingresos últimos 30 días</div>
-                    <div className="mt-2 text-2xl font-semibold">
+                            <div className="mt-2 text-3xl font-extrabold text-misionary-700">
                         {loading ? '—' : Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(Object.values(ingresosPorMoneda)[0]?.total || 0)}
                     </div>
                     <div className="text-xs text-gray-500">Sin conversión FX</div>
                 </Card>
 
-                <Card className="p-4">
+                        <Card className="p-4 border-misionary-200/60">
                     <div className="text-sm text-gray-600">Presupuestos por estado</div>
                     <div className="mt-2 flex flex-wrap gap-2">
                         {loading ? (
                             <span>—</span>
                         ) : (
                             Object.entries(pipeline).map(([estado, count]) => (
-                                <span key={estado} className="inline-flex items-center rounded-full bg-msgray-100 text-msgray-800 px-2 py-0.5 text-xs font-medium ring-1 ring-msgray-200">
+                                        <span key={estado} className="inline-flex items-center rounded-full bg-misionary-100 text-misionary-800 px-2.5 py-0.5 text-xs font-semibold ring-1 ring-misionary-200">
                                     {estado}: {count}
                                 </span>
                             ))
@@ -38,14 +39,14 @@ const Home = () => {
                     </div>
                 </Card>
 
-                <Card className="p-4">
+                        <Card className="p-4 border-misionary-200/60">
                     <div className="text-sm text-gray-600">Gastos del mes</div>
                     <div className="mt-2 flex flex-wrap gap-2">
                         {loading ? (
                             <span>—</span>
                         ) : (
                             Object.entries(gastosMesPorMoneda).map(([moneda, total]) => (
-                                <span key={moneda} className="inline-flex items-center rounded-full bg-rose-100 text-rose-800 px-2 py-0.5 text-xs font-medium ring-1 ring-rose-200">
+                                        <span key={moneda} className="inline-flex items-center rounded-full bg-rose-100 text-rose-800 px-2.5 py-0.5 text-xs font-semibold ring-1 ring-rose-200">
                                     {moneda}: {Intl.NumberFormat('es-AR').format(total)}
                                 </span>
                             ))
@@ -72,21 +73,26 @@ const Home = () => {
                     </div>
                 </Card>
 
-                <Card className="p-4">
-                    <div className="text-sm font-semibold mb-2">Gastos por categoría</div>
-                    {gastosCat.loading && <div>Cargando…</div>}
-                    {!gastosCat.loading && gastosCat.dataset.length === 0 && (
-                        <div className="text-sm text-gray-500">Sin datos</div>
-                    )}
-                    <div className="space-y-2">
-                        {gastosCat.dataset.map((r) => (
-                            <div key={r.categoria} className="flex justify-between text-sm">
-                                <span>{r.categoria}</span>
-                                <span className="font-medium">{Intl.NumberFormat('es-AR').format(r.total)}</span>
-                            </div>
-                        ))}
-                    </div>
-                </Card>
+                        <Card className="p-4">
+                            <div className="text-sm font-semibold mb-2">Gastos por categoría</div>
+                            {gastosCat.loading && <div>Cargando…</div>}
+                            {!gastosCat.loading && gastosCat.dataset.length === 0 && (
+                                <div className="text-sm text-gray-500">Sin datos</div>
+                            )}
+                            {!gastosCat.loading && gastosCat.dataset.length > 0 && (
+                                <Chart
+                                    type="donut"
+                                    height={300}
+                                    series={gastosCat.dataset.map(d => d.total)}
+                                    customOptions={{
+                                        colors: ['#a7f3d0','#34d399','#059669','#065f46','#064e3b'],
+                                        labels: gastosCat.dataset.map(d => d.categoria),
+                                        plotOptions: { pie: { donut: { labels: { total: { label: 'Total' } } } } },
+                                        legend: { show: true, position: 'bottom' },
+                                    }}
+                                />
+                            )}
+                        </Card>
             </div>
         </div>
     )
