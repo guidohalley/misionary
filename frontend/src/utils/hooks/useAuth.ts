@@ -47,11 +47,11 @@ function useAuth() {
 
     const signIn = async (credentials: LoginCredentials) => {
         try {
-            console.log('🔑 useAuth - Iniciando login con:', credentials);
+            // console.log('🔑 useAuth - Iniciando login con email:', (credentials.email || '').toLowerCase());
             const response = await AuthService.login(credentials);
-            console.log('🔑 useAuth - Respuesta del AuthService:', response);
-            console.log('🔑 useAuth - Token extraído:', response.token);
-            console.log('🔑 useAuth - Usuario extraído:', response.user);
+            // console.log('🔑 useAuth - Respuesta del AuthService:', response);
+            // console.log('🔑 useAuth - Token extraído:', response.token);
+            // console.log('🔑 useAuth - Usuario extraído:', response.user);
 
             // Actualizar Redux
             dispatch(signInSuccess(response.token));
@@ -63,16 +63,16 @@ function useAuth() {
                 email: response.user.email || '',
                 authority: response.user.roles || [],
             }));
-            console.log('🔑 useAuth - Usuario despachado:', response.user);
+            // console.log('🔑 useAuth - Usuario despachado:', response.user);
 
             const redirectUrl = new URLSearchParams(window.location.search).get(REDIRECT_URL_KEY);
             const targetUrl = redirectUrl || appConfig.authenticatedEntryPath;
-            console.log('🔑 useAuth - Navegando a:', targetUrl);
+            // console.log('🔑 useAuth - Navegando a:', targetUrl);
             navigate(targetUrl);
             
             return { status: 'success' as const, message: '' };
         } catch (error) {
-            console.error('🔑 useAuth - Error en signIn:', error);
+            // console.error('🔑 useAuth - Error en signIn:', error);
             return {
                 status: 'failed' as const,
                 message: (error as Error).message || 'Error al iniciar sesión'
@@ -97,7 +97,7 @@ function useAuth() {
             navigate(appConfig.unAuthenticatedEntryPath);
             return { status: 'success' as const };
         } catch (error) {
-            console.error('🔑 useAuth - Error en signOut:', error);
+            // console.error('🔑 useAuth - Error en signOut:', error);
             return {
                 status: 'failed' as const,
                 message: (error as Error).message

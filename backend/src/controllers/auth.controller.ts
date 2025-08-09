@@ -9,9 +9,10 @@ export class AuthController {
   static async register(req: Request, res: Response) {
     try {
       const { email, password, nombre, tipo, roles } = req.body;
+      const normalizedEmail = (email || '').trim().toLowerCase();
 
-      const existingUser = await prisma.persona.findUnique({
-        where: { email }
+      const existingUser = await prisma.persona.findFirst({
+        where: { email: { equals: normalizedEmail, mode: 'insensitive' } }
       });
 
       if (existingUser) {
@@ -20,13 +21,13 @@ export class AuthController {
 
       const hashedPassword = await bcrypt.hash(password, 10);
 
-      const user = await prisma.persona.create({
+    const user = await prisma.persona.create({
         data: {
-          email,
+          email: normalizedEmail,
           password: hashedPassword,
           nombre,
-          tipo: tipo as TipoPersona,
-          roles: roles as RolUsuario[]
+      tipo: tipo as TipoPersona,
+      roles: (roles as RolUsuario[]) ?? []
         }
       });
 
@@ -38,7 +39,8 @@ export class AuthController {
         { expiresIn }
       );
 
-  return res.status(201).json({ user, token });
+  const { password: _pwd, ...safeUser } = user as any;
+  return res.status(201).json({ user: safeUser, token });
     } catch (error) {
   return res.status(500).json({ error: 'Error al registrar usuario' });
     }
@@ -47,9 +49,10 @@ export class AuthController {
   static async login(req: Request, res: Response) {
     try {
       const { email, password } = req.body;
+      const normalizedEmail = (email || '').trim().toLowerCase();
 
-      const user = await prisma.persona.findUnique({
-        where: { email }
+      const user = await prisma.persona.findFirst({
+        where: { email: { equals: normalizedEmail, mode: 'insensitive' } }
       });
 
       if (!user) {
@@ -73,7 +76,8 @@ export class AuthController {
         { expiresIn }
       );
 
-  return res.json({ user, token });
+  const { password: _pwd, ...safeUser } = user as any;
+  return res.json({ user: safeUser, token });
     } catch (error) {
   return res.status(500).json({ error: 'Error al iniciar sesión' });
     }

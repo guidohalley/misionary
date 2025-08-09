@@ -60,6 +60,28 @@ module.exports = {
 				'2xl': '1536px',
 			},
 			extend: {
+				colors: {
+					// Paleta Misionary (Verde Neón como 600)
+					misionary: {
+						500: '#F3FF9C',
+						600: '#E9FC87',
+						700: '#CBE65D',
+					},
+					// Paleta gris oscuro para alto contraste
+					msgray: {
+						50:  '#F2F2F2',
+						100: '#E6E6E6',
+						200: '#CCCCCC',
+						300: '#B3B3B3',
+						400: '#999999',
+						500: '#666666',
+						600: '#262626', // Gris Oscuro de marca
+						700: '#1F1F1F',
+						800: '#141414',
+						900: '#0A0A0A',
+						950: '#000000',
+					},
+				},
 				typography: (theme) => ({
 					DEFAULT: {
 						css: {

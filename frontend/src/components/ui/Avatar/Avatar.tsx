@@ -12,6 +12,8 @@ export interface AvatarProps extends CommonProps {
     shape?: Exclude<TypeAttributes.Shape, 'none'> | 'square'
     src?: string
     srcSet?: string
+    imgClassName?: string
+    imgPosition?: 'center' | 'top' | 'bottom' | 'left' | 'right' | string
 }
 
 const Avatar = forwardRef<HTMLSpanElement, AvatarProps>((props, ref) => {
@@ -22,7 +24,9 @@ const Avatar = forwardRef<HTMLSpanElement, AvatarProps>((props, ref) => {
         shape = 'rounded-sm',
         size = 'md',
         src,
-        srcSet,
+    srcSet,
+    imgClassName,
+    imgPosition,
         ...rest
     } = props
 
@@ -75,7 +79,8 @@ const Avatar = forwardRef<HTMLSpanElement, AvatarProps>((props, ref) => {
     if (src) {
         children = (
             <img
-                className={`avatar-img avatar-${shape}`}
+                className={classNames(`avatar-img avatar-${shape}`, imgClassName)}
+                style={{ objectFit: 'cover', objectPosition: imgPosition || 'center', ...(rest.style || {}) }}
                 src={src}
                 srcSet={srcSet}
                 alt={alt}

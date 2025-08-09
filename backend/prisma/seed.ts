@@ -24,7 +24,7 @@ async function main() {
   console.log('Monedas básicas creadas');
   
   // 2) Usuario administrador único
-  const emailAdmin = 'Guido@misionary.com';
+  const emailAdmin = 'guido@misionary.com';
   const nombreAdmin = 'Guido';
   const passwordPlano = '4C0@Cs4^6WuK@jci';
   const hashedPassword = await bcrypt.hash(passwordPlano, 10);

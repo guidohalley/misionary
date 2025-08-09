@@ -12,26 +12,32 @@ const Cover = ({ children, content, ...rest }: CoverProps) => {
     return (
         <div className="grid lg:grid-cols-3 h-full">
             <div
-                className="col-span-2 bg-no-repeat bg-cover py-6 px-16 flex-col justify-between bg-white dark:bg-gray-800 hidden lg:flex"
+                className="col-span-2 relative bg-no-repeat bg-cover hidden lg:block h-full"
                 style={{
-                    backgroundImage: `url('/img/others/auth-cover-bg.jpg')`,
+                    backgroundImage: `url('/img/others/fondo1.png')`,
                 }}
             >
-                <Logo mode="dark" />
-                <div>
-                    <h3 className="text-white mb-4">
-                        Jump start your project with Elstar
-                    </h3>
-                    <p className="text-lg text-white opacity-80 max-w-[700px]">
-                        Elstar comes with a complete set of UI components
-                        crafted with Tailwind CSS, it fulfilled most of the use
-                        case to create modern and beautiful UI and application
-                    </p>
+                {/* Overlay */}
+                <div className="absolute inset-0 bg-black/40 md:bg-black/50" aria-hidden="true" />
+
+                {/* Contenido */}
+                <div className="relative z-10 py-6 px-16 flex flex-col justify-between h-full">
+                    <Logo mode="dark" />
+                    <div>
+                        <h3 className="text-white mb-4">
+                            Jump start your project with Elstar
+                        </h3>
+                        <p className="text-lg text-white opacity-80 max-w-[700px]">
+                            Elstar comes with a complete set of UI components
+                            crafted with Tailwind CSS, it fulfilled most of the use
+                            case to create modern and beautiful UI and application
+                        </p>
+                    </div>
+                    <span className="text-white">
+                        Copyright &copy; {`${new Date().getFullYear()}`}{' '}
+                        <span className="font-semibold">{`${APP_NAME}`}</span>{' '}
+                    </span>
                 </div>
-                <span className="text-white">
-                    Copyright &copy; {`${new Date().getFullYear()}`}{' '}
-                    <span className="font-semibold">{`${APP_NAME}`}</span>{' '}
-                </span>
             </div>
             <div className="flex flex-col justify-center items-center bg-white dark:bg-gray-800">
                 <div className="w-full xl:max-w-[450px] px-8 max-w-[380px]">

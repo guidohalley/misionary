@@ -21,9 +21,14 @@ const LoginView = () => {
 
   const onSubmit = async (data: LoginCredentials) => {
     try {
-      console.log('🔐 LoginView - Iniciando login con:', data);
+      // Normalizamos email y evitamos loguear la contraseña
+      const payload: LoginCredentials = {
+        email: (data.email || '').trim().toLowerCase(),
+        password: data.password,
+      };
+      console.log('🔐 LoginView - Iniciando login con email:', payload.email);
       setError(null);
-      const result = await signIn(data);
+      const result = await signIn(payload);
       console.log('🔐 LoginView - Resultado del signIn:', result);
       
       if (result?.status === 'failed') {
@@ -72,6 +77,7 @@ const LoginView = () => {
                 render={({ field }) => (
                   <Input
                     type="email"
+                    autoComplete="email"
                     {...field}
                     placeholder="usuario@ejemplo.com"
                   />
@@ -93,6 +99,7 @@ const LoginView = () => {
                 render={({ field }) => (
                   <Input
                     type="password"
+                    autoComplete="current-password"
                     {...field}
                     placeholder="Tu contraseña"
                   />

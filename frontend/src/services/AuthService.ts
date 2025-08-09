@@ -28,7 +28,8 @@ class AuthService {
     }
 
     static async login(credentials: LoginCredentials): Promise<AuthResponse> {
-        console.log('🌐 AuthService - Iniciando petición de login:', credentials)
+        // Evitar loguear contraseñas en consola
+        console.log('🌐 AuthService - Iniciando petición de login para:', (credentials.email || '').toLowerCase());
         
         const response = await ApiService.fetchData<AuthResponse>({
             url: '/auth/login',
