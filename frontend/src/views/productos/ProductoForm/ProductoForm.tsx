@@ -272,7 +272,7 @@ const ProductoForm: React.FC<ProductoFormProps> = ({
                           render={({ field }) => (
                             <MoneyInput
                               value={field.value || 0}
-                              onChange={field.onChange}
+                              onChange={(val: number) => field.onChange(Number.isFinite(val) ? val : 0)}
                               currency={monedaSeleccionada?.codigo || 'ARS'}
                               currencySymbol={monedaSeleccionada?.simbolo || '$'}
                               placeholder="0,00"
@@ -303,8 +303,11 @@ const ProductoForm: React.FC<ProductoFormProps> = ({
                               step="0.01"
                               min="0"
                               max="1000"
-                              value={field.value || ''}
-                              onChange={(e) => field.onChange(Number(e.target.value))}
+                              value={field.value ?? ''}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                field.onChange(val === '' ? undefined : Number(val));
+                              }}
                               placeholder="Ej: 25 (para 25%)"
                               disabled={isSubmitting}
                               className="rounded-lg"
@@ -355,7 +358,7 @@ const ProductoForm: React.FC<ProductoFormProps> = ({
                               currency={monedaSeleccionada?.codigo || 'ARS'}
                               currencySymbol={monedaSeleccionada?.simbolo || '$'}
                               placeholder="0,00"
-                              disabled={true} // Siempre readonly porque se calcula automáticamente
+                              disabled={true}
                               className="bg-gray-50 dark:bg-gray-700"
                             />
                           )}

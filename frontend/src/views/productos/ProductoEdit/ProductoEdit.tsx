@@ -38,7 +38,17 @@ const ProductoEdit: React.FC = () => {
   const handleSubmit = async (data: ProductoFormData) => {
     try {
       if (!id) throw new Error('ID de producto no encontrado');
-      await updateProducto(parseInt(id), data);
+      // Normalizar payload: solo enviar campos relevantes del update
+      const payload = {
+        nombre: data.nombre,
+        costoProveedor: data.costoProveedor,
+        margenAgencia: data.margenAgencia,
+        // precio es calculado en backend si no se envía; si viene calculado, lo incluimos
+        ...(typeof data.precio === 'number' ? { precio: data.precio } : {}),
+        proveedorId: data.proveedorId,
+        monedaId: data.monedaId,
+      };
+      await updateProducto(parseInt(id), payload);
       navigate('/productos');
     } catch (error) {
       console.error('Error updating producto:', error);
@@ -85,9 +95,12 @@ const ProductoEdit: React.FC = () => {
   }
 
   const initialData: ProductoFormData = {
-    nombre: producto.nombre,
-    precio: producto.precio,
-    proveedorId: producto.proveedorId,
+  nombre: producto.nombre,
+  costoProveedor: producto.costoProveedor,
+  margenAgencia: producto.margenAgencia,
+  precio: producto.precio,
+  proveedorId: producto.proveedorId,
+  monedaId: producto.monedaId,
   };
 
   return (
