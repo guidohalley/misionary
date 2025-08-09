@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Button, Badge, Pagination, Select, Input, Notification, toast } from '@/components/ui';
+import { Card, Button, Pagination, Select, Input, Notification, toast } from '@/components/ui';
 import { HiOutlinePencil, HiOutlineTrash, HiOutlineEye } from 'react-icons/hi';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -31,6 +31,14 @@ const ProductoList: React.FC<ProductoListProps> = ({ className }) => {
     setFilteredProductos(filtered);
     setCurrentPage(1);
   }, [productos, searchTerm]);
+
+  // Opciones de tamaño de página tipadas para Select
+  const pageSizeOptions: { value: number; label: string }[] = [
+    { value: 10, label: '10 por página' },
+    { value: 25, label: '25 por página' },
+    { value: 50, label: '50 por página' },
+  ];
+  const selectedPageSize = pageSizeOptions.find(o => o.value === pageSize) || pageSizeOptions[0];
 
   const handleEdit = (id: number) => {
     navigate(`/productos/edit/${id}`);
@@ -117,13 +125,12 @@ const ProductoList: React.FC<ProductoListProps> = ({ className }) => {
               className="w-64"
             />
             <Select
-              value={pageSize}
-              onChange={setPageSize}
-              options={[
-                { value: 10, label: '10 por página' },
-                { value: 25, label: '25 por página' },
-                { value: 50, label: '50 por página' },
-              ]}
+              value={selectedPageSize}
+              onChange={(opt: { value: number; label: string } | null) => {
+                if (opt && typeof opt.value === 'number') setPageSize(opt.value)
+              }}
+              options={pageSizeOptions}
+              isSearchable={false}
             />
           </div>
           <div className="text-sm text-gray-600">
@@ -155,12 +162,14 @@ const ProductoList: React.FC<ProductoListProps> = ({ className }) => {
                     <div className="font-medium text-gray-900">{producto.nombre}</div>
                   </td>
                   <td className="py-3 px-4">
-                    <Badge className="bg-green-100 text-green-800">
+                    <span className="inline-flex items-center rounded-full bg-misionary-100 text-misionary-800 px-2.5 py-0.5 text-xs font-medium ring-1 ring-misionary-200">
                       {formatPrice(producto.precio)}
-                    </Badge>
+                    </span>
                   </td>
                   <td className="py-3 px-4">
-                    <div className="text-gray-900">{producto.proveedor?.nombre || 'Sin proveedor'}</div>
+                    <span className="inline-flex items-center rounded-full bg-msgray-100 text-msgray-800 px-2 py-0.5 text-xs font-medium ring-1 ring-msgray-200">
+                      {producto.proveedor?.nombre || 'Sin proveedor'}
+                    </span>
                   </td>
                   <td className="py-3 px-4">
                     <div className="text-gray-600">
