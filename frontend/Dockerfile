@@ -1,31 +1,29 @@
-FROM node:18-alpine as builder
+FROM node:20-alpine AS builder
 
-# Argumentos de construcción
+# Aca se construye la aplicacion usando vite
 ARG VITE_API_URL
 
 WORKDIR /app
 
-# Instalar dependencias
 COPY package*.json ./
 RUN npm ci
 
-# Copiar el resto del código
 COPY . .
 
-# Construir la aplicación
+# Pasar variable al build de Vite (prefijo VITE_)
+ENV VITE_API_URL=$VITE_API_URL
+RUN echo "VITE_API_URL=$VITE_API_URL"
 RUN npm run build
 
-# Imagen de producción con Nginx
+# Etapa 2: Servidor Nginx
 FROM nginx:alpine
 
-# Copiar la configuración de nginx
+# Copiar la configuración de nginx si existe
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Copiar los archivos construidos
-COPY --from=builder /app/dist /usr/share/nginx/html
+# Copiar archivos estáticos compilados (outDir=build en vite.config.ts)
+COPY --from=builder /app/build /usr/share/nginx/html
 
-# Exponer el puerto
 EXPOSE 80
 
-# Configurar el comando de inicio
 CMD ["nginx", "-g", "daemon off;"]

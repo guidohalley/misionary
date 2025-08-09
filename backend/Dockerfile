@@ -1,29 +1,27 @@
-# Etapa 1: build de dependencias
-FROM node:20-alpine AS deps
-
+######## Backend - Build & Run (Production)
+# Stage 1: Builder (incluye devDependencies para compilar TypeScript)
+FROM node:20-alpine AS builder
 WORKDIR /app
 
-# Solo copiamos los archivos necesarios para instalar dependencias
+COPY package.json package-lock.json ./
+RUN npm ci
+
+COPY . .
+RUN npm run build
+
+# Stage 2: Runner (solo dependencias de producción)
+FROM node:20-alpine AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev
 
-# Etapa 2: construcción final
-FROM node:20-alpine
+# Copiamos solo lo necesario para correr
+COPY --from=builder /app/dist ./dist
+COPY prisma ./prisma
 
-WORKDIR /app
-
-# Copiamos los archivos necesarios
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
-
-# Aseguramos variables por defecto si no se pasan desde fuera
-ENV NODE_ENV=production
-
-# Generamos Prisma Client (si es necesario)
-RUN npx prisma generate
-
-# Exponemos el puerto
+# Prisma Client y migraciones al inicio
 EXPOSE 3001
-
-# Comando de inicio
-CMD ["npm", "run", "start:dev"]
+CMD ["sh", "-c", "npx prisma generate && npx prisma migrate deploy && node dist/index.js"]

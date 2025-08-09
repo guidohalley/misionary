@@ -31,8 +31,8 @@ import {
     MdViewModule,
     MdMenu,
 } from 'react-icons/md'
+import type { ReactElement } from 'react'
 
-// Removed duplicate import type { JSX } from 'react' if it existed
 export type NavigationIcons = Record<string, ReactElement>
 
 const navigationIcon: NavigationIcons = {
