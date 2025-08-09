@@ -13,7 +13,7 @@ const FooterContent = () => {
     return (
         <div className="flex items-center justify-center flex-auto w-full">
             <span className="text-sm text-gray-600 dark:text-gray-400">
-                © {new Date().getFullYear()} - Powered by <span className="font-semibold text-indigo-600 dark:text-indigo-400">MSNR</span>
+                © {new Date().getFullYear()} - Por MSNR para <span className="font-semibold text-amber-600 dark:text-amber-800">MSNR ®</span>
             </span>
         </div>
     )

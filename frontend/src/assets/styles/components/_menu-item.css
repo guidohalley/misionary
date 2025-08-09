@@ -1,6 +1,6 @@
 @layer components {
   .menu-item {
-    @apply cursor-pointer font-semibold px-3 rounded-md flex items-center w-full whitespace-nowrap gap-x-2;
+    @apply cursor-pointer font-normal px-3 rounded-md flex items-center w-full whitespace-nowrap gap-x-2;
 
     &.menu-item-light {
       @apply text-gray-600;
@@ -52,7 +52,7 @@
   }
 
   .menu-collapse-item {
-    @apply cursor-pointer select-none font-semibold px-3 h-10 rounded-md flex items-center justify-between;
+    @apply cursor-pointer select-none font-normal px-3 h-10 rounded-md flex items-center justify-between;
 
     &.menu-collapse-item-light {
       @apply text-gray-600 hover:text-gray-900 hover:bg-gray-100;

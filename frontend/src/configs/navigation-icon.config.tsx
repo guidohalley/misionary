@@ -1,89 +1,88 @@
 import {
-    HiOutlineColorSwatch,
-    HiOutlineDesktopComputer,
-    HiOutlineTemplate,
-    HiOutlineViewGridAdd,
-    HiOutlineHome,
-    HiOutlineUsers,
-    HiOutlineCube,
-    HiOutlineDocumentText,
-    HiOutlineBriefcase,
-    HiOutlineUserGroup,
-    HiOutlineTruck,
-    HiOutlineCog,
-    HiOutlineCalculator,
-    HiOutlineReceiptTax,
-    HiOutlineClipboardList,
-    HiOutlineHashtag,
-    HiOutlineClipboardCheck,
-    HiOutlineUserAdd,
-    HiOutlineOfficeBuilding,
-    HiOutlineUserCircle,
-    HiOutlineCurrencyDollar,
-    HiOutlineGlobe,
-    HiOutlineRefresh,
-    HiOutlineDatabase,
-    HiOutlineCollection,
-    HiOutlineChartBar,
-    HiOutlineLightningBolt,
-    HiOutlineDocumentAdd,
-    HiOutlineReceiptRefund,
-    HiOutlineChartPie,
-    HiOutlineCash,
-    HiOutlineTrendingUp,
-} from 'react-icons/hi'
-import type { JSX } from 'react'
+    MdHome,
+    MdPeople,
+    MdCategory,
+    MdDescription,
+    MdBusinessCenter,
+    MdGroups,
+    MdLocalShipping,
+    MdSettings,
+    MdCalculate,
+    MdReceipt,
+    MdListAlt,
+    MdPercent,
+    MdAssignmentTurnedIn,
+    MdStorage,
+    MdCollections,
+    MdBarChart,
+    MdFlashOn,
+    MdPersonAdd,
+    MdLocationCity,
+    MdAccountCircle,
+    MdAttachMoney,
+    MdPublic,
+    MdAutorenew,
+    MdAddBox,
+    MdReceiptLong,
+    MdPieChart,
+    MdTrendingUp,
+    MdColorLens,
+    MdDesktopWindows,
+    MdViewModule,
+    MdMenu,
+} from 'react-icons/md'
 
-export type NavigationIcons = Record<string, JSX.Element>
+// Removed duplicate import type { JSX } from 'react' if it existed
+export type NavigationIcons = Record<string, ReactElement>
 
 const navigationIcon: NavigationIcons = {
     // === ICONOS BÁSICOS ===
-    home: <HiOutlineHome />,
-    users: <HiOutlineUsers />,
-    product: <HiOutlineCube />,
-    document: <HiOutlineDocumentText />,
-    briefcase: <HiOutlineBriefcase />,
-    userGroup: <HiOutlineUserGroup />,
-    truck: <HiOutlineTruck />,
-    cog: <HiOutlineCog />,
-    calculator: <HiOutlineCalculator />,
-    invoice: <HiOutlineReceiptTax />,
-    receipt: <HiOutlineClipboardList />,
-    percentage: <HiOutlineHashtag />,
-    presupuesto: <HiOutlineClipboardCheck />,
-    
+    home: <MdHome />,
+    users: <MdPeople />,
+    product: <MdCategory />,
+    document: <MdDescription />,
+    briefcase: <MdBusinessCenter />,
+    userGroup: <MdGroups />,
+    truck: <MdLocalShipping />,
+    cog: <MdSettings />,
+    calculator: <MdCalculate />,
+    invoice: <MdReceipt />,
+    receipt: <MdListAlt />,
+    percentage: <MdPercent />,
+    presupuesto: <MdAssignmentTurnedIn />,
+
     // === ICONOS PARA CATÁLOGOS ===
-    database: <HiOutlineDatabase />,
-    package: <HiOutlineCollection />,
-    chartBar: <HiOutlineChartBar />,
-    
+    database: <MdStorage />,
+    package: <MdCollections />,
+    chartBar: <MdBarChart />,
+
     // === ICONOS PARA OPERACIONES RÁPIDAS ===
-    lightning: <HiOutlineLightningBolt />,
-    userAdd: <HiOutlineUserAdd />,
-    buildingAdd: <HiOutlineOfficeBuilding />,
-    documentAdd: <HiOutlineDocumentAdd />,
-    receiptAdd: <HiOutlineReceiptRefund />,
-    userPlus: <HiOutlineUserCircle />,
-    
+    lightning: <MdFlashOn />,
+    userAdd: <MdPersonAdd />,
+    buildingAdd: <MdLocationCity />,
+    documentAdd: <MdAddBox />,
+    receiptAdd: <MdReceiptLong />,
+    userPlus: <MdAccountCircle />,
+
     // === ICONOS PARA FACTURACIÓN ===
-    receiptTax: <HiOutlineReceiptTax />,
-    
+    receiptTax: <MdReceipt />,
+
     // === ICONOS PARA FINANZAS ===
-    chartLine: <HiOutlineChartPie />,
-    cash: <HiOutlineCash />,
-    trendingUp: <HiOutlineTrendingUp />,
-    
+    chartLine: <MdPieChart />,
+    cash: <MdAttachMoney />,
+    trendingUp: <MdTrendingUp />,
+
     // === ICONOS PARA CONFIGURACIÓN ===
-    currency: <HiOutlineCurrencyDollar />,
-    exchange: <HiOutlineRefresh />,
-    globe: <HiOutlineGlobe />,
-    
+    currency: <MdAttachMoney />,
+    exchange: <MdAutorenew />,
+    globe: <MdPublic />,
+
     // === ICONOS DEL TEMPLATE ORIGINAL (mantener por compatibilidad) ===
-    fileText: <HiOutlineClipboardCheck />,
-    singleMenu: <HiOutlineViewGridAdd />,
-    collapseMenu: <HiOutlineTemplate />,
-    groupSingleMenu: <HiOutlineDesktopComputer />,
-    groupCollapseMenu: <HiOutlineColorSwatch />,
+    fileText: <MdAssignmentTurnedIn />,
+    singleMenu: <MdViewModule />,
+    collapseMenu: <MdMenu />,
+    groupSingleMenu: <MdDesktopWindows />,
+    groupCollapseMenu: <MdColorLens />,
 }
 
 export default navigationIcon
