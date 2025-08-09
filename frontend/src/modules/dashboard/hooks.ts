@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
-import { fetchFacturas, fetchGastos, fetchGastosResumen, fetchPresupuestos } from './service'
-import type { FacturaDTO, PresupuestoDTO, GastoDTO, GastoResumenCategoriaDTO } from './types'
+import { fetchFacturas, fetchGastos, fetchGastosResumen, fetchPresupuestos, fetchClientes } from './service'
+import type { FacturaDTO, PresupuestoDTO, GastoDTO, GastoResumenCategoriaDTO, PersonaDTO } from './types'
 
 function isoDaysAgo(days: number) {
   const d = new Date()
@@ -14,20 +14,23 @@ export function useDashboardKpis() {
   const [facturas, setFacturas] = useState<FacturaDTO[]>([])
   const [presupuestos, setPresupuestos] = useState<PresupuestoDTO[]>([])
   const [gastos, setGastos] = useState<GastoDTO[]>([])
+  const [clientes, setClientes] = useState<PersonaDTO[]>([])
 
   useEffect(() => {
     const load = async () => {
       try {
         setLoading(true)
         setError(null)
-        const [f, p, g] = await Promise.all([
+        const [f, p, g, c] = await Promise.all([
           fetchFacturas({ fechaDesde: isoDaysAgo(30) }),
           fetchPresupuestos({}),
           fetchGastos({ fechaDesde: isoDaysAgo(30) }),
+          fetchClientes(),
         ])
         setFacturas(f)
         setPresupuestos(p)
         setGastos(g)
+        setClientes(c)
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Error cargando KPIs')
       } finally {
@@ -57,16 +60,11 @@ export function useDashboardKpis() {
     return acc
   }, [presupuestos])
 
-  const gastosMesPorMoneda = useMemo(() => {
-    const acc: Record<string, number> = {}
-    for (const g of gastos) {
-      const codigo = g.moneda?.codigo || '—'
-      acc[codigo] = (acc[codigo] || 0) + Number(g.monto || 0)
-    }
-    return acc
-  }, [gastos])
+  const clientesActivosCount = useMemo(() => clientes.filter(c => c.activo).length, [clientes])
 
-  return { loading, error, ingresosPorMoneda, pipeline, gastosMesPorMoneda }
+  const totalGastos = useMemo(() => gastos.reduce((sum, g) => sum + Number(g.monto || 0), 0), [gastos])
+
+  return { loading, error, ingresosPorMoneda, pipeline, clientesActivosCount, totalGastos, clientes }
 }
 
 export function useGastosPorCategoria() {

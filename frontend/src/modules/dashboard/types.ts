@@ -35,3 +35,11 @@ export interface GastoDTO {
   categoria: string
   fecha: string
 }
+
+export interface PersonaDTO {
+  id: number
+  nombre: string
+  email?: string
+  activo: boolean
+  tipo: string
+}
