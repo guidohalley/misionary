@@ -71,7 +71,7 @@ export const empresaController = {
         clienteId: parseInt(clienteId)
       });
 
-      res.status(201).json(nuevaEmpresa);
+  return res.status(201).json(nuevaEmpresa);
     } catch (error) {
       next(error);
     }

@@ -7,11 +7,11 @@ export class ImpuestoController {
       console.log('Creating impuesto with data:', JSON.stringify(req.body, null, 2));
       const impuesto = await ImpuestoService.create(req.body);
       console.log('Impuesto created successfully:', impuesto.id);
-      res.status(201).json(impuesto);
+  return res.status(201).json(impuesto);
     } catch (error) {
       console.error('Error creating impuesto:', error);
       console.error('Error stack:', error instanceof Error ? error.stack : 'Unknown error');
-      res.status(500).json({ 
+  return res.status(500).json({ 
         error: 'Error al crear el impuesto', 
         details: error instanceof Error ? error.message : 'Unknown error' 
       });
@@ -21,10 +21,10 @@ export class ImpuestoController {
   static async findAll(_req: Request, res: Response) {
     try {
       const impuestos = await ImpuestoService.findAll();
-      res.json(impuestos);
+  return res.json(impuestos);
     } catch (error) {
       console.error('Error fetching impuestos:', error);
-      res.status(500).json({ error: 'Error al obtener los impuestos' });
+  return res.status(500).json({ error: 'Error al obtener los impuestos' });
     }
   }
 
@@ -37,10 +37,10 @@ export class ImpuestoController {
         return res.status(404).json({ error: 'Impuesto no encontrado' });
       }
       
-      res.json(impuesto);
+  return res.json(impuesto);
     } catch (error) {
       console.error('Error fetching impuesto:', error);
-      res.status(500).json({ error: 'Error al buscar el impuesto' });
+  return res.status(500).json({ error: 'Error al buscar el impuesto' });
     }
   }
 
@@ -48,10 +48,10 @@ export class ImpuestoController {
     try {
       const id = parseInt(req.params.id);
       const impuesto = await ImpuestoService.update(id, req.body);
-      res.json(impuesto);
+  return res.json(impuesto);
     } catch (error) {
       console.error('Error updating impuesto:', error);
-      res.status(500).json({ error: 'Error al actualizar el impuesto' });
+  return res.status(500).json({ error: 'Error al actualizar el impuesto' });
     }
   }
 
@@ -59,10 +59,10 @@ export class ImpuestoController {
     try {
       const id = parseInt(req.params.id);
       await ImpuestoService.delete(id);
-      res.status(204).send();
+  return res.status(204).send();
     } catch (error) {
       console.error('Error deleting impuesto:', error);
-      res.status(500).json({ error: 'Error al eliminar el impuesto' });
+  return res.status(500).json({ error: 'Error al eliminar el impuesto' });
     }
   }
 
@@ -70,10 +70,10 @@ export class ImpuestoController {
     try {
       const id = parseInt(req.params.id);
       const impuesto = await ImpuestoService.toggle(id);
-      res.json(impuesto);
+  return res.json(impuesto);
     } catch (error) {
       console.error('Error toggling impuesto:', error);
-      res.status(500).json({ error: 'Error al cambiar estado del impuesto' });
+  return res.status(500).json({ error: 'Error al cambiar estado del impuesto' });
     }
   }
 }

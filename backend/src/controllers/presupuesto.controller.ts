@@ -8,11 +8,11 @@ export class PresupuestoController {
       console.log('Creating presupuesto with data:', JSON.stringify(req.body, null, 2));
       const presupuesto = await PresupuestoService.create(req.body);
       console.log('Presupuesto created successfully:', presupuesto.id);
-      res.status(201).json(presupuesto);
+  return res.status(201).json(presupuesto);
     } catch (error) {
       console.error('Error creating presupuesto:', error);
       console.error('Error stack:', error instanceof Error ? error.stack : 'Unknown error');
-      res.status(500).json({ error: 'Error al crear el presupuesto', details: error instanceof Error ? error.message : 'Unknown error' });
+  return res.status(500).json({ error: 'Error al crear el presupuesto', details: error instanceof Error ? error.message : 'Unknown error' });
     }
   }
 
@@ -25,9 +25,9 @@ export class PresupuestoController {
         return res.status(404).json({ error: 'Presupuesto no encontrado' });
       }
       
-      res.json(presupuesto);
+  return res.json(presupuesto);
     } catch (error) {
-      res.status(500).json({ error: 'Error al buscar el presupuesto' });
+  return res.status(500).json({ error: 'Error al buscar el presupuesto' });
     }
   }
 
@@ -35,9 +35,9 @@ export class PresupuestoController {
     try {
       const id = parseInt(req.params.id);
       const presupuesto = await PresupuestoService.update(id, req.body);
-      res.json(presupuesto);
+  return res.json(presupuesto);
     } catch (error) {
-      res.status(500).json({ error: 'Error al actualizar el presupuesto' });
+  return res.status(500).json({ error: 'Error al actualizar el presupuesto' });
     }
   }
 
@@ -51,9 +51,9 @@ export class PresupuestoController {
       }
 
       const presupuesto = await PresupuestoService.updateEstado(id, estado);
-      res.json(presupuesto);
+  return res.json(presupuesto);
     } catch (error) {
-      res.status(500).json({ error: 'Error al actualizar el estado del presupuesto' });
+  return res.status(500).json({ error: 'Error al actualizar el estado del presupuesto' });
     }
   }
 
@@ -61,9 +61,9 @@ export class PresupuestoController {
     try {
       const id = parseInt(req.params.id);
       await PresupuestoService.delete(id);
-      res.status(204).send();
+  return res.status(204).send();
     } catch (error) {
-      res.status(500).json({ error: 'Error al eliminar el presupuesto' });
+  return res.status(500).json({ error: 'Error al eliminar el presupuesto' });
     }
   }
 
@@ -74,9 +74,9 @@ export class PresupuestoController {
         clienteId ? parseInt(clienteId as string) : undefined,
         estado as EstadoPresupuesto | undefined
       );
-      res.json(presupuestos);
+  return res.json(presupuestos);
     } catch (error) {
-      res.status(500).json({ error: 'Error al obtener los presupuestos' });
+  return res.status(500).json({ error: 'Error al obtener los presupuestos' });
     }
   }
 }

@@ -34,10 +34,10 @@ export class PersonaController {
         activo: true
       });
       
-      res.status(201).json(persona);
+  return res.status(201).json(persona);
     } catch (error) {
       console.error('Error en PersonaController.create:', error);
-      res.status(500).json({ error: 'Error al crear la persona' });
+  return res.status(500).json({ error: 'Error al crear la persona' });
     }
   }
 
@@ -90,31 +90,31 @@ export class PersonaController {
       console.log('Datos para actualizar:', updateData);
       
       const persona = await PersonaService.update(id, updateData);
-      console.log('Persona actualizada:', persona);
-      res.json(persona);
+  console.log('Persona actualizada:', persona);
+  return res.json(persona);
     } catch (error) {
       console.error('Error en PersonaController.update:', error);
-      res.status(500).json({ error: 'Error al actualizar la persona' });
+  return res.status(500).json({ error: 'Error al actualizar la persona' });
     }
   }
 
   static async delete(req: Request, res: Response) {
     try {
       const id = parseInt(req.params.id);
-      await PersonaService.delete(id);
-      res.status(204).send();
+  await PersonaService.delete(id);
+  return res.status(204).send();
     } catch (error) {
-      res.status(500).json({ error: 'Error al eliminar la persona' });
+  return res.status(500).json({ error: 'Error al eliminar la persona' });
     }
   }
 
   static async findAll(req: Request, res: Response) {
     try {
       const { tipo } = req.query;
-      const personas = await PersonaService.findAll(tipo as any);
-      res.json(personas);
+  const personas = await PersonaService.findAll(tipo as any);
+  return res.json(personas);
     } catch (error) {
-      res.status(500).json({ error: 'Error al obtener las personas' });
+  return res.status(500).json({ error: 'Error al obtener las personas' });
     }
   }
 
@@ -136,11 +136,11 @@ export class PersonaController {
         clienteData.password = await bcrypt.hash(cliente.password, 10);
       }
 
-      const result = await PersonaService.createClienteWithEmpresa(clienteData, empresa);
-      res.status(201).json(result);
+  const result = await PersonaService.createClienteWithEmpresa(clienteData, empresa);
+  return res.status(201).json(result);
     } catch (error) {
       console.error('Error en PersonaController.createClienteWithEmpresa:', error);
-      res.status(500).json({ error: 'Error al crear el cliente con empresa' });
+  return res.status(500).json({ error: 'Error al crear el cliente con empresa' });
     }
   }
 }

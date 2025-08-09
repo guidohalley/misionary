@@ -6,8 +6,8 @@ import { HttpError } from '../utils/http-error';
 export class FacturaController {
   static async create(req: Request, res: Response, next: NextFunction) {
     try {
-      const factura = await FacturaService.create(req.body);
-      res.status(201).json(factura);
+  const factura = await FacturaService.create(req.body);
+  return res.status(201).json(factura);
     } catch (error) {
       next(error);
     }

@@ -48,7 +48,7 @@ export class MonedaController {
       }
 
       const { codigo } = req.params;
-      const moneda = await MonedaService.getMonedaByCodigo(codigo as CodigoMoneda);
+  const moneda = await MonedaService.getMonedaByCodigo(codigo as CodigoMoneda);
 
       if (!moneda) {
         return res.status(404).json({
@@ -57,14 +57,14 @@ export class MonedaController {
         });
       }
 
-      res.json({
+  return res.json({
         success: true,
         data: moneda,
         message: 'Moneda obtenida exitosamente'
       });
     } catch (error) {
       console.error('Error al obtener moneda por código:', error);
-      res.status(500).json({
+  return res.status(500).json({
         success: false,
         message: 'Error interno del servidor',
         error: error instanceof Error ? error.message : 'Error desconocido'
@@ -112,14 +112,14 @@ export class MonedaController {
         });
       }
 
-      res.json({
+  return res.json({
         success: true,
         data: tipoCambio,
         message: 'Tipo de cambio obtenido exitosamente'
       });
     } catch (error) {
       console.error('Error al obtener tipo de cambio:', error);
-      res.status(500).json({
+  return res.status(500).json({
         success: false,
         message: 'Error interno del servidor',
         error: error instanceof Error ? error.message : 'Error desconocido'
@@ -163,7 +163,7 @@ export class MonedaController {
         fechaConversion
       );
 
-      res.json({
+  return res.json({
         success: true,
         data: {
           montoOriginal: parseFloat(monto),
@@ -177,7 +177,7 @@ export class MonedaController {
       });
     } catch (error) {
       console.error('Error al convertir moneda:', error);
-      res.status(500).json({
+  return res.status(500).json({
         success: false,
         message: 'Error interno del servidor',
         error: error instanceof Error ? error.message : 'Error desconocido'
@@ -221,14 +221,14 @@ export class MonedaController {
         fechaTipoCambio
       );
 
-      res.json({
+  return res.json({
         success: true,
         data: tipoCambio,
         message: 'Tipo de cambio actualizado exitosamente'
       });
     } catch (error) {
       console.error('Error al actualizar tipo de cambio:', error);
-      res.status(500).json({
+  return res.status(500).json({
         success: false,
         message: 'Error interno del servidor',
         error: error instanceof Error ? error.message : 'Error desconocido'
@@ -275,14 +275,14 @@ export class MonedaController {
         fechaHastaDate
       );
 
-      res.json({
+  return res.json({
         success: true,
         data: historial,
         message: 'Historial de tipos de cambio obtenido exitosamente'
       });
     } catch (error) {
       console.error('Error al obtener historial de tipos de cambio:', error);
-      res.status(500).json({
+  return res.status(500).json({
         success: false,
         message: 'Error interno del servidor',
         error: error instanceof Error ? error.message : 'Error desconocido'
@@ -313,14 +313,14 @@ export class MonedaController {
         fechaActualizacion
       );
 
-      res.json({
+  return res.json({
         success: true,
         data: resultados,
         message: `${resultados.length} tipos de cambio actualizados exitosamente`
       });
     } catch (error) {
       console.error('Error al actualizar tipos de cambio masivamente:', error);
-      res.status(500).json({
+  return res.status(500).json({
         success: false,
         message: 'Error interno del servidor',
         error: error instanceof Error ? error.message : 'Error desconocido'

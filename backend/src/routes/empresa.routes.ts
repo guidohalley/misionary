@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { body } from 'express-validator';
 import { empresaController } from '../controllers/empresa.controller';
 import { auth } from '../middleware/auth';
+import { asyncHandler } from '../utils/asyncHandler';
 
 const router = Router();
 
@@ -92,12 +93,12 @@ const updateEmpresaValidation = [
 router.use(auth);
 
 // Rutas CRUD para empresas
-router.get('/', empresaController.getAllEmpresas);
-router.get('/search', empresaController.searchEmpresas);
-router.get('/:id', empresaController.getEmpresaById);
-router.get('/cliente/:clienteId', empresaController.getEmpresasByCliente);
-router.post('/', createEmpresaValidation, empresaController.createEmpresa);
-router.put('/:id', updateEmpresaValidation, empresaController.updateEmpresa);
-router.delete('/:id', empresaController.deleteEmpresa);
+router.get('/', asyncHandler(empresaController.getAllEmpresas));
+router.get('/search', asyncHandler(empresaController.searchEmpresas));
+router.get('/:id', asyncHandler(empresaController.getEmpresaById));
+router.get('/cliente/:clienteId', asyncHandler(empresaController.getEmpresasByCliente));
+router.post('/', createEmpresaValidation, asyncHandler(empresaController.createEmpresa));
+router.put('/:id', updateEmpresaValidation, asyncHandler(empresaController.updateEmpresa));
+router.delete('/:id', asyncHandler(empresaController.deleteEmpresa));
 
 export default router;

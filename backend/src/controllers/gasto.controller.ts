@@ -113,7 +113,7 @@ export class GastoController {
 
       const nuevoGasto = await gastoService.createGastoOperativo(gastoData);
       
-      res.status(201).json({
+  return res.status(201).json({
         success: true,
         data: nuevoGasto,
         message: 'Gasto operativo creado exitosamente'
@@ -223,7 +223,7 @@ export class GastoController {
 
       const nuevaAsignacion = await gastoService.createAsignacion(asignacionData);
       
-      res.status(201).json({
+  return res.status(201).json({
         success: true,
         data: nuevaAsignacion,
         message: 'Asignación creada exitosamente'
