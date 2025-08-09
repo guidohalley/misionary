@@ -24,4 +24,4 @@ COPY prisma ./prisma
 
 # Prisma Client y migraciones al inicio
 EXPOSE 3001
-CMD ["sh", "-c", "npx prisma generate && npx prisma migrate deploy && node dist/index.js"]
+CMD ["sh", "-c", "npx prisma generate && npx prisma migrate deploy && if [ \"$SEED_ON_START\" = \"true\" ]; then echo 'Running prisma db seed...'; npx prisma db seed; fi && node dist/index.js"]
