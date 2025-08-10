@@ -23,30 +23,50 @@ const Home = () => {
 
             {/* Acciones rápidas */}
             <motion.div 
-                className="flex flex-wrap gap-2 mb-6"
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6"
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.25 }}
             >
-                <Button size="sm" className="bg-msgray-950 hover:bg-msgray-900 text-white transition-colors shadow-sm hover:shadow focus:ring-2 focus:ring-msgray-700"
+                <Button
+                    block
+                    size="lg"
+                    variant="plain"
+                    icon={<FiFilePlus />}
+                    className="!bg-black hover:!bg-black/90 !text-white transition-colors shadow-sm hover:shadow focus:!ring-2 focus:!ring-black focus:!ring-offset-2 focus:!ring-offset-white !border-transparent"
                     onClick={() => navigate('/presupuestos/new')}
                 >
-                    <FiFilePlus className="mr-2" /> Nuevo Presupuesto
+                    Nuevo Presupuesto
                 </Button>
-                <Button size="sm" className="bg-msgray-950 hover:bg-msgray-900 text-white transition-colors shadow-sm hover:shadow focus:ring-2 focus:ring-msgray-700"
+                <Button
+                    block
+                    size="lg"
+                    variant="plain"
+                    icon={<FiPlusCircle />}
+                    className="!bg-black hover:!bg-black/90 !text-white transition-colors shadow-sm hover:shadow focus:!ring-2 focus:!ring-black focus:!ring-offset-2 focus:!ring-offset-white !border-transparent"
                     onClick={() => navigate('/gastos/new')}
                 >
-                    <FiPlusCircle className="mr-2" /> Nuevo Gasto
+                    Nuevo Gasto
                 </Button>
-                <Button size="sm" className="bg-msgray-950 hover:bg-msgray-900 text-white transition-colors shadow-sm hover:shadow focus:ring-2 focus:ring-msgray-700"
+                <Button
+                    block
+                    size="lg"
+                    variant="plain"
+                    icon={<FiUserPlus />}
+                    className="!bg-black hover:!bg-black/90 !text-white transition-colors shadow-sm hover:shadow focus:!ring-2 focus:!ring-black focus:!ring-offset-2 focus:!ring-offset-white !border-transparent"
                     onClick={() => navigate('/personas/cliente/new')}
                 >
-                    <FiUserPlus className="mr-2" /> Nuevo Cliente
+                    Nuevo Cliente
                 </Button>
-                <Button size="sm" className="bg-msgray-950 hover:bg-msgray-900 text-white transition-colors shadow-sm hover:shadow focus:ring-2 focus:ring-msgray-700"
+                <Button
+                    block
+                    size="lg"
+                    variant="plain"
+                    icon={<FiTruck />}
+                    className="!bg-black hover:!bg-black/90 !text-white transition-colors shadow-sm hover:shadow focus:!ring-2 focus:!ring-black focus:!ring-offset-2 focus:!ring-offset-white !border-transparent"
                     onClick={() => navigate('/personas/proveedor/new')}
                 >
-                    <FiTruck className="mr-2" /> Nuevo Proveedor
+                    Nuevo Proveedor
                 </Button>
             </motion.div>
 
