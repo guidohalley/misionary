@@ -21,8 +21,29 @@ model Moneda {
   presupuestos       Presupuesto[]
   productos          Producto[]
   servicios          Servicio[]
+  recibos            Recibo[]
+  pagosAdmin         PagoAdmin[]
+  cobrosCliente      CobroCliente[]
   tiposCambio        TipoCambio[]      @relation("MonedaOrigen")
   tiposCambioDestino TipoCambio[]      @relation("MonedaDestino")
+}
+
+model CobroCliente {
+  id            Int         @id @default(autoincrement())
+  presupuestoId Int
+  monto         Decimal     @db.Decimal(15, 2)
+  monedaId      Int         @default(1)
+  fecha         DateTime
+  metodoPago    String
+  concepto      String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  presupuesto   Presupuesto @relation(fields: [presupuestoId], references: [id])
+  moneda        Moneda      @relation(fields: [monedaId], references: [id])
+
+  @@index([presupuestoId])
+  @@index([fecha])
 }
 
 model TipoCambio {
@@ -56,6 +77,7 @@ model Persona {
   presupuestos            Presupuesto[]     @relation("ClientePresupuestos")
   productos               Producto[]
   recibos                 Recibo[]
+  pagosAdmin              PagoAdmin[]
   servicios               Servicio[]
   empresas                Empresa[]         @relation("ClienteEmpresas")
 }
@@ -127,13 +149,24 @@ model Presupuesto {
   updatedAt            DateTime                  @updatedAt
   monedaId             Int                       @default(1)
   tipoCambioFecha      DateTime?
+  // Periodo y recurrencia
+  periodoInicio        DateTime?
+  periodoFin           DateTime?
+  esRecurrente         Boolean                   @default(false)
+  frecuencia           FrecuenciaContrato?
+  renovacionAutomatica Boolean                   @default(false)
+  precioPeriodo        Decimal?                  @db.Decimal(15, 2)
   asignacionesGasto    AsignacionGastoProyecto[]
-  factura              Factura?
+  facturas             Factura[]
   items                Item[]
   cliente              Persona                   @relation("ClientePresupuestos", fields: [clienteId], references: [id])
   empresa              Empresa?                  @relation("EmpresaPresupuestos", fields: [empresaId], references: [id])
   moneda               Moneda                    @relation(fields: [monedaId], references: [id])
   presupuestoImpuestos PresupuestoImpuesto[]
+  recibos              Recibo[]
+  pagosAdmin           PagoAdmin[]
+  // Relación a cobros directos de cliente (sin factura)
+  cobrosCliente        CobroCliente[]
 }
 
 model Item {
@@ -151,7 +184,7 @@ model Item {
 model Factura {
   id                 Int           @id @default(autoincrement())
   numero             String        @unique
-  presupuestoId      Int           @unique
+  presupuestoId      Int
   empresaId          Int?
   fecha              DateTime
   subtotal           Decimal       @db.Decimal(15, 2)
@@ -172,13 +205,18 @@ model Factura {
 model Recibo {
   id         Int      @id @default(autoincrement())
   personaId  Int
+  presupuestoId Int?
   concepto   String
   monto      Decimal  @db.Decimal(15, 2)
   fecha      DateTime
   metodoPago String
+  tipo       ReciboTipo @default(PROVEEDOR)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   persona    Persona  @relation(fields: [personaId], references: [id])
+  presupuesto Presupuesto? @relation(fields: [presupuestoId], references: [id])
+  monedaId   Int      @default(1)
+  moneda     Moneda   @relation(fields: [monedaId], references: [id])
 }
 
 model Impuesto {
@@ -265,6 +303,25 @@ model HistorialPrecio {
   @@index([fechaDesde])
 }
 
+model PagoAdmin {
+  id            Int         @id @default(autoincrement())
+  adminId       Int
+  presupuestoId Int
+  monto         Decimal     @db.Decimal(15, 2)
+  monedaId      Int         @default(1)
+  fecha         DateTime
+  metodoPago    String
+  concepto      String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  admin         Persona     @relation(fields: [adminId], references: [id])
+  presupuesto   Presupuesto @relation(fields: [presupuestoId], references: [id])
+  moneda        Moneda      @relation(fields: [monedaId], references: [id])
+
+  @@index([presupuestoId])
+}
+
 enum TipoPersona {
   CLIENTE
   PROVEEDOR
@@ -305,4 +362,16 @@ enum CategoriaGasto {
   TRANSPORTE
   COMUNICACION
   OTROS
+}
+
+enum ReciboTipo {
+  PROVEEDOR
+  ADMIN
+}
+
+enum FrecuenciaContrato {
+  UNICO
+  MENSUAL
+  TRIMESTRAL
+  ANUAL
 }

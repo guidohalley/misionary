@@ -219,6 +219,16 @@ const navigationConfig: NavigationTree[] = [
         authority: [],
         subMenu: [
             {
+                key: 'finanzas.resumen',
+                path: '/finanzas',
+                title: 'Presupuestos',
+                translateKey: 'nav.finanzas.resumen',
+                icon: 'chartLine',
+                type: NAV_ITEM_TYPE_ITEM,
+                authority: [],
+                subMenu: [],
+            },
+            {
                 key: 'finanzas.gastos',
                 path: '/gastos',
                 title: 'Gastos Operativos',

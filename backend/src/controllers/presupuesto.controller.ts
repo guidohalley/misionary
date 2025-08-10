@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import { PresupuestoService } from '../services/presupuesto.service';
-import { EstadoPresupuesto } from '@prisma/client';
 
 export class PresupuestoController {
   static async create(req: Request, res: Response) {
@@ -46,7 +45,9 @@ export class PresupuestoController {
       const id = parseInt(req.params.id);
       const { estado } = req.body;
       
-      if (!Object.values(EstadoPresupuesto).includes(estado)) {
+      // Validación laxa del estado; el servicio/migraciones garantizan valores válidos
+      const allowedEstados = ['BORRADOR','ENVIADO','APROBADO','FACTURADO']
+      if (!allowedEstados.includes(estado)) {
         return res.status(400).json({ error: 'Estado inválido' });
       }
 
@@ -72,7 +73,7 @@ export class PresupuestoController {
       const { clienteId, estado } = req.query;
       const presupuestos = await PresupuestoService.findAll(
         clienteId ? parseInt(clienteId as string) : undefined,
-        estado as EstadoPresupuesto | undefined
+        (estado as string | undefined)
       );
   return res.json(presupuestos);
     } catch (error) {

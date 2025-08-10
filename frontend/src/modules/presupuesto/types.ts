@@ -4,6 +4,7 @@ import { Servicio } from '../servicio/types';
 import { Moneda } from '../moneda/types';
 import { Impuesto } from '../impuesto/types';
 import { EstadoPresupuesto } from '../../views/presupuestos/schemas';
+import type { Empresa } from '../empresa/types'
 
 export interface Item {
   id: number;
@@ -30,6 +31,8 @@ export interface Presupuesto {
   id: number;
   clienteId: number;
   cliente: Persona;
+  empresaId?: number;
+  empresa?: Empresa | null;
   items: Item[];
   subtotal: number;
   impuestos: number;

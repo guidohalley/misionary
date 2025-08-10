@@ -1,5 +1,6 @@
 import prisma from '../config/prisma';
 import { HttpError } from '../utils/http-error';
+import { EstadoFactura } from '@prisma/client';
 
 // Usamos literales de string para estados para evitar dependencia directa del enum generado
 const ESTADO_FACTURA = {
@@ -75,7 +76,7 @@ export class FacturaService {
   }
 
   static async update(id: number, data: {
-    estado?: string;
+    estado?: EstadoFactura;
     fecha?: Date;
   }) {
     return prisma.factura.update({

@@ -9,9 +9,9 @@ import {
   AsignacionGastoFilters,
   AnalisisRentabilidad,
   Moneda,
-  Persona,
-  Presupuesto
+  Persona
 } from './types';
+import type { Presupuesto as PresupuestoFull } from '@/modules/presupuesto/types'
 
 // ================================
 // GASTOS OPERATIVOS
@@ -182,12 +182,10 @@ export async function fetchProveedores(): Promise<Persona[]> {
   return response.data;
 }
 
-export async function fetchPresupuestosActivos(): Promise<Presupuesto[]> {
-  // Temporalmente devolver array vacío hasta corregir el endpoint
-  // const response = await ApiService.fetchData<Presupuesto[]>({
-  //   url: '/presupuestos?estado=APROBADO,FACTURADO',
-  //   method: 'GET'
-  // });
-  // return response.data;
-  return [];
+export async function fetchPresupuestosActivos(): Promise<PresupuestoFull[]> {
+  const response = await ApiService.fetchData<PresupuestoFull[]>({
+    url: '/presupuestos',
+    method: 'GET'
+  });
+  return response.data as any
 }

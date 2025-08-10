@@ -39,3 +39,29 @@ export async function fetchEmpresas(): Promise<EmpresaDTO[]> {
   const res = await ApiService.fetchData<EmpresaDTO[]>({ url: `/empresas`, method: 'GET' })
   return res.data
 }
+
+export async function fetchKpisMensuales(params?: { desde?: string; hasta?: string }) {
+  const qs = params ? new URLSearchParams(params as any).toString() : ''
+  const query = qs ? `?${qs}` : ''
+  const res = await ApiService.fetchData<{ success: boolean; data: any }>({ url: `/finanzas/kpis-mensuales${query}`, method: 'GET' })
+  return (res.data as any)?.data || (res.data as unknown as any)
+}
+
+export async function fetchCobrosPeriodo(params?: { desde?: string; hasta?: string }) {
+  const qs = params ? new URLSearchParams(params as any).toString() : ''
+  const query = qs ? `?${qs}` : ''
+  const res = await ApiService.fetchData<{ success: boolean; data: any }>({ url: `/finanzas/cobros${query}`, method: 'GET' })
+  return (res.data as any)?.data || (res.data as unknown as any)
+}
+
+export async function crearCobroClienteApi(payload: { presupuestoId: number; monto: number; fecha: string; metodoPago: string; concepto?: string; monedaId?: number }) {
+  const res = await ApiService.fetchData<{ success: boolean; data: any }>({ url: `/finanzas/cobros-cliente`, method: 'POST', data: payload })
+  return (res.data as any)?.data
+}
+
+export async function listarCobrosClienteApi(params?: { presupuestoId?: number; desde?: string; hasta?: string }) {
+  const qs = params ? new URLSearchParams(params as any).toString() : ''
+  const query = qs ? `?${qs}` : ''
+  const res = await ApiService.fetchData<{ success: boolean; data: any[] }>({ url: `/finanzas/cobros-cliente${query}`, method: 'GET' })
+  return (res.data as any)?.data || []
+}

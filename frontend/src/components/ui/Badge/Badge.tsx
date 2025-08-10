@@ -23,7 +23,7 @@ const Badge = forwardRef<HTMLElement, BadgeProps>((props, ref) => {
 
     const dot = typeof content !== 'number' && typeof content !== 'string'
 
-    const badgeClass = classNames(dot ? 'badge-dot' : 'badge', innerClass)
+    const badgeClass = classNames(innerClass)
 
     const renderBadge = () => {
         if (children) {

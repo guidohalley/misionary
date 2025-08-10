@@ -7,7 +7,8 @@ COPY package.json package-lock.json ./
 RUN npm ci
 
 COPY . .
-RUN npm run build
+# Generar Prisma Client con el schema ya copiado y luego compilar TypeScript
+RUN npx prisma generate && npm run build
 
 # Stage 2: Runner (solo dependencias de producción)
 FROM node:20-alpine AS runner

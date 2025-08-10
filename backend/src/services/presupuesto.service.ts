@@ -1,5 +1,4 @@
 import prisma from '../config/prisma';
-import { Presupuesto, EstadoPresupuesto } from '@prisma/client';
 
 export class PresupuestoService {
   static async create(data: {
@@ -68,7 +67,7 @@ export class PresupuestoService {
           impuestos: data.impuestos,
           total: data.total,
           monedaId: data.monedaId || 1,
-          estado: EstadoPresupuesto.BORRADOR,
+          estado: 'BORRADOR' as any,
           items: {
             create: data.items
           },
@@ -81,6 +80,7 @@ export class PresupuestoService {
         },
         include: {
           cliente: true,
+          empresa: true,
           moneda: true,
           items: {
             include: {
@@ -125,6 +125,7 @@ export class PresupuestoService {
         where: { id: presupuesto.id },
         include: {
           cliente: true,
+          empresa: true,
           moneda: true,
           items: {
             include: {
@@ -153,6 +154,7 @@ export class PresupuestoService {
       where: { id },
       include: {
         cliente: true,
+  empresa: true,
         moneda: true,
         items: {
           include: {
@@ -165,17 +167,18 @@ export class PresupuestoService {
             impuesto: true
           }
         },
-        factura: true
+  facturas: true
       }
     });
   }
 
-  static async update(id: number, data: Partial<Presupuesto>) {
+  static async update(id: number, data: any) {
     return prisma.presupuesto.update({
       where: { id },
       data,
       include: {
         cliente: true,
+  empresa: true,
         moneda: true,
         items: {
           include: {
@@ -192,10 +195,10 @@ export class PresupuestoService {
     });
   }
 
-  static async updateEstado(id: number, estado: EstadoPresupuesto) {
+  static async updateEstado(id: number, estado: string) {
     return prisma.presupuesto.update({
       where: { id },
-      data: { estado }
+      data: { estado: estado as any }
     });
   }
 
@@ -205,15 +208,16 @@ export class PresupuestoService {
     });
   }
 
-  static async findAll(clienteId?: number, estado?: EstadoPresupuesto) {
+  static async findAll(clienteId?: number, estado?: string) {
     const where: any = {};
     if (clienteId) where.clienteId = clienteId;
-    if (estado) where.estado = estado;
+  if (estado) where.estado = estado as any;
 
     return prisma.presupuesto.findMany({
       where,
       include: {
         cliente: true,
+  empresa: true,
         moneda: true,
         items: {
           include: {

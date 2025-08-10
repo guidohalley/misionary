@@ -12,12 +12,11 @@ export enum EstadoPresupuesto {
 export const itemSchema = z.object({
   productoId: z.number().optional(),
   servicioId: z.number().optional(),
-  cantidad: z.number()
+  cantidad: z.coerce.number()
     .min(1, 'La cantidad debe ser mayor a 0')
     .int('La cantidad debe ser un número entero'),
-  precioUnitario: z.number()
-    .min(0, 'El precio debe ser mayor o igual a 0')
-    .positive('El precio debe ser positivo'),
+  precioUnitario: z.coerce.number()
+    .nonnegative('El precio debe ser mayor o igual a 0'),
 }).refine(
   (data) => data.productoId || data.servicioId,
   {
@@ -35,9 +34,7 @@ export const presupuestoSchema = z.object({
   items: z.array(itemSchema)
     .min(1, 'Debe agregar al menos un item'),
   
-  impuestosSeleccionados: z.array(z.number())
-    .min(1, 'Debe seleccionar al menos un impuesto')
-    .optional(),
+  impuestosSeleccionados: z.array(z.number()).default([]),
   
   monedaId: z.number()
     .int('Debe seleccionar una moneda')

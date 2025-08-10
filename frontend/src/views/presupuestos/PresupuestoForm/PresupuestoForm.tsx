@@ -405,7 +405,10 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
                               min="1"
                               placeholder="1"
                               disabled={isSubmitting}
-                              onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
+                              onChange={(e) => {
+                                const val = Number(e.target.value)
+                                field.onChange(Number.isFinite(val) && val > 0 ? Math.floor(val) : 1)
+                              }}
                             />
                           )}
                         />
@@ -428,7 +431,10 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
                               min="0"
                               placeholder="0.00"
                               disabled={isSubmitting}
-                              onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                              onChange={(e) => {
+                                const val = Number(e.target.value)
+                                field.onChange(Number.isFinite(val) && val >= 0 ? val : 0)
+                              }}
                             />
                           )}
                         />

@@ -15,6 +15,8 @@ import historialPrecioRoutes from './routes/historialPrecio.routes';
 import empresaRoutes from './routes/empresa.routes';
 import { gastoRoutes } from './routes/gasto.routes';
 import healthRoutes from './routes/health.routes';
+import reciboRoutes from './routes/recibo.routes';
+import finanzasRoutes from './routes/finanzas.routes';
 
 const app = express();
 
@@ -36,6 +38,8 @@ app.use('/api/monedas', monedaRoutes);
 app.use('/api/historial-precios', historialPrecioRoutes);
 app.use('/api/empresas', empresaRoutes);
 app.use('/api/gastos-operativos', gastoRoutes);
+app.use('/api/recibos', reciboRoutes);
+app.use('/api/finanzas', finanzasRoutes);
 app.use('/api/health', healthRoutes);
 
 // Error handling

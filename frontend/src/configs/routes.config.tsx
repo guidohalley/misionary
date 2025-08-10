@@ -31,6 +31,11 @@ const HistorialPrecioView = lazy(() => import('@/views/historialPrecio'));
 const EmpresasView = lazy(() => import('@/views/empresas'));
 const EmpresaNew = lazy(() => import('@/views/empresas/EmpresaNew'));
 const EmpresaEdit = lazy(() => import('@/views/empresas/EmpresaEdit'));
+const FinanzasList = lazy(() => import('@/views/finanzas/FinanzasList'));
+const FinanzasResumen = lazy(() => import('@/views/finanzas/FinanzasResumen'));
+const RecibosView = lazy(() => import('@/views/recibos'));
+const ReciboNew = lazy(() => import('@/views/recibos/ReciboNew'));
+const RentabilidadMain = lazy(() => import('@/views/rentabilidad/RentabilidadMain'));
 
 const publicRoutes = [
   {
@@ -157,9 +162,19 @@ const protectedRoutes = [
     component: GastosView,
   },
   {
+    key: 'rentabilidad',
+    path: '/gastos/rentabilidad',
+    component: RentabilidadMain,
+  },
+  {
     key: 'gasto-new',
     path: '/gastos/new',
     component: GastoNew,
+  },
+  {
+    key: 'recibo-new',
+    path: '/recibos/new',
+    component: ReciboNew,
   },
   {
     key: 'historial-precios',
@@ -180,6 +195,22 @@ const protectedRoutes = [
     key: 'empresa-edit',
     path: '/empresas/edit/:id',
     component: EmpresaEdit,
+  }
+  ,
+  {
+    key: 'finanzas',
+    path: '/finanzas',
+    component: FinanzasList,
+  },
+  {
+    key: 'finanzas-detalle',
+    path: '/finanzas/:id',
+    component: FinanzasResumen,
+  },
+  {
+    key: 'recibos',
+    path: '/recibos',
+    component: RecibosView,
   }
 ];
 
