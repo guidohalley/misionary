@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useForm, Controller, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Card, Button, FormItem, FormContainer, Input, Select, Notification, toast, Checkbox } from '@/components/ui';
+import { Card, Button, FormItem, FormContainer, Input, Select, Notification, toast, Checkbox, DatePicker } from '@/components/ui';
 import { HiOutlinePlus, HiOutlineTrash } from 'react-icons/hi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { presupuestoSchema } from '../schemas';
@@ -29,6 +29,7 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [impuestosSeleccionados, setImpuestosSeleccionados] = useState<Impuesto[]>([]);
+  const [vigenciaPreset, setVigenciaPreset] = useState<'NONE' | '3M' | '6M' | '1Y'>('NONE')
   
   const { personas, refreshPersonas } = usePersona();
   const { productos, refreshProductos } = useProducto();
@@ -52,6 +53,8 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
       items: [{ cantidad: 1, precioUnitario: 0 }],
       impuestosSeleccionados: [],
       monedaId: 1, // ARS por defecto
+      periodoInicio: undefined,
+      periodoFin: undefined,
     },
   });
 
@@ -67,6 +70,34 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
     watchItems, 
     impuestosSeleccionados
   );
+
+  // Helpers para fechas y presets de vigencia
+  const watchPeriodoInicio = watch('periodoInicio')
+  const toYMD = (d: Date) => d.toISOString().split('T')[0]
+  const addMonths = (d: Date, months: number) => {
+    const dt = new Date(d)
+    const day = dt.getDate()
+    dt.setMonth(dt.getMonth() + months)
+    // Ajuste de fin de mes para evitar desbordes (30->31 etc.)
+    if (dt.getDate() < day) {
+      dt.setDate(0)
+    }
+    return dt
+  }
+
+  useEffect(() => {
+    if (vigenciaPreset === 'NONE') return
+    // Si no hay periodoInicio, poner hoy por defecto
+    let base = watchPeriodoInicio ? new Date(watchPeriodoInicio) : new Date()
+    if (!watchPeriodoInicio) {
+      setValue('periodoInicio', toYMD(base))
+    }
+    let fin = base
+    if (vigenciaPreset === '3M') fin = addMonths(base, 3)
+    if (vigenciaPreset === '6M') fin = addMonths(base, 6)
+    if (vigenciaPreset === '1Y') fin = addMonths(base, 12)
+    setValue('periodoFin', toYMD(fin))
+  }, [vigenciaPreset, watchPeriodoInicio, setValue])
 
   useEffect(() => {
     refreshPersonas();
@@ -96,7 +127,13 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
 
   useEffect(() => {
     if (initialData) {
-      reset(initialData);
+      // Normalizar fechas ISO a YYYY-MM-DD para inputs type=date
+      const norm = (d?: string) => (d ? new Date(d).toISOString().slice(0, 10) : undefined)
+      reset({
+        ...initialData,
+        periodoInicio: norm((initialData as any).periodoInicio),
+        periodoFin: norm((initialData as any).periodoFin),
+      });
     }
   }, [initialData, reset]);
 
@@ -114,7 +151,10 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
         items: data.items.map(item => ({
           ...item,
           precioUnitario: item.precioUnitario
-        }))
+        })),
+        // Normalizar fechas a ISO si vienen como string YYYY-MM-DD
+        periodoInicio: data.periodoInicio ? new Date(data.periodoInicio).toISOString() : undefined,
+        periodoFin: data.periodoFin ? new Date(data.periodoFin).toISOString() : undefined,
       };
 
       await onSubmit(dataWithTotals);
@@ -245,6 +285,84 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
                   )}
                 />
               </FormItem>
+
+              {/* Rango de vigencia */}
+              <div className="grid grid-cols-2 gap-4">
+                <FormItem
+                  label="Vigencia desde"
+                  invalid={!!errors.periodoInicio}
+                  errorMessage={errors.periodoInicio?.message}
+                >
+                  <Controller
+                    name="periodoInicio"
+                    control={control}
+                    render={({ field }) => (
+                      <Input
+                        {...field}
+                        type="date"
+                        disabled={isSubmitting}
+                      />
+                    )}
+                  />
+                </FormItem>
+                <FormItem
+                  label="Vigencia hasta"
+                  invalid={!!errors.periodoFin}
+                  errorMessage={errors.periodoFin?.message}
+                >
+                  <Controller
+                    name="periodoFin"
+                    control={control}
+                    render={({ field }) => (
+                      <Input
+                        {...field}
+                        type="date"
+                        disabled={isSubmitting || vigenciaPreset !== 'NONE'}
+                      />
+                    )}
+                  />
+                </FormItem>
+              </div>
+
+              {/* Presets de duración */}
+              <div className="mb-2">
+                <div className="text-sm text-gray-700 mb-2">Duración rápida</div>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    variant={vigenciaPreset === 'NONE' ? 'solid' : 'twoTone'}
+                    className={vigenciaPreset === 'NONE' ? 'bg-gray-600 text-white' : ''}
+                    onClick={() => setVigenciaPreset('NONE')}
+                  >
+                    Sin vigencia
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={vigenciaPreset === '3M' ? 'solid' : 'twoTone'}
+                    className={vigenciaPreset === '3M' ? 'bg-blue-600 text-white' : ''}
+                    onClick={() => setVigenciaPreset('3M')}
+                  >
+                    3 meses
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={vigenciaPreset === '6M' ? 'solid' : 'twoTone'}
+                    className={vigenciaPreset === '6M' ? 'bg-blue-600 text-white' : ''}
+                    onClick={() => setVigenciaPreset('6M')}
+                  >
+                    6 meses
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={vigenciaPreset === '1Y' ? 'solid' : 'twoTone'}
+                    className={vigenciaPreset === '1Y' ? 'bg-blue-600 text-white' : ''}
+                    onClick={() => setVigenciaPreset('1Y')}
+                  >
+                    1 año
+                  </Button>
+                </div>
+                <div className="text-xs text-gray-500 mt-1">Se calcula a partir de "Vigencia desde".</div>
+              </div>
 
               {/* Impuestos */}
               <div>

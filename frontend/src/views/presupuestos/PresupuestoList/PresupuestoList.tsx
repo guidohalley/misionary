@@ -170,8 +170,8 @@ const PresupuestoList: React.FC<PresupuestoListProps> = ({ className }) => {
               className="w-64"
             />
             <Select
-              value={estadoFilter}
-              onChange={setEstadoFilter}
+              value={estadoFilter ? { value: estadoFilter, label: estadoFilter } : { value: '', label: 'Todos los estados' }}
+              onChange={(opt: any) => setEstadoFilter(opt?.value || '')}
               options={[
                 { value: '', label: 'Todos los estados' },
                 { value: EstadoPresupuesto.BORRADOR, label: 'Borrador' },
@@ -181,8 +181,8 @@ const PresupuestoList: React.FC<PresupuestoListProps> = ({ className }) => {
               ]}
             />
             <Select
-              value={pageSize}
-              onChange={setPageSize}
+              value={{ value: pageSize, label: `${pageSize} por página` }}
+              onChange={(opt: any) => setPageSize(opt?.value || 10)}
               options={[
                 { value: 10, label: '10 por página' },
                 { value: 25, label: '25 por página' },
@@ -204,6 +204,7 @@ const PresupuestoList: React.FC<PresupuestoListProps> = ({ className }) => {
                 <th className="text-left py-3 px-4 font-semibold text-gray-700">Total</th>
                 <th className="text-left py-3 px-4 font-semibold text-gray-700">Estado</th>
                 <th className="text-left py-3 px-4 font-semibold text-gray-700">Fecha</th>
+                <th className="text-left py-3 px-4 font-semibold text-gray-700">Vigencia</th>
                 <th className="text-center py-3 px-4 font-semibold text-gray-700">Acciones</th>
               </tr>
             </thead>
@@ -239,6 +240,15 @@ const PresupuestoList: React.FC<PresupuestoListProps> = ({ className }) => {
                       <div className="text-gray-600">
                         {new Date(presupuesto.createdAt).toLocaleDateString('es-AR')}
                       </div>
+                    </td>
+                    <td className="py-3 px-4">
+                      {presupuesto.periodoInicio ? (
+                        <div className="text-gray-600">
+                          {new Date(presupuesto.periodoInicio).toLocaleDateString('es-AR')} {presupuesto.periodoFin ? `→ ${new Date(presupuesto.periodoFin).toLocaleDateString('es-AR')}` : ''}
+                        </div>
+                      ) : (
+                        <div className="text-gray-400">-</div>
+                      )}
                     </td>
                     <td className="py-3 px-4">
                       <div className="flex justify-center space-x-2">

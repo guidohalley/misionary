@@ -42,6 +42,8 @@ export interface Presupuesto {
   moneda: Moneda;
   presupuestoImpuestos: PresupuestoImpuesto[];
   tipoCambioFecha?: string;
+  periodoInicio?: string;
+  periodoFin?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -61,6 +63,8 @@ export interface CreatePresupuestoDTO {
   total: number;
   impuestosSeleccionados?: number[];
   monedaId?: number;
+  periodoInicio?: string; // ISO o YYYY-MM-DD
+  periodoFin?: string;    // ISO o YYYY-MM-DD
 }
 
 export interface UpdatePresupuestoDTO {
@@ -72,6 +76,8 @@ export interface UpdatePresupuestoDTO {
   estado?: EstadoPresupuesto;
   impuestosSeleccionados?: number[];
   monedaId?: number;
+  periodoInicio?: string;
+  periodoFin?: string;
 }
 
 export const estadoPresupuestoOptions = [

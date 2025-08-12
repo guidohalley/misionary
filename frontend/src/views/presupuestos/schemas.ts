@@ -25,8 +25,8 @@ export const itemSchema = z.object({
   }
 );
 
-// Schema de validación principal
-export const presupuestoSchema = z.object({
+// Schema base para creación (todos requeridos salvo opcionales)
+const createBase = z.object({
   clienteId: z.number()
     .int('Debe seleccionar un cliente')
     .positive('Debe seleccionar un cliente válido'),
@@ -34,21 +34,62 @@ export const presupuestoSchema = z.object({
   items: z.array(itemSchema)
     .min(1, 'Debe agregar al menos un item'),
   
-  impuestosSeleccionados: z.array(z.number()).default([]),
+  impuestosSeleccionados: z.array(z.number()).optional(),
   
   monedaId: z.number()
     .int('Debe seleccionar una moneda')
     .positive('Debe seleccionar una moneda válida')
     .optional(),
+  // Fechas como string (YYYY-MM-DD o ISO). Se validan más abajo.
+  periodoInicio: z.string().optional(),
+  periodoFin: z.string().optional(),
   
   estado: z.nativeEnum(EstadoPresupuesto).optional(),
 });
+
+// Efectos/refinements para create
+const createPresupuestoSchemaInternal = createBase
+  .refine((data) => {
+    if (data.periodoInicio && data.periodoFin) {
+      return new Date(data.periodoInicio) <= new Date(data.periodoFin);
+    }
+    return true;
+  }, {
+    message: 'La fecha desde debe ser anterior o igual a la fecha hasta',
+    path: ['periodoFin']
+  }).refine((data) => {
+    // Si están presentes, deben ser fechas válidas
+    const valid = (v?: string) => !v || !isNaN(new Date(v).getTime());
+    return valid(data.periodoInicio) && valid(data.periodoFin);
+  }, {
+    message: 'Fecha inválida',
+    path: ['periodoInicio']
+  });
+
+// Schema de validación principal (create) para formularios
+export const presupuestoSchema = createPresupuestoSchemaInternal;
 
 // Schema para creación
 export const createPresupuestoSchema = presupuestoSchema;
 
 // Schema para actualización
-export const updatePresupuestoSchema = presupuestoSchema.partial();
+const updateBase = createBase.partial();
+export const updatePresupuestoSchema = updateBase
+  .refine((data) => {
+    if (data.periodoInicio && data.periodoFin) {
+      return new Date(data.periodoInicio) <= new Date(data.periodoFin);
+    }
+    return true;
+  }, {
+    message: 'La fecha desde debe ser anterior o igual a la fecha hasta',
+    path: ['periodoFin']
+  }).refine((data) => {
+    const valid = (v?: string) => !v || !isNaN(new Date(v).getTime());
+    return valid(data.periodoInicio) && valid(data.periodoFin);
+  }, {
+    message: 'Fecha inválida',
+    path: ['periodoInicio']
+  });
 
 export type CreatePresupuestoFormData = z.infer<typeof createPresupuestoSchema>;
 export type UpdatePresupuestoFormData = z.infer<typeof updatePresupuestoSchema>;

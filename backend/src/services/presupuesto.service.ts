@@ -14,6 +14,8 @@ export class PresupuestoService {
     total: number;
     impuestosSeleccionados?: number[];
     monedaId?: number;
+  periodoInicio?: string | Date;
+  periodoFin?: string | Date;
   }) {
     try {
       console.log('PresupuestoService.create - Input data:', JSON.stringify(data, null, 2));
@@ -68,6 +70,9 @@ export class PresupuestoService {
           total: data.total,
           monedaId: data.monedaId || 1,
           estado: 'BORRADOR' as any,
+          // Vigencia del presupuesto (opcional)
+          periodoInicio: data.periodoInicio ? new Date(data.periodoInicio) : undefined,
+          periodoFin: data.periodoFin ? new Date(data.periodoFin) : undefined,
           items: {
             create: data.items
           },
@@ -167,7 +172,7 @@ export class PresupuestoService {
             impuesto: true
           }
         },
-  facturas: true
+          facturas: true
       }
     });
   }
@@ -229,7 +234,7 @@ export class PresupuestoService {
           include: {
             impuesto: true
           }
-        }
+  }
       }
     });
   }
