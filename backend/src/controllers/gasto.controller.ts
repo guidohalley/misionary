@@ -35,7 +35,7 @@ export class GastoController {
       if (categoria) filters.categoria = categoria as CategoriaGasto;
       if (proveedorId) filters.proveedorId = parseInt(proveedorId as string);
       if (monedaId) filters.monedaId = parseInt(monedaId as string);
-      if (fechaDesde) filters.fechaDesde = new Date(fechaDesde as string);
+  if (fechaDesde) filters.fechaDesde = new Date(fechaDesde as string);
       if (fechaHasta) filters.fechaHasta = new Date(fechaHasta as string);
       if (esRecurrente !== undefined) filters.esRecurrente = esRecurrente === 'true';
       if (activo !== undefined) filters.activo = activo === 'true';
@@ -140,7 +140,7 @@ export class GastoController {
       // Convertir tipos si es necesario
       if (updateData.monto) updateData.monto = parseFloat(updateData.monto);
       if (updateData.monedaId) updateData.monedaId = parseInt(updateData.monedaId);
-      if (updateData.proveedorId) updateData.proveedorId = parseInt(updateData.proveedorId);
+  if (updateData.proveedorId) updateData.proveedorId = parseInt(updateData.proveedorId);
       if (updateData.fecha) updateData.fecha = new Date(updateData.fecha);
 
       const gastoActualizado = await gastoService.updateGastoOperativo(parseInt(id), updateData);

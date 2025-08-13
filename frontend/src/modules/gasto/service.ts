@@ -9,7 +9,8 @@ import {
   AsignacionGastoFilters,
   AnalisisRentabilidad,
   Moneda,
-  Persona
+  Persona,
+  TipoGasto
 } from './types';
 import type { Presupuesto as PresupuestoFull } from '@/modules/presupuesto/types'
 
@@ -188,4 +189,16 @@ export async function fetchPresupuestosActivos(): Promise<PresupuestoFull[]> {
     method: 'GET'
   });
   return response.data as any
+}
+
+// ================================
+// TIPOS DE GASTO
+// ================================
+
+export async function fetchTiposGasto(): Promise<TipoGasto[]> {
+  const response = await ApiService.fetchData<{success: boolean, data: TipoGasto[]}>({
+    url: '/tipos-gasto',
+    method: 'GET'
+  });
+  return response.data.data;
 }

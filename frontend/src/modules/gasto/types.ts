@@ -7,6 +7,7 @@ export interface GastoOperativo {
   monedaId: number;
   fecha: Date;
   categoria: string;
+  tipoId?: number;
   esRecurrente: boolean;
   frecuencia?: string;
   proveedorId?: number;
@@ -20,6 +21,7 @@ export interface GastoOperativo {
   moneda: Moneda;
   proveedor?: Persona;
   asignaciones: AsignacionGastoProyecto[];
+  tipo?: TipoGasto;
 }
 
 export interface AsignacionGastoProyecto {
@@ -76,6 +78,7 @@ export interface CreateGastoOperativoDTO extends Record<string, unknown> {
   monedaId: number;
   fecha: Date;
   categoria: string;
+  tipoId?: number;
   esRecurrente?: boolean;
   frecuencia?: string;
   proveedorId?: number;
@@ -148,4 +151,13 @@ export interface PaginatedResponse<T> extends ApiResponse<T[]> {
     total: number;
     totalPages: number;
   };
+}
+
+export interface TipoGasto {
+  id: number;
+  nombre: string;
+  slug: string;
+  color?: string | null;
+  descripcion?: string | null;
+  activo: boolean;
 }

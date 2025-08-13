@@ -12,11 +12,15 @@ import type {
 
 export class MonedaService {
   /**
-   * Obtener todas las monedas activas
-   */
-  static async fetchMonedas(): Promise<Moneda[]> {
-    const response = await ApiService.fetchData<ApiResponse<Moneda[]>>({
-      url: '/monedas',
+  static async fetchTipoCambioActual(
+    monedaDesde: CodigoMoneda, 
+    monedaHacia: CodigoMoneda,
+    tipo?: 'OFICIAL' | 'BLUE' | 'TARJETA'
+  ): Promise<TipoCambio> {
+    const qs = tipo ? `?tipo=${tipo}` : '';
+    const response = await ApiService.fetchData<ApiResponse<TipoCambio>>({
+      url: `/monedas/tipo-cambio/${monedaDesde}/${monedaHacia}${qs}`,
+      method: 'GET'
       method: 'GET'
     });
     return response.data.data;
@@ -38,10 +42,12 @@ export class MonedaService {
    */
   static async fetchTipoCambioActual(
     monedaDesde: CodigoMoneda, 
-    monedaHacia: CodigoMoneda
+    monedaHacia: CodigoMoneda,
+    tipo?: import('./types').TipoCotizacion
   ): Promise<TipoCambio> {
+    const qs = tipo ? `?tipo=${tipo}` : ''
     const response = await ApiService.fetchData<ApiResponse<TipoCambio>>({
-      url: `/monedas/tipo-cambio/${monedaDesde}/${monedaHacia}`,
+      url: `/monedas/tipo-cambio/${monedaDesde}/${monedaHacia}${qs}`,
       method: 'GET'
     });
     return response.data.data;

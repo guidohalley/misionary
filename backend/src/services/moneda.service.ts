@@ -1,4 +1,4 @@
-import { PrismaClient, Moneda, TipoCambio, CodigoMoneda } from '@prisma/client';
+import { PrismaClient, Moneda, TipoCambio, CodigoMoneda, TipoCotizacion } from '@prisma/client';
 import { Decimal } from '@prisma/client/runtime/library';
 
 const prisma = new PrismaClient();
@@ -37,12 +37,14 @@ export class MonedaService {
    */
   static async getTipoCambioActual(
     monedaDesdeId: number,
-    monedaHaciaId: number
+    monedaHaciaId: number,
+    tipo: TipoCotizacion = 'OFICIAL'
   ): Promise<TipoCambio | null> {
     return await prisma.tipoCambio.findFirst({
       where: {
         monedaDesdeId,
-        monedaHaciaId
+        monedaHaciaId,
+        tipo
       },
       orderBy: { fecha: 'desc' },
       include: {
@@ -58,7 +60,8 @@ export class MonedaService {
   static async getTipoCambioPorFecha(
     monedaDesdeId: number,
     monedaHaciaId: number,
-    fecha: Date
+    fecha: Date,
+    tipo: TipoCotizacion = 'OFICIAL'
   ): Promise<TipoCambio | null> {
     // Normalizar fecha al inicio del día
     const fechaNormalizada = new Date(fecha);
@@ -66,9 +69,10 @@ export class MonedaService {
 
     return await prisma.tipoCambio.findUnique({
       where: {
-        monedaDesdeId_monedaHaciaId_fecha: {
+        monedaDesdeId_monedaHaciaId_tipo_fecha: {
           monedaDesdeId,
           monedaHaciaId,
+          tipo,
           fecha: fechaNormalizada
         }
       },
@@ -86,7 +90,9 @@ export class MonedaService {
     monedaDesdeId: number,
     monedaHaciaId: number,
     valor: number,
-    fecha: Date = new Date()
+    fecha: Date = new Date(),
+    tipo: TipoCotizacion = 'OFICIAL',
+    fuente?: string
   ): Promise<TipoCambio> {
     // Normalizar fecha al inicio del día
     const fechaNormalizada = new Date(fecha);
@@ -94,20 +100,24 @@ export class MonedaService {
 
     return await prisma.tipoCambio.upsert({
       where: {
-        monedaDesdeId_monedaHaciaId_fecha: {
+        monedaDesdeId_monedaHaciaId_tipo_fecha: {
           monedaDesdeId,
           monedaHaciaId,
+          tipo,
           fecha: fechaNormalizada
         }
       },
       update: {
-        valor: new Decimal(valor)
+        valor: new Decimal(valor),
+        fuente
       },
       create: {
         monedaDesdeId,
         monedaHaciaId,
         valor: new Decimal(valor),
-        fecha: fechaNormalizada
+        fecha: fechaNormalizada,
+        tipo,
+        fuente
       },
       include: {
         monedaDesde: true,
@@ -123,7 +133,8 @@ export class MonedaService {
     monto: number,
     monedaDesdeId: number,
     monedaHaciaId: number,
-    fecha?: Date
+    fecha?: Date,
+    tipo: TipoCotizacion = 'OFICIAL'
   ): Promise<{ montoConvertido: number; tipoCambio: TipoCambio | null }> {
     // Si es la misma moneda, no hay conversión
     if (monedaDesdeId === monedaHaciaId) {
@@ -136,9 +147,9 @@ export class MonedaService {
     let tipoCambio: TipoCambio | null;
 
     if (fecha) {
-      tipoCambio = await this.getTipoCambioPorFecha(monedaDesdeId, monedaHaciaId, fecha);
+      tipoCambio = await this.getTipoCambioPorFecha(monedaDesdeId, monedaHaciaId, fecha, tipo);
     } else {
-      tipoCambio = await this.getTipoCambioActual(monedaDesdeId, monedaHaciaId);
+      tipoCambio = await this.getTipoCambioActual(monedaDesdeId, monedaHaciaId, tipo);
     }
 
     if (!tipoCambio) {
@@ -212,6 +223,8 @@ export class MonedaService {
       monedaDesde: CodigoMoneda;
       monedaHacia: CodigoMoneda;
       valor: number;
+      tipo?: TipoCotizacion;
+      fuente?: string;
     }>,
     fecha: Date = new Date()
   ): Promise<TipoCambio[]> {
@@ -227,7 +240,9 @@ export class MonedaService {
           monedaDesde.id,
           monedaHacia.id,
           tipoCambio.valor,
-          fecha
+          fecha,
+          tipoCambio.tipo || 'OFICIAL',
+          tipoCambio.fuente
         );
         resultados.push(resultado);
       }

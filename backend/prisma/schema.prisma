@@ -52,11 +52,16 @@ model TipoCambio {
   monedaHaciaId Int
   valor         Decimal  @db.Decimal(15, 4)
   fecha         DateTime @db.Date
+  // Tipo de cotización (oficial, blue, tarjeta)
+  tipo          TipoCotizacion @default(OFICIAL)
+  // Fuente opcional (ej: dolarapi, bcra, manual)
+  fuente        String?
   createdAt     DateTime @default(now())
   monedaDesde   Moneda   @relation("MonedaOrigen", fields: [monedaDesdeId], references: [id])
   monedaHacia   Moneda   @relation("MonedaDestino", fields: [monedaHaciaId], references: [id])
 
-  @@unique([monedaDesdeId, monedaHaciaId, fecha])
+  @@unique([monedaDesdeId, monedaHaciaId, tipo, fecha])
+  @@index([fecha])
 }
 
 model Persona {
@@ -362,6 +367,12 @@ enum CategoriaGasto {
   TRANSPORTE
   COMUNICACION
   OTROS
+}
+
+enum TipoCotizacion {
+  OFICIAL
+  BLUE
+  TARJETA
 }
 
 enum ReciboTipo {

@@ -15,6 +15,7 @@ import {
 import MoneyInput from '@/components/shared/MoneyInput';
 import { HiOutlineArrowLeft, HiOutlineSave, HiOutlineX, HiOutlineCash } from 'react-icons/hi';
 import { useGasto, useGastoAuxiliarData } from '@/modules/gasto/hooks/useGasto';
+import { fetchTiposGasto } from '@/modules/gasto/service';
 import { CategoriaGasto, categoriasGastoOptions, frecuenciaOptions } from '../schemas';
 
 const GastoNew: React.FC = () => {
@@ -30,6 +31,7 @@ const GastoNew: React.FC = () => {
     monedaId: 1,
     fecha: new Date(),
     categoria: '' as CategoriaGasto | '',
+    tipoId: undefined as number | undefined,
     esRecurrente: false,
     frecuencia: '',
     proveedorId: undefined as number | undefined,
@@ -37,6 +39,13 @@ const GastoNew: React.FC = () => {
     observaciones: '',
     activo: true
   });
+  const [tipos, setTipos] = useState<{value:number,label:string,color?:string}[]>([]);
+
+  React.useEffect(() => {
+    fetchTiposGasto().then(list => {
+      setTipos(list.filter(t=>t.activo).map(t=>({value:t.id,label:t.nombre,color:t.color||undefined})));
+    }).catch(()=>setTipos([]));
+  }, []);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,6 +101,7 @@ const GastoNew: React.FC = () => {
     value: categoria.value,
     label: `${categoria.icon} ${categoria.label}`
   }));
+  const tipoOptions = [{value: undefined as any, label: 'Sin tipo'}, ...tipos];
 
   // Obtener la moneda seleccionada para el MoneyInput
   const selectedMoneda = monedas.find(m => m.id === formData.monedaId);
@@ -170,6 +180,16 @@ const GastoNew: React.FC = () => {
                     isDisabled={isSubmitting}
                     onChange={(option) => setFormData({...formData, categoria: option?.value || ''})}
                     value={categoriaOptions.find(option => option.value === formData.categoria)}
+                  />
+                </FormItem>
+
+                <FormItem label="Tipo (opcional)">
+                  <Select
+                    options={tipoOptions}
+                    placeholder="Selecciona un tipo"
+                    isDisabled={isSubmitting}
+                    onChange={(option) => setFormData({...formData, tipoId: option?.value})}
+                    value={tipoOptions.find(option => option.value === formData.tipoId)}
                   />
                 </FormItem>
 

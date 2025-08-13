@@ -1,6 +1,12 @@
 import { Request, Response } from 'express';
 import { MonedaService } from '../services/moneda.service';
 import { body, param, query, validationResult } from 'express-validator';
+// Tipos de cotización
+enum TipoCotizacion {
+  OFICIAL = 'OFICIAL',
+  BLUE = 'BLUE',
+  TARJETA = 'TARJETA'
+}
 
 // Enum local para validaciones
 enum CodigoMoneda {
@@ -87,7 +93,8 @@ export class MonedaController {
         });
       }
 
-      const { monedaDesde, monedaHacia } = req.params;
+  const { monedaDesde, monedaHacia } = req.params;
+  const { tipo } = req.query;
 
       // Buscar las monedas por código
       const monedaDesdeObj = await MonedaService.getMonedaByCodigo(monedaDesde as CodigoMoneda);
@@ -102,7 +109,8 @@ export class MonedaController {
 
       const tipoCambio = await MonedaService.getTipoCambioActual(
         monedaDesdeObj.id,
-        monedaHaciaObj.id
+        monedaHaciaObj.id,
+        (tipo as TipoCotizacion) || 'OFICIAL'
       );
 
       if (!tipoCambio) {
@@ -142,7 +150,7 @@ export class MonedaController {
         });
       }
 
-      const { monto, monedaDesde, monedaHacia, fecha } = req.body;
+  const { monto, monedaDesde, monedaHacia, fecha, tipo } = req.body;
 
       // Buscar las monedas por código
       const monedaDesdeObj = await MonedaService.getMonedaByCodigo(monedaDesde);
@@ -160,7 +168,8 @@ export class MonedaController {
         parseFloat(monto),
         monedaDesdeObj.id,
         monedaHaciaObj.id,
-        fechaConversion
+        fechaConversion,
+        (tipo as any) || 'OFICIAL'
       );
 
   return res.json({
@@ -200,7 +209,7 @@ export class MonedaController {
         });
       }
 
-      const { monedaDesde, monedaHacia, valor, fecha } = req.body;
+  const { monedaDesde, monedaHacia, valor, fecha, tipo, fuente } = req.body;
 
       // Buscar las monedas por código
       const monedaDesdeObj = await MonedaService.getMonedaByCodigo(monedaDesde);
@@ -218,7 +227,9 @@ export class MonedaController {
         monedaDesdeObj.id,
         monedaHaciaObj.id,
         parseFloat(valor),
-        fechaTipoCambio
+        fechaTipoCambio,
+        (tipo as any) || 'OFICIAL',
+        fuente
       );
 
   return res.json({
@@ -342,7 +353,11 @@ export const validarTipoCambioParams = [
     .withMessage('Código de moneda origen inválido'),
   param('monedaHacia')
     .isIn(['ARS', 'USD', 'EUR'])
-    .withMessage('Código de moneda destino inválido')
+    .withMessage('Código de moneda destino inválido'),
+  query('tipo')
+    .optional()
+    .isIn(['OFICIAL', 'BLUE', 'TARJETA'])
+    .withMessage('Tipo de cotización inválido')
 ];
 
 export const validarConversionBody = [
@@ -360,7 +375,11 @@ export const validarConversionBody = [
   body('fecha')
     .optional()
     .isISO8601()
-    .withMessage('La fecha debe tener formato ISO8601')
+    .withMessage('La fecha debe tener formato ISO8601'),
+  body('tipo')
+    .optional()
+    .isIn(['OFICIAL', 'BLUE', 'TARJETA'])
+    .withMessage('Tipo de cotización inválido')
 ];
 
 export const validarTipoCambioBody = [
@@ -378,7 +397,14 @@ export const validarTipoCambioBody = [
   body('fecha')
     .optional()
     .isISO8601()
-    .withMessage('La fecha debe tener formato ISO8601')
+    .withMessage('La fecha debe tener formato ISO8601'),
+  body('tipo')
+    .optional()
+    .isIn(['OFICIAL', 'BLUE', 'TARJETA'])
+    .withMessage('Tipo de cotización inválido'),
+  body('fuente')
+    .optional()
+    .isString()
 ];
 
 export const validarActualizacionMasiva = [

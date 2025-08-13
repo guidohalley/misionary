@@ -5,6 +5,12 @@ export enum CodigoMoneda {
   EUR = 'EUR'
 }
 
+export enum TipoCotizacion {
+  OFICIAL = 'OFICIAL',
+  BLUE = 'BLUE',
+  TARJETA = 'TARJETA',
+}
+
 // Tipos de dominio
 export interface Moneda {
   id: number;
@@ -25,6 +31,8 @@ export interface TipoCambio {
   createdAt: string;
   monedaDesde: Moneda;
   monedaHacia: Moneda;
+  tipo?: TipoCotizacion;
+  fuente?: string | null;
 }
 
 // DTOs para API
@@ -33,6 +41,7 @@ export interface ConversionRequest {
   monedaDesde: CodigoMoneda;
   monedaHacia: CodigoMoneda;
   fecha?: string;
+  tipo?: TipoCotizacion;
 }
 
 export interface ConversionResponse {
@@ -49,6 +58,8 @@ export interface TipoCambioRequest {
   monedaHacia: CodigoMoneda;
   valor: number;
   fecha?: string;
+  tipo?: TipoCotizacion;
+  fuente?: string;
 }
 
 export interface ActualizacionMasivaRequest {
@@ -56,6 +67,8 @@ export interface ActualizacionMasivaRequest {
     monedaDesde: CodigoMoneda;
     monedaHacia: CodigoMoneda;
     valor: number;
+  tipo?: TipoCotizacion;
+  fuente?: string;
   }>;
   fecha?: string;
 }

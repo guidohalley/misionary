@@ -67,7 +67,7 @@ class GastoService {
       }
     }
 
-    return await prisma.gastoOperativo.findMany({
+  return await prisma.gastoOperativo.findMany({
       where,
       include: {
         moneda: true,
@@ -100,7 +100,7 @@ class GastoService {
   }
 
   async getGastoOperativoById(id: number) {
-    const gasto = await prisma.gastoOperativo.findUnique({
+  const gasto = await prisma.gastoOperativo.findUnique({
       where: { id },
       include: {
         moneda: true,
@@ -158,7 +158,7 @@ class GastoService {
       }
     }
 
-    return await prisma.gastoOperativo.create({
+  return await prisma.gastoOperativo.create({
       data: {
         concepto: data.concepto,
         descripcion: data.descripcion,
@@ -181,7 +181,7 @@ class GastoService {
             email: true,
             telefono: true
           }
-        }
+  }
       }
     });
   }
@@ -216,7 +216,7 @@ class GastoService {
       }
     }
 
-    return await prisma.gastoOperativo.update({
+  return await prisma.gastoOperativo.update({
       where: { id },
       data,
       include: {
@@ -228,7 +228,7 @@ class GastoService {
             email: true,
             telefono: true
           }
-        }
+  }
       }
     });
   }
@@ -465,7 +465,7 @@ class GastoService {
       }
     });
 
-    const totalPorMoneda = asignaciones.reduce((acc, asignacion) => {
+  const totalPorMoneda = asignaciones.reduce((acc: any, asignacion: any) => {
       const codigoMoneda = asignacion.gasto.moneda.codigo;
       if (!acc[codigoMoneda]) {
         acc[codigoMoneda] = {
