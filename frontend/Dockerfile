@@ -10,8 +10,8 @@ COPY package.json package-lock.json ./
 # Usar npm install simple en Alpine - esto funciona sin problemas
 RUN npm install
 
-# Instalar binarios específicos para Alpine/musl (Rollup + TailwindCSS)
-RUN npm install @rollup/rollup-linux-x64-musl @tailwindcss/oxide-linux-x64-musl --force
+# Instalar binarios específicos para Alpine/musl (Rollup + TailwindCSS + LightningCSS)
+RUN npm install @rollup/rollup-linux-x64-musl @tailwindcss/oxide-linux-x64-musl lightningcss-linux-x64-musl --force
 
 COPY . .
 
