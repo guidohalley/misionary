@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
 import { PersonaService } from '../services/persona.service';
 import bcrypt from 'bcrypt';
+import { RolUsuario } from '@prisma/client';
+import { body, validationResult } from 'express-validator';
 
 export class PersonaController {
   static async create(req: Request, res: Response) {
@@ -61,10 +63,18 @@ export class PersonaController {
     try {
       const id = parseInt(req.params.id);
       const { password, tipo, roles, ...rest } = req.body;
+      const currentUser = (req as any).user;
       
-      console.log('Datos recibidos para actualizar persona:', { id, body: req.body });
+      console.log('Datos recibidos para actualizar persona:', { id, body: req.body, updatedBy: currentUser.id });
       
       let updateData: any = rest;
+      
+      // Solo ADMIN puede cambiar tipos y roles
+      if (!currentUser.roles.includes('ADMIN')) {
+        return res.status(403).json({ 
+          error: 'Solo los administradores pueden actualizar usuarios' 
+        });
+      }
       
       // Si se está cambiando el tipo, actualizar esUsuario y roles
       if (tipo) {
@@ -75,26 +85,50 @@ export class PersonaController {
         if (tipo === 'CLIENTE') {
           updateData.roles = [];
         } else if (tipo === 'PROVEEDOR') {
-          updateData.roles = ['PROVEEDOR'];
+          // Para proveedores, permitir roles adicionales si se especifican
+          // Por ejemplo, un proveedor podría también ser contador
+          updateData.roles = roles && roles.length > 0 ? roles : ['PROVEEDOR'];
+          // Asegurar que PROVEEDOR siempre esté incluido
+          if (!updateData.roles.includes('PROVEEDOR')) {
+            updateData.roles.push('PROVEEDOR');
+          }
         } else if (tipo === 'INTERNO') {
-          updateData.roles = roles || ['ADMIN'];
+          updateData.roles = roles && roles.length > 0 ? roles : ['ADMIN'];
+        }
+      } else if (roles) {
+        // Si no se cambia el tipo pero se especifican roles, actualizarlos
+        // (solo para usuarios que ya son del sistema)
+        const currentPersona = await PersonaService.findById(id);
+        if (currentPersona && currentPersona.esUsuario) {
+          if (currentPersona.tipo === 'PROVEEDOR') {
+            // Asegurar que PROVEEDOR siempre esté incluido
+            updateData.roles = roles.includes('PROVEEDOR') ? roles : [...roles, 'PROVEEDOR'];
+          } else {
+            updateData.roles = roles;
+          }
         }
       }
       
       // Solo procesar contraseña si se proporciona y es un usuario del sistema
-      if (password && (updateData.tipo === 'INTERNO' || updateData.tipo === 'PROVEEDOR')) {
-        const hashedPassword = await bcrypt.hash(password, 10);
-        updateData.password = hashedPassword;
+      if (password) {
+        const currentPersona = await PersonaService.findById(id);
+        if (currentPersona && currentPersona.esUsuario) {
+          const hashedPassword = await bcrypt.hash(password, 10);
+          updateData.password = hashedPassword;
+        }
       }
       
       console.log('Datos para actualizar:', updateData);
       
       const persona = await PersonaService.update(id, updateData);
-  console.log('Persona actualizada:', persona);
-  return res.json(persona);
+      console.log('Persona actualizada:', persona);
+      
+      // No devolver la contraseña en la respuesta
+      const { password: _, ...personaResponse } = persona;
+      return res.json(personaResponse);
     } catch (error) {
       console.error('Error en PersonaController.update:', error);
-  return res.status(500).json({ error: 'Error al actualizar la persona' });
+      return res.status(500).json({ error: 'Error al actualizar la persona' });
     }
   }
 
@@ -136,11 +170,145 @@ export class PersonaController {
         clienteData.password = await bcrypt.hash(cliente.password, 10);
       }
 
-  const result = await PersonaService.createClienteWithEmpresa(clienteData, empresa);
-  return res.status(201).json(result);
+      const result = await PersonaService.createClienteWithEmpresa(clienteData, empresa);
+      return res.status(201).json(result);
     } catch (error) {
       console.error('Error en PersonaController.createClienteWithEmpresa:', error);
-  return res.status(500).json({ error: 'Error al crear el cliente con empresa' });
+      return res.status(500).json({ error: 'Error al crear el cliente con empresa' });
+    }
+  }
+
+  /**
+   * Actualizar roles específicos de un usuario (solo ADMIN)
+   * PATCH /api/personas/:id/roles
+   */
+  static async updateRoles(req: Request, res: Response) {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          error: 'Datos de entrada inválidos',
+          details: errors.array()
+        });
+      }
+
+      const id = parseInt(req.params.id);
+      const { roles } = req.body;
+      const currentUser = (req as any).user;
+      
+      // Solo ADMIN puede actualizar roles
+      if (!currentUser.roles.includes('ADMIN')) {
+        return res.status(403).json({ 
+          error: 'Solo los administradores pueden actualizar roles de usuario' 
+        });
+      }
+
+      const persona = await PersonaService.findById(id);
+      if (!persona) {
+        return res.status(404).json({ error: 'Usuario no encontrado' });
+      }
+
+      if (!persona.esUsuario) {
+        return res.status(400).json({ 
+          error: 'Solo se pueden actualizar roles de usuarios del sistema' 
+        });
+      }
+
+      // Validar roles según el tipo de persona
+      let validatedRoles = roles;
+      if (persona.tipo === 'PROVEEDOR') {
+        // Los proveedores siempre deben tener el rol PROVEEDOR
+        validatedRoles = roles.includes('PROVEEDOR') ? roles : [...roles, 'PROVEEDOR'];
+      }
+
+      const updatedPersona = await PersonaService.update(id, { roles: validatedRoles });
+      
+      // No devolver la contraseña en la respuesta
+      const { password: _, ...personaResponse } = updatedPersona;
+      
+      console.log(`Roles actualizados para usuario ${id}:`, {
+        before: persona.roles,
+        after: validatedRoles,
+        updatedBy: currentUser.id
+      });
+
+      return res.json({
+        success: true,
+        message: 'Roles actualizados correctamente',
+        data: personaResponse
+      });
+    } catch (error) {
+      console.error('Error en PersonaController.updateRoles:', error);
+      return res.status(500).json({ error: 'Error al actualizar los roles del usuario' });
+    }
+  }
+
+  /**
+   * Resetear contraseña de un usuario (solo ADMIN)
+   * POST /api/personas/:id/reset-password
+   */
+  static async resetPassword(req: Request, res: Response) {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          error: 'Datos de entrada inválidos',
+          details: errors.array()
+        });
+      }
+
+      const id = parseInt(req.params.id);
+      const { password } = req.body;
+      const currentUser = (req as any).user;
+      
+      // Solo ADMIN puede resetear contraseñas
+      if (!currentUser.roles.includes('ADMIN')) {
+        return res.status(403).json({ 
+          error: 'Solo los administradores pueden resetear contraseñas' 
+        });
+      }
+
+      const persona = await PersonaService.findById(id);
+      if (!persona) {
+        return res.status(404).json({ error: 'Usuario no encontrado' });
+      }
+
+      if (!persona.esUsuario) {
+        return res.status(400).json({ 
+          error: 'Solo se puede resetear la contraseña de usuarios del sistema' 
+        });
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+      await PersonaService.update(id, { password: hashedPassword });
+      
+      console.log(`Contraseña reseteada para usuario ${id} por admin ${currentUser.id}`);
+
+      return res.json({
+        success: true,
+        message: 'Contraseña reseteada correctamente'
+      });
+    } catch (error) {
+      console.error('Error en PersonaController.resetPassword:', error);
+      return res.status(500).json({ error: 'Error al resetear la contraseña del usuario' });
     }
   }
 }
+
+// Validaciones para los endpoints
+export const validarRoles = [
+  body('roles')
+    .isArray({ min: 1 })
+    .withMessage('Se debe proporcionar al menos un rol'),
+  body('roles.*')
+    .isIn(['ADMIN', 'CONTADOR', 'PROVEEDOR'])
+    .withMessage('Rol inválido. Valores permitidos: ADMIN, CONTADOR, PROVEEDOR')
+];
+
+export const validarResetPassword = [
+  body('password')
+    .isLength({ min: 6 })
+    .withMessage('La contraseña debe tener al menos 6 caracteres')
+    .matches(/^(?=.*[A-Za-z])(?=.*\d)/)
+    .withMessage('La contraseña debe contener al menos una letra y un número')
+];

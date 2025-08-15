@@ -11,6 +11,8 @@ Los proveedores podían ver los precios (costoProveedor, margenAgencia, precio) 
 - **Permisos completos**: Ve todos los productos, servicios y precios
 - **Puede**: Crear, leer, actualizar y eliminar cualquier producto/servicio
 - **Acceso a**: Historial de precios completo de todos los productos/servicios
+- **Gestión de usuarios**: Control total sobre proveedores (editar datos, roles, contraseñas)
+- **Administración avanzada**: Puede asignar roles múltiples y cambiar tipos de usuario
 
 #### CONTADOR
 - **Permisos de lectura completos**: Ve todos los productos, servicios y precios (necesario para análisis financieros)
@@ -23,6 +25,8 @@ Los proveedores podían ver los precios (costoProveedor, margenAgencia, precio) 
   - **Productos/servicios de otros**: Ve información básica SIN precios (costoProveedor, margenAgencia, precio = null)
   - **Solo puede crear/actualizar/eliminar**: Sus propios productos/servicios
   - **Historial de precios**: Solo de sus propios productos/servicios
+- **Roles múltiples**: Un ADMIN puede asignar roles adicionales (ej: PROVEEDOR + CONTADOR)
+- **Gestión por ADMIN**: Los administradores pueden editar todos sus datos y roles
 
 ### 2. Cambios en Controladores
 
