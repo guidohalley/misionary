@@ -2,7 +2,7 @@ FROM node:20-alpine AS builder
 
 # Construcción con Vite
 ARG VITE_API_URL
-ARG CACHEBUST=0
+ARG CACHEBUST=20250815-192339
 
 WORKDIR /app
 

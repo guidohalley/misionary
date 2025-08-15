@@ -3,7 +3,7 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
 
-ARG CACHEBUST=0
+ARG CACHEBUST=20250815-192339
 COPY package.json package-lock.json ./
 # Forzar invalidación de cache de dependencias cuando cambie CACHEBUST
 RUN echo "CACHEBUST=${CACHEBUST}" > /tmp/CACHEBUST && npm ci
@@ -18,7 +18,7 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
-ARG CACHEBUST=0
+ARG CACHEBUST=20250815-192339
 COPY package.json package-lock.json ./
 # Forzar invalidación de cache de dependencias de runtime cuando cambie CACHEBUST
 RUN echo "CACHEBUST=${CACHEBUST}" > /tmp/CACHEBUST && npm ci --omit=dev
