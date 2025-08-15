@@ -5,7 +5,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Card, Button, Input, Select, FormItem, FormContainer, Alert } from '@/components/ui';
 import { usePersona } from '../hooks';
-import { updatePersonaSchema, UpdatePersonaFormData, TipoPersona, RolUsuario } from '../schemas';
+import { updatePersonaAdminSchema, UpdatePersonaAdminFormData, TipoPersona, RolUsuario } from '../schemas';
 import { tipoPersonaOptions, rolUsuarioOptions } from '../types';
 
 const PersonaEdit: React.FC = () => {
@@ -21,8 +21,8 @@ const PersonaEdit: React.FC = () => {
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<UpdatePersonaFormData>({
-    resolver: zodResolver(updatePersonaSchema),
+  } = useForm<UpdatePersonaAdminFormData>({
+    resolver: zodResolver(updatePersonaAdminSchema),
     defaultValues: {
       nombre: '',
       email: '',
@@ -51,7 +51,7 @@ const PersonaEdit: React.FC = () => {
     }
   }, [id, personas, reset]);
 
-  const onSubmit = async (data: UpdatePersonaFormData) => {
+  const onSubmit = async (data: UpdatePersonaAdminFormData) => {
     if (!id) return;
 
     console.log('Datos a enviar:', data);

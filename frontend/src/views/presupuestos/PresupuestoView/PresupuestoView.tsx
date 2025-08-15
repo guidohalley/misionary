@@ -5,11 +5,30 @@ import { HiOutlinePencil, HiOutlineArrowLeft, HiOutlineCheck, HiOutlineMail, HiO
 import { motion } from 'framer-motion';
 import { usePresupuesto } from '@/modules/presupuesto/hooks/usePresupuesto';
 import { EstadoPresupuesto } from '../schemas';
+import useAuth from '@/utils/hooks/useAuth';
 
 const PresupuestoView: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const { selectedPresupuesto, loading, error, getPresupuesto, updateEstado } = usePresupuesto();
+  const { user } = useAuth();
+
+  // Determinar si el usuario puede editar este presupuesto
+  const canEdit = () => {
+    if (!selectedPresupuesto) return false;
+    
+    const isAdmin = user?.authority?.includes('ADMIN');
+    const estado = selectedPresupuesto.estado;
+    
+    // BORRADOR: cualquier usuario puede editar
+    if (estado === EstadoPresupuesto.BORRADOR) return true;
+    
+    // APROBADO: solo ADMIN puede editar
+    if (estado === EstadoPresupuesto.APROBADO && isAdmin) return true;
+    
+    // FACTURADO: nadie puede editar
+    return false;
+  };
 
   useEffect(() => {
     if (id) {
@@ -187,7 +206,7 @@ const PresupuestoView: React.FC = () => {
           >
             Imprimir
           </Button>
-          {selectedPresupuesto.estado === EstadoPresupuesto.BORRADOR && (
+          {canEdit() && (
             <Button
               variant="twoTone"
               icon={<HiOutlinePencil />}

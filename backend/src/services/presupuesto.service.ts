@@ -177,13 +177,78 @@ export class PresupuestoService {
     });
   }
 
-  static async update(id: number, data: any) {
+  static async update(id: number, data: any, userId?: number, userRoles?: string[]) {
+    // Verificar el presupuesto actual para validar permisos
+    const presupuestoExistente = await prisma.presupuesto.findUnique({
+      where: { id }
+    });
+
+    if (!presupuestoExistente) {
+      throw new Error('Presupuesto no encontrado');
+    }
+
+    // Validar permisos según el estado del presupuesto
+    const { estado } = presupuestoExistente;
+    const isAdmin = userRoles?.includes('ADMIN');
+
+    // BORRADOR: cualquier usuario puede editar
+    if (estado === 'BORRADOR') {
+      // Permitido siempre
+    }
+    // APROBADO: solo ADMIN puede editar
+    else if (estado === 'APROBADO') {
+      if (!isAdmin) {
+        throw new Error('Solo los administradores pueden editar presupuestos aprobados');
+      }
+    }
+    // FACTURADO: nadie puede editar
+    else if (estado === 'FACTURADO') {
+      throw new Error('No se pueden editar presupuestos facturados');
+    }
+    // ENVIADO: por defecto no se permite editar
+    else if (estado === 'ENVIADO') {
+      if (!isAdmin) {
+        throw new Error('Solo los administradores pueden editar presupuestos enviados');
+      }
+    }
+
+    // Procesar los datos antes de la actualización
+    const updateData: any = { ...data };
+    
+    // Si hay items, necesitamos manejarlos correctamente
+    if (data.items && Array.isArray(data.items)) {
+      // Primero eliminar los items existentes y luego crear los nuevos
+      updateData.items = {
+        deleteMany: {}, // Elimina todos los items existentes
+        create: data.items.map((item: any) => ({
+          descripcion: item.descripcion,
+          cantidad: item.cantidad,
+          precioUnitario: item.precioUnitario,
+          total: item.total,
+          productoId: item.productoId || null,
+          servicioId: item.servicioId || null
+        }))
+      };
+    }
+
+    // Si hay impuestos seleccionados, manejarlos también
+    if (data.impuestosSeleccionados && Array.isArray(data.impuestosSeleccionados)) {
+      updateData.presupuestoImpuestos = {
+        deleteMany: {}, // Elimina los impuestos existentes
+        create: data.impuestosSeleccionados.map((impuestoId: number) => ({
+          impuestoId,
+          monto: 0 // Se puede calcular después con el porcentaje real
+        }))
+      };
+      delete updateData.impuestosSeleccionados;
+    }
+
     return prisma.presupuesto.update({
       where: { id },
-      data,
+      data: updateData,
       include: {
         cliente: true,
-  empresa: true,
+        empresa: true,
         moneda: true,
         items: {
           include: {
@@ -198,9 +263,7 @@ export class PresupuestoService {
         }
       }
     });
-  }
-
-  static async updateEstado(id: number, estado: string) {
+  }  static async updateEstado(id: number, estado: string) {
     return prisma.presupuesto.update({
       where: { id },
       data: { estado: estado as any }

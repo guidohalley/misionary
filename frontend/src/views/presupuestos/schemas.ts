@@ -64,6 +64,36 @@ const createPresupuestoSchemaInternal = createBase
   }, {
     message: 'Fecha inválida',
     path: ['periodoInicio']
+  }).refine((data) => {
+    // Validar que tenga vigencia mínima para proyecciones
+    if (data.periodoInicio && data.periodoFin) {
+      const inicio = new Date(data.periodoInicio);
+      const fin = new Date(data.periodoFin);
+      const diffTime = Math.abs(fin.getTime() - inicio.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      
+      // Mínimo 7 días para proyecciones válidas
+      return diffDays >= 7;
+    }
+    return true;
+  }, {
+    message: 'La vigencia debe ser de al menos 1 semana para permitir análisis y proyecciones',
+    path: ['periodoFin']
+  }).refine((data) => {
+    // Advertir sobre vigencias muy largas sin revisión
+    if (data.periodoInicio && data.periodoFin) {
+      const inicio = new Date(data.periodoInicio);
+      const fin = new Date(data.periodoFin);
+      const diffTime = Math.abs(fin.getTime() - inicio.getTime());
+      const diffMonths = diffTime / (1000 * 60 * 60 * 24 * 30);
+      
+      // Más de 2 años es demasiado sin revisión
+      return diffMonths <= 24;
+    }
+    return true;
+  }, {
+    message: 'Vigencias superiores a 2 años requieren revisión periódica. Considera dividir en etapas.',
+    path: ['periodoFin']
   });
 
 // Schema de validación principal (create) para formularios

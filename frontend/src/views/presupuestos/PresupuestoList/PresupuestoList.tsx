@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { usePresupuesto } from '@/modules/presupuesto/hooks/usePresupuesto';
 import { EstadoPresupuesto } from '../schemas';
 import type { Presupuesto } from '@/modules/presupuesto/types';
+import useAuth from '@/utils/hooks/useAuth';
 
 interface PresupuestoListProps {
   className?: string;
@@ -14,6 +15,21 @@ interface PresupuestoListProps {
 const PresupuestoList: React.FC<PresupuestoListProps> = ({ className }) => {
   const navigate = useNavigate();
   const { presupuestos, loading, error, refreshPresupuestos, deletePresupuesto, updateEstado } = usePresupuesto();
+  const { user } = useAuth();
+  
+  // Función para determinar si se puede editar un presupuesto
+  const canEditPresupuesto = (estado: EstadoPresupuesto) => {
+    const isAdmin = user?.authority?.includes('ADMIN');
+    
+    // BORRADOR: cualquier usuario puede editar
+    if (estado === EstadoPresupuesto.BORRADOR) return true;
+    
+    // APROBADO: solo ADMIN puede editar
+    if (estado === EstadoPresupuesto.APROBADO && isAdmin) return true;
+    
+    // FACTURADO: nadie puede editar
+    return false;
+  };
   
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -268,7 +284,7 @@ const PresupuestoList: React.FC<PresupuestoListProps> = ({ className }) => {
                           className="text-gray-600 hover:text-gray-700"
                           title="Imprimir presupuesto"
                         />
-                        {presupuesto.estado === EstadoPresupuesto.BORRADOR && (
+                        {canEditPresupuesto(presupuesto.estado) && (
                           <Button
                             size="sm"
                             variant="twoTone"

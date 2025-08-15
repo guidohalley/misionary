@@ -1,11 +1,18 @@
 import ApiService from '@/services/ApiService';
 import { Persona, CreatePersonaDTO, UpdatePersonaDTO } from './types';
 
-export async function fetchPersonas(): Promise<Persona[]> {
+export async function fetchPersonas(tipo?: string): Promise<Persona[]> {
+  const params: Record<string, string> = {};
+  if (tipo) {
+    params.tipo = tipo;
+  }
+
   const response = await ApiService.fetchData<Persona[]>({
     url: '/personas',
-    method: 'GET'
+    method: 'GET',
+    params
   });
+  
   return response.data;
 }
 

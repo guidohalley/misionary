@@ -171,6 +171,49 @@ export const updateInternoSchema = internoSchema.partial().extend({
     .or(z.literal(''))
 });
 
+// Schema flexible para edición administrativa (permite cambio de tipo)
+export const updatePersonaAdminSchema = z.object({
+  nombre: z.string()
+    .min(2, 'El nombre debe tener al menos 2 caracteres')
+    .max(100, 'El nombre no puede exceder 100 caracteres')
+    .optional(),
+  
+  email: z.string()
+    .email('Email inválido')
+    .optional(),
+  
+  password: z.string()
+    .min(6, 'La contraseña debe tener al menos 6 caracteres')
+    .optional()
+    .or(z.literal('')),
+  
+  telefono: z.string()
+    .min(10, 'El teléfono debe tener al menos 10 dígitos')
+    .optional()
+    .or(z.literal('')),
+  
+  cvu: z.string()
+    .length(22, 'El CVU debe tener exactamente 22 dígitos')
+    .optional()
+    .or(z.literal('')),
+  
+  cuit: z.string()
+    .regex(/^\d{2}-\d{8}-\d{1}$/, 'El CUIT debe tener el formato XX-XXXXXXXX-X')
+    .optional()
+    .or(z.literal('')),
+  
+  direccion: z.string()
+    .max(500, 'La dirección no puede exceder 500 caracteres')
+    .optional()
+    .or(z.literal('')),
+  
+  // Campos flexibles para edición
+  tipo: z.nativeEnum(TipoPersona).optional(),
+  roles: z.array(z.nativeEnum(RolUsuario)).optional(),
+  esUsuario: z.boolean().optional(),
+  activo: z.boolean().optional(),
+});
+
 // ====================================
 // TIPOS TYPESCRIPT
 // ====================================
@@ -184,6 +227,7 @@ export type ClienteConEmpresaFormData = z.infer<typeof clienteConEmpresaSchema>;
 export type UpdateClienteFormData = z.infer<typeof updateClienteSchema>;
 export type UpdateProveedorFormData = z.infer<typeof updateProveedorSchema>;
 export type UpdateInternoFormData = z.infer<typeof updateInternoSchema>;
+export type UpdatePersonaAdminFormData = z.infer<typeof updatePersonaAdminSchema>;
 
 // ====================================
 // SCHEMAS LEGACY (mantener compatibilidad)
@@ -192,7 +236,8 @@ export type UpdateInternoFormData = z.infer<typeof updateInternoSchema>;
 // Schema genérico (mantener para compatibilidad)
 export const personaSchema = z.union([clienteSchema, proveedorSchema, internoSchema]);
 export const createPersonaSchema = personaSchema;
-export const updatePersonaSchema = z.union([updateClienteSchema, updateProveedorSchema, updateInternoSchema]);
+// Usar el schema flexible para actualización
+export const updatePersonaSchema = updatePersonaAdminSchema;
 
 export type CreatePersonaFormData = ClienteFormData | ProveedorFormData | InternoFormData;
-export type UpdatePersonaFormData = UpdateClienteFormData | UpdateProveedorFormData | UpdateInternoFormData;
+export type UpdatePersonaFormData = UpdatePersonaAdminFormData;

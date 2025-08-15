@@ -1,16 +1,26 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Card, Button } from '@/components/ui';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
 import PersonaList from './PersonaList';
 import { usePersona } from './hooks';
 import { Persona, UpdatePersonaDTO } from './types';
+import { TipoPersona } from './schemas';
 
-const PersonasView: React.FC = () => {
+interface PersonasViewProps {
+  tipoFiltro?: TipoPersona;
+}
+
+const PersonasView: React.FC<PersonasViewProps> = ({ tipoFiltro }) => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [personaToDelete, setPersonaToDelete] = useState<number | null>(null);
+
+  // Obtener tipo de filtro desde URL o prop
+  const tipoFromUrl = searchParams.get('tipo') as TipoPersona | null;
+  const tipoActivo = tipoFromUrl || tipoFiltro;
 
   const {
     personas,
@@ -18,7 +28,22 @@ const PersonasView: React.FC = () => {
     error,
     updatePersona,
     deletePersona,
-  } = usePersona();
+  } = usePersona(tipoActivo);
+
+  // Obtener título según el tipo de filtro
+  const getTitulo = () => {
+    if (tipoActivo === TipoPersona.CLIENTE) return 'Gestión de Clientes';
+    if (tipoActivo === TipoPersona.PROVEEDOR) return 'Gestión de Proveedores'; 
+    if (tipoActivo === TipoPersona.INTERNO) return 'Gestión de Usuarios Internos';
+    return 'Gestión de Personas';
+  };
+
+  const getBotonTexto = () => {
+    if (tipoActivo === TipoPersona.CLIENTE) return 'Nuevo Cliente';
+    if (tipoActivo === TipoPersona.PROVEEDOR) return 'Nuevo Proveedor';
+    if (tipoActivo === TipoPersona.INTERNO) return 'Nuevo Usuario Interno';
+    return 'Nueva Persona';
+  };
 
   const handleCreate = () => {
     navigate('/personas/new');
@@ -60,7 +85,7 @@ const PersonasView: React.FC = () => {
         className="flex justify-between items-center"
       >
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-          Gestión de Personas
+          {getTitulo()}
         </h1>
         <motion.div
           whileHover={{ scale: 1.02 }}
@@ -71,7 +96,7 @@ const PersonasView: React.FC = () => {
             onClick={handleCreate}
             className="bg-blue-600 hover:bg-blue-700"
           >
-            Nueva Persona
+            {getBotonTexto()}
           </Button>
         </motion.div>
       </motion.div>
@@ -101,7 +126,7 @@ const PersonasView: React.FC = () => {
         onClose={() => setShowDeleteDialog(false)}
         onConfirm={confirmDelete}
         title="Confirmar eliminación"
-        message="¿Estás seguro de que deseas eliminar esta persona? Esta acción no se puede deshacer."
+        children="¿Estás seguro de que deseas eliminar esta persona? Esta acción no se puede deshacer."
         confirmText="Eliminar"
         cancelText="Cancelar"
         type="danger"

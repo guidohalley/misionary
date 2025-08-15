@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Persona, CreatePersonaDTO, UpdatePersonaDTO } from '../types';
 import * as personaService from '../service';
 
-export function usePersona() {
+export function usePersona(tipo?: string) {
   const [personas, setPersonas] = useState<Persona[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -12,14 +12,15 @@ export function usePersona() {
     try {
       setLoading(true);
       setError(null);
-      const data = await personaService.fetchPersonas();
+      const data = await personaService.fetchPersonas(tipo);
       setPersonas(data);
     } catch (err) {
       setError('Error al cargar las personas');
+      console.error('❌ Error al cargar personas:', err);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [tipo]);
 
   useEffect(() => {
     fetchPersonas();

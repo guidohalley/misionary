@@ -33,14 +33,16 @@ export class PresupuestoController {
   static async update(req: Request, res: Response) {
     try {
       const id = parseInt(req.params.id);
-      const presupuesto = await PresupuestoService.update(id, req.body);
-  return res.json(presupuesto);
+      const user = (req as any).user;
+      
+      const presupuesto = await PresupuestoService.update(id, req.body, user?.id, user?.roles);
+      return res.json(presupuesto);
     } catch (error) {
-  return res.status(500).json({ error: 'Error al actualizar el presupuesto' });
+      console.error('Error updating presupuesto:', error);
+      const message = error instanceof Error ? error.message : 'Error al actualizar el presupuesto';
+      return res.status(500).json({ error: message });
     }
-  }
-
-  static async updateEstado(req: Request, res: Response) {
+  }  static async updateEstado(req: Request, res: Response) {
     try {
       const id = parseInt(req.params.id);
       const { estado } = req.body;

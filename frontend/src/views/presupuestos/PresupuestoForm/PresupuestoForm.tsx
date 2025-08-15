@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useForm, Controller, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Card, Button, FormItem, FormContainer, Input, Select, Notification, toast, Checkbox, DatePicker } from '@/components/ui';
@@ -29,7 +29,7 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [impuestosSeleccionados, setImpuestosSeleccionados] = useState<Impuesto[]>([]);
-  const [vigenciaPreset, setVigenciaPreset] = useState<'NONE' | '3M' | '6M' | '1Y'>('NONE')
+  const [vigenciaPreset, setVigenciaPreset] = useState<'NONE' | '1M' | '3M' | '6M' | '1Y'>(isEdit ? 'NONE' : '1M')
   
   const { personas, refreshPersonas } = usePersona();
   const { productos, refreshProductos } = useProducto();
@@ -38,6 +38,31 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
   const { getActiveImpuestos } = useImpuesto();
   
   const [impuestosDisponibles, setImpuestosDisponibles] = useState<Impuesto[]>([]);
+  
+  // Obtener fechas por defecto (hoy + 1 mes)
+  const getDefaultDates = () => {
+    const today = new Date();
+    const oneMonthLater = addMonths(today, 1);
+    return {
+      inicio: toYMD(today),
+      fin: toYMD(oneMonthLater)
+    };
+  };
+
+  // Helper functions for date management
+  const toYMD = (d: Date) => d.toISOString().split('T')[0];
+  const addMonths = (d: Date, months: number) => {
+    const dt = new Date(d);
+    const day = dt.getDate();
+    dt.setMonth(dt.getMonth() + months);
+    // Ajuste de fin de mes para evitar desbordes (30->31 etc.)
+    if (dt.getDate() < day) {
+      dt.setDate(0);
+    }
+    return dt;
+  };
+
+  const defaultDates = getDefaultDates();
   
   const {
     control,
@@ -53,8 +78,8 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
       items: [{ cantidad: 1, precioUnitario: 0 }],
       impuestosSeleccionados: [],
       monedaId: 1, // ARS por defecto
-      periodoInicio: undefined,
-      periodoFin: undefined,
+      periodoInicio: defaultDates.inicio,
+      periodoFin: defaultDates.fin,
     },
   });
 
@@ -73,18 +98,33 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
 
   // Helpers para fechas y presets de vigencia
   const watchPeriodoInicio = watch('periodoInicio')
-  const toYMD = (d: Date) => d.toISOString().split('T')[0]
-  const addMonths = (d: Date, months: number) => {
-    const dt = new Date(d)
-    const day = dt.getDate()
-    dt.setMonth(dt.getMonth() + months)
-    // Ajuste de fin de mes para evitar desbordes (30->31 etc.)
-    if (dt.getDate() < day) {
-      dt.setDate(0)
-    }
-    return dt
-  }
+  const watchPeriodoFin = watch('periodoFin')
+  
+  // Calcular duración para mostrar al usuario
+  const calcularDuracion = () => {
+    if (!watchPeriodoInicio || !watchPeriodoFin) return null;
+    
+    const inicio = new Date(watchPeriodoInicio);
+    const fin = new Date(watchPeriodoFin);
+    const diffTime = Math.abs(fin.getTime() - inicio.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 1) return "1 día";
+    if (diffDays < 7) return `${diffDays} días`;
+    if (diffDays < 30) return `${Math.round(diffDays / 7)} semana${Math.round(diffDays / 7) > 1 ? 's' : ''}`;
+    if (diffDays < 365) return `${Math.round(diffDays / 30)} mes${Math.round(diffDays / 30) > 1 ? 'es' : ''}`;
+    
+    const years = Math.floor(diffDays / 365);
+    const months = Math.round((diffDays % 365) / 30);
+    
+    if (years === 1 && months === 0) return "1 año";
+    if (years > 1 && months === 0) return `${years} años`;
+    if (years === 1) return `1 año y ${months} mes${months > 1 ? 'es' : ''}`;
+    return `${years} años y ${months} mes${months > 1 ? 'es' : ''}`;
+  };
 
+  const duracion = calcularDuracion();
+  
   useEffect(() => {
     if (vigenciaPreset === 'NONE') return
     // Si no hay periodoInicio, poner hoy por defecto
@@ -93,6 +133,7 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
       setValue('periodoInicio', toYMD(base))
     }
     let fin = base
+    if (vigenciaPreset === '1M') fin = addMonths(base, 1)
     if (vigenciaPreset === '3M') fin = addMonths(base, 3)
     if (vigenciaPreset === '6M') fin = addMonths(base, 6)
     if (vigenciaPreset === '1Y') fin = addMonths(base, 12)
@@ -125,17 +166,35 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
     }).format(price);
   };
 
+  // Ref para rastrear si ya inicializamos
+  const initializedRef = useRef(false);
+  const lastInitialDataRef = useRef<any>(null);
+
   useEffect(() => {
-    if (initialData) {
+    if (initialData && (!initializedRef.current || JSON.stringify(lastInitialDataRef.current) !== JSON.stringify(initialData))) {
       // Normalizar fechas ISO a YYYY-MM-DD para inputs type=date
       const norm = (d?: string) => (d ? new Date(d).toISOString().slice(0, 10) : undefined)
+      
+      console.log('🔄 Inicializando formulario con datos:', initialData);
+      
       reset({
         ...initialData,
         periodoInicio: norm((initialData as any).periodoInicio),
         periodoFin: norm((initialData as any).periodoFin),
       });
+
+      // Precargar impuestos seleccionados si existen
+      if ((initialData as any).presupuestoImpuestos && impuestosDisponibles.length > 0) {
+        const impuestosIds = (initialData as any).presupuestoImpuestos.map((pi: any) => pi.impuestoId);
+        const impuestosDelPresupuesto = impuestosDisponibles.filter(imp => impuestosIds.includes(imp.id));
+        setImpuestosSeleccionados(impuestosDelPresupuesto);
+        console.log('✅ Impuestos precargados:', impuestosDelPresupuesto);
+      }
+
+      initializedRef.current = true;
+      lastInitialDataRef.current = initialData;
     }
-  }, [initialData, reset]);
+  }, [initialData, reset, impuestosDisponibles]);
 
   const handleFormSubmit = async (data: PresupuestoFormData) => {
     try {
@@ -324,44 +383,85 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
                 </FormItem>
               </div>
 
+              {/* Indicador de duración */}
+              {duracion && (
+                <div className="mb-4">
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-blue-600 text-sm font-medium">
+                        📏 Duración: {duracion}
+                      </span>
+                      {watchPeriodoInicio && watchPeriodoFin && (() => {
+                        const diffDays = Math.ceil(Math.abs(new Date(watchPeriodoFin).getTime() - new Date(watchPeriodoInicio).getTime()) / (1000 * 60 * 60 * 24));
+                        if (diffDays >= 365) {
+                          return <span className="text-orange-600 text-xs">🎯 Ideal para proyecciones anuales</span>;
+                        } else if (diffDays >= 90) {
+                          return <span className="text-green-600 text-xs">✅ Buena para análisis trimestral</span>;
+                        } else if (diffDays >= 30) {
+                          return <span className="text-blue-600 text-xs">📊 Válida para análisis mensual</span>;
+                        } else if (diffDays >= 7) {
+                          return <span className="text-gray-600 text-xs">⚡ Vigencia corta</span>;
+                        }
+                        return null;
+                      })()}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Presets de duración */}
               <div className="mb-2">
-                <div className="text-sm text-gray-700 mb-2">Duración rápida</div>
+                <div className="text-sm font-medium text-gray-700 mb-2">⚡ Duración rápida</div>
                 <div className="flex flex-wrap gap-2">
                   <Button
                     type="button"
+                    size="sm"
                     variant={vigenciaPreset === 'NONE' ? 'solid' : 'twoTone'}
                     className={vigenciaPreset === 'NONE' ? 'bg-gray-600 text-white' : ''}
                     onClick={() => setVigenciaPreset('NONE')}
                   >
-                    Sin vigencia
+                    🔓 Manual
                   </Button>
                   <Button
                     type="button"
+                    size="sm"
+                    variant={vigenciaPreset === '1M' ? 'solid' : 'twoTone'}
+                    className={vigenciaPreset === '1M' ? 'bg-green-600 text-white' : ''}
+                    onClick={() => setVigenciaPreset('1M')}
+                  >
+                    📅 1 mes
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
                     variant={vigenciaPreset === '3M' ? 'solid' : 'twoTone'}
                     className={vigenciaPreset === '3M' ? 'bg-blue-600 text-white' : ''}
                     onClick={() => setVigenciaPreset('3M')}
                   >
-                    3 meses
+                    🗓️ 3 meses
                   </Button>
                   <Button
                     type="button"
+                    size="sm"
                     variant={vigenciaPreset === '6M' ? 'solid' : 'twoTone'}
-                    className={vigenciaPreset === '6M' ? 'bg-blue-600 text-white' : ''}
+                    className={vigenciaPreset === '6M' ? 'bg-purple-600 text-white' : ''}
                     onClick={() => setVigenciaPreset('6M')}
                   >
-                    6 meses
+                    📆 6 meses
                   </Button>
                   <Button
                     type="button"
+                    size="sm"
                     variant={vigenciaPreset === '1Y' ? 'solid' : 'twoTone'}
-                    className={vigenciaPreset === '1Y' ? 'bg-blue-600 text-white' : ''}
+                    className={vigenciaPreset === '1Y' ? 'bg-orange-600 text-white' : ''}
                     onClick={() => setVigenciaPreset('1Y')}
                   >
-                    1 año
+                    🗓️ 1 año
                   </Button>
                 </div>
-                <div className="text-xs text-gray-500 mt-1">Se calcula a partir de "Vigencia desde".</div>
+                <div className="text-xs text-gray-500 mt-1">
+                  💡 Se calcula automáticamente desde "Vigencia desde". Para proyecciones anuales usa 1 año.
+                </div>
               </div>
 
               {/* Impuestos */}

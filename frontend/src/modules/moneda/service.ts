@@ -12,15 +12,11 @@ import type {
 
 export class MonedaService {
   /**
-  static async fetchTipoCambioActual(
-    monedaDesde: CodigoMoneda, 
-    monedaHacia: CodigoMoneda,
-    tipo?: 'OFICIAL' | 'BLUE' | 'TARJETA'
-  ): Promise<TipoCambio> {
-    const qs = tipo ? `?tipo=${tipo}` : '';
-    const response = await ApiService.fetchData<ApiResponse<TipoCambio>>({
-      url: `/monedas/tipo-cambio/${monedaDesde}/${monedaHacia}${qs}`,
-      method: 'GET'
+   * Obtener todas las monedas activas
+   */
+  static async fetchMonedas(): Promise<Moneda[]> {
+    const response = await ApiService.fetchData<ApiResponse<Moneda[]>>({
+      url: '/monedas',
       method: 'GET'
     });
     return response.data.data;
@@ -45,7 +41,7 @@ export class MonedaService {
     monedaHacia: CodigoMoneda,
     tipo?: import('./types').TipoCotizacion
   ): Promise<TipoCambio> {
-    const qs = tipo ? `?tipo=${tipo}` : ''
+    const qs = tipo ? `?tipo=${tipo}` : '';
     const response = await ApiService.fetchData<ApiResponse<TipoCambio>>({
       url: `/monedas/tipo-cambio/${monedaDesde}/${monedaHacia}${qs}`,
       method: 'GET'
@@ -101,6 +97,17 @@ export class MonedaService {
   }
 
   /**
+   * Obtener todos los tipos de cambio disponibles
+   */
+  static async fetchTiposCambioDisponibles(): Promise<TipoCambio[]> {
+    const response = await ApiService.fetchData<ApiResponse<TipoCambio[]>>({
+      url: '/monedas/tipos-cambio-disponibles',
+      method: 'GET'
+    });
+    return response.data.data;
+  }
+
+  /**
    * Actualizar tipos de cambio masivamente (requiere autenticación ADMIN/CONTADOR)
    */
   static async actualizarTiposCambioMasivo(data: ActualizacionMasivaRequest): Promise<TipoCambio[]> {
@@ -148,3 +155,6 @@ export class MonedaService {
     return configuraciones[codigo] || configuraciones.ARS;
   }
 }
+
+// Export por defecto también
+export default MonedaService;
