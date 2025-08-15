@@ -2,25 +2,13 @@ import { Request, Response, NextFunction } from 'express';
 import { gastoService } from '../services/gasto.service';
 import { HttpError } from '../utils/http-error';
 
-// Enum local para evitar problemas de importación
-enum CategoriaGasto {
-  OFICINA = 'OFICINA',
-  PERSONAL = 'PERSONAL',
-  MARKETING = 'MARKETING',
-  TECNOLOGIA = 'TECNOLOGIA',
-  SERVICIOS = 'SERVICIOS',
-  TRANSPORTE = 'TRANSPORTE',
-  COMUNICACION = 'COMUNICACION',
-  OTROS = 'OTROS'
-}
-
 export class GastoController {
   // ─────────────────── GASTOS OPERATIVOS ─────────────────── 
 
   async getGastosOperativos(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const {
-        categoria,
+        categoriaId,
         proveedorId,
         monedaId,
         fechaDesde,
@@ -32,7 +20,7 @@ export class GastoController {
 
       const filters: any = {};
       
-      if (categoria) filters.categoria = categoria as CategoriaGasto;
+      if (categoriaId) filters.categoriaId = parseInt(categoriaId as string);
       if (proveedorId) filters.proveedorId = parseInt(proveedorId as string);
       if (monedaId) filters.monedaId = parseInt(monedaId as string);
   if (fechaDesde) filters.fechaDesde = new Date(fechaDesde as string);
@@ -75,7 +63,7 @@ export class GastoController {
         monto,
         monedaId,
         fecha,
-        categoria,
+        categoriaId,
         esRecurrente,
         frecuencia,
         proveedorId,
@@ -84,17 +72,12 @@ export class GastoController {
       } = req.body;
 
       // Validaciones básicas
-      if (!concepto || !monto || !monedaId || !fecha || !categoria) {
-        throw new HttpError(400, 'Los campos concepto, monto, monedaId, fecha y categoria son obligatorios');
+      if (!concepto || !monto || !monedaId || !fecha || !categoriaId) {
+        throw new HttpError(400, 'Los campos concepto, monto, monedaId, fecha y categoriaId son obligatorios');
       }
 
       if (monto <= 0) {
         throw new HttpError(400, 'El monto debe ser mayor a 0');
-      }
-
-      // Validar enum de categoría
-      if (!Object.values(CategoriaGasto).includes(categoria)) {
-        throw new HttpError(400, 'Categoría de gasto inválida');
       }
 
       const gastoData = {
@@ -103,7 +86,7 @@ export class GastoController {
         monto: parseFloat(monto),
         monedaId: parseInt(monedaId),
         fecha: new Date(fecha),
-        categoria: categoria as CategoriaGasto,
+  categoriaId: parseInt(categoriaId),
         esRecurrente: esRecurrente || false,
         frecuencia,
         proveedorId: proveedorId ? parseInt(proveedorId) : undefined,
@@ -133,15 +116,12 @@ export class GastoController {
         throw new HttpError(400, 'El monto debe ser mayor a 0');
       }
 
-      if (updateData.categoria && !Object.values(CategoriaGasto).includes(updateData.categoria)) {
-        throw new HttpError(400, 'Categoría de gasto inválida');
-      }
-
       // Convertir tipos si es necesario
       if (updateData.monto) updateData.monto = parseFloat(updateData.monto);
       if (updateData.monedaId) updateData.monedaId = parseInt(updateData.monedaId);
   if (updateData.proveedorId) updateData.proveedorId = parseInt(updateData.proveedorId);
       if (updateData.fecha) updateData.fecha = new Date(updateData.fecha);
+  if (updateData.categoriaId) updateData.categoriaId = parseInt(updateData.categoriaId);
 
       const gastoActualizado = await gastoService.updateGastoOperativo(parseInt(id), updateData);
       
@@ -314,22 +294,6 @@ export class GastoController {
   }
 
   // ─────────────────── UTILITARIOS ─────────────────── 
-
-  async getCategoriasGasto(_req: Request, res: Response, next: NextFunction) {
-    try {
-      const categorias = Object.values(CategoriaGasto).map((categoria: string) => ({
-        value: categoria,
-        label: categoria.toLowerCase().replace('_', ' ')
-      }));
-      
-      res.json({
-        success: true,
-        data: categorias
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
 }
 
 export const gastoController = new GastoController();

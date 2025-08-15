@@ -1,17 +1,5 @@
 import { z } from 'zod';
 
-// Enums locales que coinciden con el backend
-export enum CategoriaGasto {
-  OFICINA = 'OFICINA',
-  PERSONAL = 'PERSONAL',
-  MARKETING = 'MARKETING',
-  TECNOLOGIA = 'TECNOLOGIA',
-  SERVICIOS = 'SERVICIOS',
-  TRANSPORTE = 'TRANSPORTE',
-  COMUNICACION = 'COMUNICACION',
-  OTROS = 'OTROS'
-}
-
 export enum CodigoMoneda {
   ARS = 'ARS',
   USD = 'USD',
@@ -44,9 +32,7 @@ export const gastoOperativoSchema = z.object({
     required_error: 'La fecha es requerida'
   }),
   
-  categoria: z.nativeEnum(CategoriaGasto, {
-    required_error: 'La categoría es requerida'
-  }),
+  categoriaId: z.number().int('Debe seleccionar una categoría').positive('Debe seleccionar una categoría'),
   
   esRecurrente: z.boolean().default(false),
   
@@ -116,16 +102,8 @@ export type CreateAsignacionGastoFormData = z.infer<typeof createAsignacionGasto
 // OPCIONES PARA SELECTS
 // ====================================
 
-export const categoriasGastoOptions = [
-  { value: CategoriaGasto.OFICINA, label: 'Oficina', icon: '🏢', description: 'Alquiler, servicios, limpieza' },
-  { value: CategoriaGasto.PERSONAL, label: 'Personal', icon: '👥', description: 'Sueldos, cargas sociales, capacitación' },
-  { value: CategoriaGasto.MARKETING, label: 'Marketing', icon: '📢', description: 'Publicidad, eventos, contenido' },
-  { value: CategoriaGasto.TECNOLOGIA, label: 'Tecnología', icon: '💻', description: 'Software, hardware, hosting' },
-  { value: CategoriaGasto.SERVICIOS, label: 'Servicios', icon: '🔧', description: 'Contabilidad, legal, consultoría' },
-  { value: CategoriaGasto.TRANSPORTE, label: 'Transporte', icon: '🚗', description: 'Combustible, mantenimiento, viajes' },
-  { value: CategoriaGasto.COMUNICACION, label: 'Comunicación', icon: '📞', description: 'Internet, teléfono, reuniones' },
-  { value: CategoriaGasto.OTROS, label: 'Otros', icon: '📝', description: 'Gastos diversos' }
-];
+// categorias se consumen desde API
+export const categoriasGastoOptions: never[] = [] as never[];
 
 export const frecuenciaOptions = [
   { value: 'MENSUAL', label: 'Mensual' },

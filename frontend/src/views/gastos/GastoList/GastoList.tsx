@@ -4,7 +4,8 @@ import { HiOutlinePencil, HiOutlineTrash, HiOutlineEye, HiOutlinePlus } from 're
 import { Button, Badge, Tooltip, Card, Input, Select, DatePicker } from '@/components/ui';
 import DataTable from '@/components/shared/DataTable';
 import { ColumnDef } from '@tanstack/react-table';
-import { GastoOperativo, CategoriaGasto, categoriasGastoOptions } from '../types';
+import { GastoOperativo } from '../types';
+import { fetchCategorias } from '@/modules/categoria/service';
 import { useNavigate } from 'react-router-dom';
 import { MonedaService } from '@/modules/moneda/service';
 import { CodigoMoneda, TipoCotizacion } from '@/modules/moneda/types';
@@ -32,7 +33,8 @@ const GastoList: React.FC<GastoListProps> = ({
   const [search, setSearch] = useState('');
   const [fechaDesde, setFechaDesde] = useState<Date | null>(startOfMonth(new Date()));
   const [fechaHasta, setFechaHasta] = useState<Date | null>(new Date());
-  const [categoria, setCategoria] = useState<string | undefined>(undefined);
+  const [categoriaId, setCategoriaId] = useState<number | undefined>(undefined);
+  const [categorias, setCategorias] = useState<{value:number,label:string}[]>([]);
   const [moneda, setMoneda] = useState<CodigoMoneda | 'ALL'>('ALL');
   const [cotizacion, setCotizacion] = useState<TipoCotizacion>(TipoCotizacion.TARJETA);
   const [rates, setRates] = useState<{ USD?: number; EUR?: number }>({});
@@ -42,6 +44,7 @@ const GastoList: React.FC<GastoListProps> = ({
   function startOfMonth(d: Date) { const x = new Date(d); x.setDate(1); x.setHours(0,0,0,0); return x; }
 
   useEffect(() => {
+  fetchCategorias(true).then(list => setCategorias(list.map(c=>({value:c.id,label:c.nombre})))).catch(()=>setCategorias([]));
     // Cargar tipos de cambio a ARS según cotización seleccionada, con fallback a API pública
     async function fetchPublicUSD(tipo: TipoCotizacion): Promise<number | undefined> {
       try {
@@ -111,14 +114,14 @@ const GastoList: React.FC<GastoListProps> = ({
   const filteredGastos = useMemo(() => {
     return gastos.filter(g => {
       const okSearch = search ? `${g.concepto} ${g.descripcion || ''}`.toLowerCase().includes(search.toLowerCase()) : true;
-      const okCat = categoria ? g.categoria === categoria : true;
+      const okCat = categoriaId ? g.categoriaId === categoriaId : true;
       const f = new Date(g.fecha);
       const okDesde = fechaDesde ? f >= fechaDesde : true;
       const okHasta = fechaHasta ? f <= fechaHasta : true;
       const okMon = moneda === 'ALL' ? true : g.moneda?.codigo === moneda;
       return okSearch && okCat && okDesde && okHasta && okMon;
     });
-  }, [gastos, search, categoria, fechaDesde, fechaHasta, moneda]);
+  }, [gastos, search, categoriaId, fechaDesde, fechaHasta, moneda]);
 
   // Totales por código de moneda (sobre lista filtrada)
   useEffect(() => {
@@ -141,7 +144,7 @@ const GastoList: React.FC<GastoListProps> = ({
   const subtotalesPorCategoria = useMemo(() => {
     const map: Record<string, { ARS: number; USD: number; EUR: number }> = {};
     for (const g of filteredGastos) {
-      const cat = g.categoria;
+      const cat = g.categoria?.nombre || `CAT#${g.categoriaId}`;
       const code = (g.moneda?.codigo || 'ARS') as 'ARS' | 'USD' | 'EUR';
       if (!map[cat]) map[cat] = { ARS: 0, USD: 0, EUR: 0 };
       map[cat][code] += Number(g.monto);
@@ -237,22 +240,12 @@ const GastoList: React.FC<GastoListProps> = ({
     },
     {
       header: 'Categoría',
-      accessorKey: 'categoria',
-      cell: ({ row }) => {
-        const categoria = categoriasGastoOptions.find(c => c.value === row.original.categoria);
-        return (
-          <Tooltip title={categoria?.description || ''}>
-            <div className="flex items-center gap-2">
-              <span className="text-lg">{categoria?.icon}</span>
-              <Badge
-                className={getBadgeColorByCategoria(row.original.categoria)}
-              >
-                {categoria?.label || row.original.categoria}
-              </Badge>
-            </div>
-          </Tooltip>
-        );
-      },
+      accessorKey: 'categoria.nombre',
+      cell: ({ row }) => (
+        <Badge className="bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200">
+          {row.original.categoria?.nombre || `ID ${row.original.categoriaId}`}
+        </Badge>
+      ),
     },
     {
       header: 'Tipo',
@@ -358,28 +351,8 @@ const GastoList: React.FC<GastoListProps> = ({
     },
   ], [onEdit, onDelete, onView, onAsignar]);
 
-  const getBadgeColorByCategoria = (categoria: string): string => {
-    switch (categoria) {
-      case CategoriaGasto.OFICINA:
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
-      case CategoriaGasto.PERSONAL:
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
-      case CategoriaGasto.MARKETING:
-        return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
-      case CategoriaGasto.TECNOLOGIA:
-        return 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200';
-      case CategoriaGasto.SERVICIOS:
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
-      case CategoriaGasto.TRANSPORTE:
-        return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200';
-      case CategoriaGasto.COMUNICACION:
-        return 'bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-200';
-      case CategoriaGasto.OTROS:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
-      default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
-    }
-  };
+  // colores simplificados
+  const getBadgeColorByCategoria = (_: string): string => 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
 
   return (
     <motion.div
@@ -454,9 +427,9 @@ const GastoList: React.FC<GastoListProps> = ({
             onChange={(o:any)=>setMoneda(o?.value || 'ALL')}
           />
           <Select
-            options={[{value:undefined,label:'Todas las categorías'}, ...categoriasGastoOptions.map(c=>({value:c.value,label:c.label}))]}
-            value={{ value: categoria, label: categoria ? (categoriasGastoOptions.find(c=>c.value===categoria)?.label||categoria) : 'Todas las categorías' }}
-            onChange={(o:any)=>setCategoria(o?.value)}
+            options={[{value:undefined,label:'Todas las categorías'}, ...categorias]}
+            value={{ value: categoriaId, label: categoriaId ? (categorias.find(c=>c.value===categoriaId)?.label || String(categoriaId)) : 'Todas las categorías' }}
+            onChange={(o:any)=>setCategoriaId(o?.value)}
           />
           <DatePicker value={fechaDesde} onChange={d=>setFechaDesde(d)} placeholder="Desde" />
           <DatePicker value={fechaHasta} onChange={d=>setFechaHasta(d)} placeholder="Hasta" />
@@ -482,15 +455,11 @@ const GastoList: React.FC<GastoListProps> = ({
           <div className="text-xs text-gray-500">Equivalente en ARS usando {cotizacion}</div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-          {Object.entries(subtotalesPorCategoria).map(([cat, vals]) => {
-            const categoriaInfo = categoriasGastoOptions.find(c => c.value === cat);
+      {Object.entries(subtotalesPorCategoria).map(([cat, vals]) => {
             const equivArs = Number(vals.ARS || 0) + Number(vals.USD || 0) * Number(rates.USD || 0) + Number(vals.EUR || 0) * Number(rates.EUR || 0);
             return (
               <div key={cat} className="border rounded-lg p-3 dark:border-gray-700">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-lg">{categoriaInfo?.icon}</span>
-                  <span className="font-medium">{categoriaInfo?.label || cat}</span>
-                </div>
+        <div className="flex items-center gap-2 mb-1 font-medium">{cat}</div>
                 <div className="text-xs text-gray-500">ARS: $ {Number(vals.ARS || 0).toLocaleString('es-AR', { minimumFractionDigits: 2 })}</div>
                 <div className="text-xs text-gray-500">USD: US$ {Number(vals.USD || 0).toLocaleString('es-AR', { minimumFractionDigits: 2 })} (≈ $ {(Number(vals.USD || 0) * Number(rates.USD || 0)).toLocaleString('es-AR', { minimumFractionDigits: 2 })})</div>
                 <div className="text-xs text-gray-500">EUR: € {Number(vals.EUR || 0).toLocaleString('es-AR', { minimumFractionDigits: 2 })} (≈ $ {(Number(vals.EUR || 0) * Number(rates.EUR || 0)).toLocaleString('es-AR', { minimumFractionDigits: 2 })})</div>

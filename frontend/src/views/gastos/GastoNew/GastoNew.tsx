@@ -16,7 +16,9 @@ import MoneyInput from '@/components/shared/MoneyInput';
 import { HiOutlineArrowLeft, HiOutlineSave, HiOutlineX, HiOutlineCash } from 'react-icons/hi';
 import { useGasto, useGastoAuxiliarData } from '@/modules/gasto/hooks/useGasto';
 import { fetchTiposGasto } from '@/modules/gasto/service';
-import { CategoriaGasto, categoriasGastoOptions, frecuenciaOptions } from '../schemas';
+import { frecuenciaOptions } from '../schemas';
+import { fetchCategorias, createCategoria } from '@/modules/categoria/service';
+import { useAuth } from '@/contexts/AuthContext';
 
 const GastoNew: React.FC = () => {
   const navigate = useNavigate();
@@ -24,13 +26,14 @@ const GastoNew: React.FC = () => {
   const { monedas, proveedores } = useGastoAuxiliarData();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     concepto: '',
     descripcion: '',
     monto: 0,
     monedaId: 1,
     fecha: new Date(),
-    categoria: '' as CategoriaGasto | '',
+  categoriaId: undefined as number | undefined,
     tipoId: undefined as number | undefined,
     esRecurrente: false,
     frecuencia: '',
@@ -40,16 +43,20 @@ const GastoNew: React.FC = () => {
     activo: true
   });
   const [tipos, setTipos] = useState<{value:number,label:string,color?:string}[]>([]);
+  const [categorias, setCategorias] = useState<{value:number,label:string}[]>([]);
 
   React.useEffect(() => {
     fetchTiposGasto().then(list => {
       setTipos(list.filter(t=>t.activo).map(t=>({value:t.id,label:t.nombre,color:t.color||undefined})));
     }).catch(()=>setTipos([]));
+    fetchCategorias(true).then(list => {
+      setCategorias(list.map(c=>({ value: c.id, label: c.nombre })));
+    }).catch(()=>setCategorias([]));
   }, []);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.concepto || !formData.categoria || formData.monto <= 0) {
+  if (!formData.concepto || !formData.categoriaId || formData.monto <= 0) {
       alert('Por favor complete los campos requeridos');
       return;
     }
@@ -58,7 +65,7 @@ const GastoNew: React.FC = () => {
       setIsSubmitting(true);
       await createGastoOperativo({
         ...formData,
-        categoria: formData.categoria as string
+  categoriaId: formData.categoriaId as number
       });
       navigate('/gastos');
     } catch (error) {
@@ -97,10 +104,7 @@ const GastoNew: React.FC = () => {
     ];
   }, [proveedores]);
 
-  const categoriaOptions = categoriasGastoOptions.map(categoria => ({
-    value: categoria.value,
-    label: `${categoria.icon} ${categoria.label}`
-  }));
+  const categoriaOptions = categorias;
   const tipoOptions = [{value: undefined as any, label: 'Sin tipo'}, ...tipos];
 
   // Obtener la moneda seleccionada para el MoneyInput
@@ -170,17 +174,38 @@ const GastoNew: React.FC = () => {
                   />
                 </FormItem>
 
-                <FormItem
-                  label="Categoría"
-                  asterisk
-                >
-                  <Select
-                    options={categoriaOptions}
-                    placeholder="Selecciona una categoría"
-                    isDisabled={isSubmitting}
-                    onChange={(option) => setFormData({...formData, categoria: option?.value || ''})}
-                    value={categoriaOptions.find(option => option.value === formData.categoria)}
-                  />
+                <FormItem label="Categoría" asterisk>
+                  <div className="flex gap-2">
+                    <div className="flex-1">
+                      <Select
+                        options={categoriaOptions}
+                        placeholder="Selecciona una categoría"
+                        isDisabled={isSubmitting}
+                        onChange={(option) => setFormData({...formData, categoriaId: option?.value})}
+                        value={categoriaOptions.find(option => option.value === formData.categoriaId)}
+                      />
+                    </div>
+                    {user?.roles?.includes('ADMIN') && (
+                      <Button
+                        type="button"
+                        variant="twoTone"
+                        onClick={async () => {
+                          const nombre = prompt('Nueva categoría (se guardará en MAYÚSCULAS):');
+                          if (!nombre) return;
+                          try {
+                            const nueva = await createCategoria(nombre.toUpperCase());
+                            const opt = { value: nueva.id, label: nueva.nombre };
+                            setCategorias(prev => [...prev, opt]);
+                            setFormData(prev => ({ ...prev, categoriaId: nueva.id }));
+                          } catch (e) {
+                            alert('No se pudo crear la categoría');
+                          }
+                        }}
+                      >
+                        Crear
+                      </Button>
+                    )}
+                  </div>
                 </FormItem>
 
                 <FormItem label="Tipo (opcional)">

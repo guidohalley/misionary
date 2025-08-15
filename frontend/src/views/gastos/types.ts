@@ -16,14 +16,12 @@ export type {
 
 // Re-export de enums y schemas desde schemas.ts
 export {
-  CategoriaGasto,
   CodigoMoneda,
   gastoOperativoSchema,
   asignacionGastoSchema,
   createGastoOperativoSchema,
   updateGastoOperativoSchema,
   createAsignacionGastoSchema,
-  categoriasGastoOptions,
   frecuenciaOptions,
   type CreateGastoOperativoFormData,
   type UpdateGastoOperativoFormData,

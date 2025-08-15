@@ -256,7 +256,7 @@ model GastoOperativo {
   monto         Decimal                   @db.Decimal(15, 2)
   monedaId      Int
   fecha         DateTime
-  categoria     CategoriaGasto
+  categoriaId   Int
   esRecurrente  Boolean                   @default(false)
   frecuencia    String?
   proveedorId   Int?
@@ -268,6 +268,7 @@ model GastoOperativo {
   asignaciones  AsignacionGastoProyecto[]
   moneda        Moneda                    @relation(fields: [monedaId], references: [id])
   proveedor     Persona?                  @relation("GastoProveedor", fields: [proveedorId], references: [id])
+  categoria     Categoria                 @relation(fields: [categoriaId], references: [id])
 }
 
 model AsignacionGastoProyecto {
@@ -358,15 +359,13 @@ enum CodigoMoneda {
   EUR
 }
 
-enum CategoriaGasto {
-  OFICINA
-  PERSONAL
-  MARKETING
-  TECNOLOGIA
-  SERVICIOS
-  TRANSPORTE
-  COMUNICACION
-  OTROS
+model Categoria {
+  id        Int               @id @default(autoincrement())
+  nombre    String            @unique
+  activo    Boolean           @default(true)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  gastos    GastoOperativo[]
 }
 
 enum TipoCotizacion {

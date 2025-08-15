@@ -1,7 +1,6 @@
-import { PrismaClient, CategoriaGasto } from '@prisma/client';
+import prisma from '../config/prisma';
 import { HttpError } from '../utils/http-error';
 
-const prisma = new PrismaClient();
 
 export interface CreateGastoOperativoData {
   concepto: string;
@@ -9,7 +8,7 @@ export interface CreateGastoOperativoData {
   monto: number;
   monedaId: number;
   fecha: Date;
-  categoria: CategoriaGasto;
+  categoriaId: number;
   esRecurrente?: boolean;
   frecuencia?: string;
   proveedorId?: number;
@@ -29,7 +28,7 @@ export interface CreateAsignacionData {
 }
 
 export interface GastoOperativoFilter {
-  categoria?: CategoriaGasto;
+  categoriaId?: number;
   proveedorId?: number;
   monedaId?: number;
   fechaDesde?: Date;
@@ -46,7 +45,7 @@ class GastoService {
     const where: any = {};
 
     if (filters) {
-      if (filters.categoria) where.categoria = filters.categoria;
+  if (filters.categoriaId) where.categoriaId = filters.categoriaId;
       if (filters.proveedorId) where.proveedorId = filters.proveedorId;
       if (filters.monedaId) where.monedaId = filters.monedaId;
       if (filters.esRecurrente !== undefined) where.esRecurrente = filters.esRecurrente;
@@ -79,6 +78,7 @@ class GastoService {
             telefono: true
           }
         },
+        categoria: true,
         asignaciones: {
           include: {
             presupuesto: {
@@ -112,6 +112,7 @@ class GastoService {
             telefono: true
           }
         },
+        categoria: true,
         asignaciones: {
           include: {
             presupuesto: {
@@ -158,6 +159,12 @@ class GastoService {
       }
     }
 
+    // Validar categoría
+    const categoria = await prisma.categoria.findUnique({ where: { id: data.categoriaId } });
+    if (!categoria) {
+      throw new HttpError(400, 'Categoría no encontrada');
+    }
+
   return await prisma.gastoOperativo.create({
       data: {
         concepto: data.concepto,
@@ -165,7 +172,7 @@ class GastoService {
         monto: data.monto,
         monedaId: data.monedaId,
         fecha: data.fecha,
-        categoria: data.categoria,
+        categoriaId: data.categoriaId,
         esRecurrente: data.esRecurrente || false,
         frecuencia: data.frecuencia,
         proveedorId: data.proveedorId,
@@ -181,7 +188,8 @@ class GastoService {
             email: true,
             telefono: true
           }
-  }
+        },
+        categoria: true
       }
     });
   }
@@ -195,7 +203,7 @@ class GastoService {
       throw new HttpError(404, 'Gasto operativo no encontrado');
     }
 
-    // Validaciones similares al create
+  // Validaciones similares al create
     if (data.monedaId) {
       const moneda = await prisma.moneda.findUnique({
         where: { id: data.monedaId }
@@ -216,9 +224,29 @@ class GastoService {
       }
     }
 
-  return await prisma.gastoOperativo.update({
+    if (data.categoriaId) {
+      const categoria = await prisma.categoria.findUnique({ where: { id: data.categoriaId } });
+      if (!categoria) {
+        throw new HttpError(400, 'Categoría no encontrada');
+      }
+    }
+
+    return await prisma.gastoOperativo.update({
       where: { id },
-      data,
+      data: {
+        concepto: data.concepto,
+        descripcion: data.descripcion,
+        monto: data.monto,
+        monedaId: data.monedaId,
+        fecha: data.fecha,
+        categoriaId: data.categoriaId,
+        esRecurrente: data.esRecurrente,
+        frecuencia: data.frecuencia,
+        proveedorId: data.proveedorId,
+        comprobante: data.comprobante,
+        observaciones: data.observaciones,
+        activo: data.activo
+      },
       include: {
         moneda: true,
         proveedor: {
@@ -228,7 +256,8 @@ class GastoService {
             email: true,
             telefono: true
           }
-  }
+        },
+        categoria: true
       }
     });
   }
@@ -441,16 +470,24 @@ class GastoService {
       if (fechaHasta) where.fecha.lte = fechaHasta;
     }
 
-    return await prisma.gastoOperativo.groupBy({
-      by: ['categoria'],
+    const grouped = await prisma.gastoOperativo.groupBy({
+      by: ['categoriaId'],
       where,
-      _sum: {
-        monto: true
-      },
-      _count: {
-        id: true
-      }
+      _sum: { monto: true },
+      _count: { id: true }
     });
+
+    type Grouped = { categoriaId: number | null; _sum: { monto: any }; _count: { id: number } };
+    const ids = (grouped as Grouped[]).map((g) => g.categoriaId).filter((v): v is number => v !== null);
+  const categorias: { id: number; nombre: string }[] = await prisma.categoria.findMany({ where: { id: { in: ids } }, select: { id: true, nombre: true } });
+  const byId = new Map<number, { id: number; nombre: string }>(categorias.map((c) => [c.id, { id: c.id, nombre: c.nombre }]));
+
+    return (grouped as Grouped[]).map((g) => ({
+      categoriaId: g.categoriaId,
+      categoriaNombre: g.categoriaId ? (byId.get(g.categoriaId)?.nombre ?? 'SIN CATEGORÍA') : 'SIN CATEGORÍA',
+      _sum: g._sum,
+      _count: g._count
+    }));
   }
 
   async getCostosOperativosPorProyecto(presupuestoId: number) {

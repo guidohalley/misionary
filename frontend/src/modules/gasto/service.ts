@@ -44,32 +44,32 @@ export async function fetchGastosOperativos(filters?: GastoOperativoFilters): Pr
 }
 
 export async function fetchGastoOperativoById(id: number): Promise<GastoOperativo> {
-  const response = await ApiService.fetchData<GastoOperativo>({
+  const response = await ApiService.fetchData<{success:boolean,data:GastoOperativo}>({
     url: `/gastos-operativos/${id}`,
     method: 'GET'
   });
   // Para un objeto individual, la API lo devuelve directamente
-  return response.data;
+  return response.data.data;
 }
 
 export async function createGastoOperativo(data: CreateGastoOperativoDTO): Promise<GastoOperativo> {
-  const response = await ApiService.fetchData<GastoOperativo>({
+  const response = await ApiService.fetchData<{success:boolean,data:GastoOperativo}>({
     url: '/gastos-operativos',
     method: 'POST',
     data
   });
   // Para un objeto individual, la API lo devuelve directamente
-  return response.data;
+  return response.data.data;
 }
 
 export async function updateGastoOperativo(id: number, data: UpdateGastoOperativoDTO): Promise<GastoOperativo> {
-  const response = await ApiService.fetchData<GastoOperativo>({
+  const response = await ApiService.fetchData<{success:boolean,data:GastoOperativo}>({
     url: `/gastos-operativos/${id}`,
     method: 'PUT',
     data
   });
   // Para un objeto individual, la API lo devuelve directamente
-  return response.data;
+  return response.data.data;
 }
 
 export async function deleteGastoOperativo(id: number): Promise<void> {

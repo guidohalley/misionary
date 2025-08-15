@@ -43,7 +43,7 @@ export function useGasto() {
     try {
       setLoading(true);
       setError(null);
-      const gasto = await gastoService.fetchGastoOperativoById(id);
+  const gasto = await gastoService.fetchGastoOperativoById(id);
       setSelectedGasto(gasto);
       return gasto;
     } catch (err) {
@@ -58,7 +58,7 @@ export function useGasto() {
     try {
       setLoading(true);
       setError(null);
-      const newGasto = await gastoService.createGastoOperativo(data);
+  const newGasto = await gastoService.createGastoOperativo(data);
       setGastosOperativos(prev => [...prev, newGasto]);
       return newGasto;
     } catch (err) {
@@ -73,7 +73,7 @@ export function useGasto() {
     try {
       setLoading(true);
       setError(null);
-      const updatedGasto = await gastoService.updateGastoOperativo(id, data);
+  const updatedGasto = await gastoService.updateGastoOperativo(id, data);
       setGastosOperativos(prev => prev.map(g => g.id === id ? updatedGasto : g));
       if (selectedGasto?.id === id) {
         setSelectedGasto(updatedGasto);
@@ -274,8 +274,8 @@ export function useGastoAuxiliarData() {
   const fetchPresupuestos = useCallback(async () => {
     try {
       setLoading(true);
-      const data = await gastoService.fetchPresupuestosActivos();
-      setPresupuestos(data);
+  const data = await gastoService.fetchPresupuestosActivos();
+  setPresupuestos(data as any);
     } catch (err) {
       setError('Error al cargar los presupuestos');
     } finally {
