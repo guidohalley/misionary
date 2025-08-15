@@ -1,4 +1,5 @@
 import prisma from '../config/prisma';
+import PresupuestoHistorialService from './presupuesto-historial.service';
 
 export class PresupuestoService {
   static async create(data: {
@@ -147,6 +148,17 @@ export class PresupuestoService {
       });
       
       console.log('Presupuesto creado exitosamente:', presupuesto.id);
+      
+      // Registrar en el historial de cambios
+      const snapshot = await PresupuestoHistorialService.crearSnapshot(presupuesto.id);
+      if (snapshot) {
+        await PresupuestoHistorialService.registrarCambio({
+          tipo: 'CREATE',
+          presupuestoId: presupuesto.id,
+          datosNuevos: snapshot
+        });
+      }
+      
       return presupuestoFinal || presupuesto;
     } catch (error) {
       console.error('Error en PresupuestoService.create:', error);
@@ -243,6 +255,9 @@ export class PresupuestoService {
       delete updateData.impuestosSeleccionados;
     }
 
+    // Crear snapshot del estado anterior
+    const snapshotAnterior = await PresupuestoHistorialService.crearSnapshot(id);
+
     return prisma.presupuesto.update({
       where: { id },
       data: updateData,
@@ -262,11 +277,43 @@ export class PresupuestoService {
           }
         }
       }
+    }).then(async (presupuestoActualizado) => {
+      // Registrar el cambio en el historial
+      const snapshotNuevo = await PresupuestoHistorialService.crearSnapshot(id);
+      if (snapshotAnterior && snapshotNuevo) {
+        await PresupuestoHistorialService.registrarCambio({
+          tipo: 'UPDATE',
+          presupuestoId: id,
+          usuarioId: userId,
+          datosAnteriores: snapshotAnterior,
+          datosNuevos: snapshotNuevo
+        });
+      }
+      
+      return presupuestoActualizado;
     });
-  }  static async updateEstado(id: number, estado: string) {
+  }  static async updateEstado(id: number, estado: string, usuarioId?: number) {
+    // Crear snapshot del estado anterior
+    const snapshotAnterior = await PresupuestoHistorialService.crearSnapshot(id);
+
     return prisma.presupuesto.update({
       where: { id },
       data: { estado: estado as any }
+    }).then(async (presupuestoActualizado) => {
+      // Registrar el cambio de estado en el historial
+      const snapshotNuevo = await PresupuestoHistorialService.crearSnapshot(id);
+      if (snapshotAnterior && snapshotNuevo) {
+        await PresupuestoHistorialService.registrarCambio({
+          tipo: 'STATE_CHANGE',
+          presupuestoId: id,
+          usuarioId: usuarioId,
+          motivoCambio: `Cambio de estado: ${snapshotAnterior.estado} → ${estado}`,
+          datosAnteriores: snapshotAnterior,
+          datosNuevos: snapshotNuevo
+        });
+      }
+      
+      return presupuestoActualizado;
     });
   }
 

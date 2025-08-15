@@ -15,15 +15,15 @@ model Moneda {
   activo             Boolean           @default(true)
   createdAt          DateTime          @default(now())
   updatedAt          DateTime          @updatedAt
+  cobrosCliente      CobroCliente[]
   facturas           Factura[]
   gastosOperativos   GastoOperativo[]
   historialPrecios   HistorialPrecio[] @relation("HistorialPrecioMoneda")
+  pagosAdmin         PagoAdmin[]
   presupuestos       Presupuesto[]
   productos          Producto[]
-  servicios          Servicio[]
   recibos            Recibo[]
-  pagosAdmin         PagoAdmin[]
-  cobrosCliente      CobroCliente[]
+  servicios          Servicio[]
   tiposCambio        TipoCambio[]      @relation("MonedaOrigen")
   tiposCambioDestino TipoCambio[]      @relation("MonedaDestino")
 }
@@ -38,72 +38,68 @@ model CobroCliente {
   concepto      String?
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
-
-  presupuesto   Presupuesto @relation(fields: [presupuestoId], references: [id])
   moneda        Moneda      @relation(fields: [monedaId], references: [id])
+  presupuesto   Presupuesto @relation(fields: [presupuestoId], references: [id])
 
   @@index([presupuestoId])
   @@index([fecha])
 }
 
 model TipoCambio {
-  id            Int      @id @default(autoincrement())
+  id            Int            @id @default(autoincrement())
   monedaDesdeId Int
   monedaHaciaId Int
-  valor         Decimal  @db.Decimal(15, 4)
-  fecha         DateTime @db.Date
-  // Tipo de cotización (oficial, blue, tarjeta)
-  tipo          TipoCotizacion @default(OFICIAL)
-  // Fuente opcional (ej: dolarapi, bcra, manual)
+  valor         Decimal        @db.Decimal(15, 4)
+  fecha         DateTime       @db.Date
+  createdAt     DateTime       @default(now())
   fuente        String?
-  createdAt     DateTime @default(now())
-  monedaDesde   Moneda   @relation("MonedaOrigen", fields: [monedaDesdeId], references: [id])
-  monedaHacia   Moneda   @relation("MonedaDestino", fields: [monedaHaciaId], references: [id])
+  tipo          TipoCotizacion @default(OFICIAL)
+  monedaDesde   Moneda         @relation("MonedaOrigen", fields: [monedaDesdeId], references: [id])
+  monedaHacia   Moneda         @relation("MonedaDestino", fields: [monedaHaciaId], references: [id])
 
   @@unique([monedaDesdeId, monedaHaciaId, tipo, fecha])
   @@index([fecha])
 }
 
 model Persona {
-  id                      Int               @id @default(autoincrement())
+  id                      Int                  @id @default(autoincrement())
   nombre                  String
   tipo                    TipoPersona
   telefono                String?
   cvu                     String?
   roles                   RolUsuario[]
   password                String?
-  email                   String            @unique
-  createdAt               DateTime          @default(now())
-  updatedAt               DateTime          @updatedAt
-  activo                  Boolean           @default(true)
-  esUsuario               Boolean           @default(false)
-  gastosComoProveedor     GastoOperativo[]  @relation("GastoProveedor")
-  historialPreciosUsuario HistorialPrecio[] @relation("HistorialPrecioUsuario")
-  presupuestos            Presupuesto[]     @relation("ClientePresupuestos")
+  email                   String               @unique
+  createdAt               DateTime             @default(now())
+  updatedAt               DateTime             @updatedAt
+  activo                  Boolean              @default(true)
+  esUsuario               Boolean              @default(false)
+  empresas                Empresa[]            @relation("ClienteEmpresas")
+  gastosComoProveedor     GastoOperativo[]     @relation("GastoProveedor")
+  historialPreciosUsuario HistorialPrecio[]    @relation("HistorialPrecioUsuario")
+  pagosAdmin              PagoAdmin[]
+  presupuestos            Presupuesto[]        @relation("ClientePresupuestos")
+  presupuestosVersiones   PresupuestoVersion[] @relation("PresupuestoVersionUsuario")
   productos               Producto[]
   recibos                 Recibo[]
-  pagosAdmin              PagoAdmin[]
   servicios               Servicio[]
-  empresas                Empresa[]         @relation("ClienteEmpresas")
 }
 
 model Empresa {
-  id          Int       @id @default(autoincrement())
-  nombre      String
-  razonSocial String?
-  cuit        String?   @unique
-  telefono    String?
-  email       String?
-  direccion   String?
-  clienteId   Int
-  activo      Boolean   @default(true)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  // Relaciones
-  cliente     Persona   @relation("ClienteEmpresas", fields: [clienteId], references: [id], onDelete: Cascade)
+  id           Int           @id @default(autoincrement())
+  nombre       String
+  razonSocial  String?
+  cuit         String?       @unique
+  telefono     String?
+  email        String?
+  direccion    String?
+  clienteId    Int
+  activo       Boolean       @default(true)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  cliente      Persona       @relation("ClienteEmpresas", fields: [clienteId], references: [id], onDelete: Cascade)
+  facturas     Factura[]     @relation("EmpresaFacturas")
   presupuestos Presupuesto[] @relation("EmpresaPresupuestos")
-  facturas    Factura[] @relation("EmpresaFacturas")
 
   @@index([clienteId])
   @@index([activo])
@@ -112,13 +108,13 @@ model Empresa {
 model Producto {
   id               Int               @id @default(autoincrement())
   nombre           String
-  costoProveedor   Decimal           @db.Decimal(15, 2)
-  margenAgencia    Decimal           @db.Decimal(5, 2)
   precio           Decimal           @db.Decimal(15, 2)
   proveedorId      Int
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
   monedaId         Int               @default(1)
+  costoProveedor   Decimal           @db.Decimal(15, 2)
+  margenAgencia    Decimal           @db.Decimal(5, 2)
   historialPrecios HistorialPrecio[] @relation("ProductoHistorialPrecios")
   items            Item[]
   moneda           Moneda            @relation(fields: [monedaId], references: [id])
@@ -129,13 +125,13 @@ model Servicio {
   id               Int               @id @default(autoincrement())
   nombre           String
   descripcion      String
-  costoProveedor   Decimal           @db.Decimal(15, 2)
-  margenAgencia    Decimal           @db.Decimal(5, 2)
   precio           Decimal           @db.Decimal(15, 2)
   proveedorId      Int
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
   monedaId         Int               @default(1)
+  costoProveedor   Decimal           @db.Decimal(15, 2)
+  margenAgencia    Decimal           @db.Decimal(5, 2)
   historialPrecios HistorialPrecio[] @relation("ServicioHistorialPrecios")
   items            Item[]
   moneda           Moneda            @relation(fields: [monedaId], references: [id])
@@ -145,7 +141,6 @@ model Servicio {
 model Presupuesto {
   id                   Int                       @id @default(autoincrement())
   clienteId            Int
-  empresaId            Int?
   subtotal             Decimal                   @db.Decimal(15, 2)
   impuestos            Decimal                   @db.Decimal(15, 2)
   total                Decimal                   @db.Decimal(15, 2)
@@ -154,24 +149,50 @@ model Presupuesto {
   updatedAt            DateTime                  @updatedAt
   monedaId             Int                       @default(1)
   tipoCambioFecha      DateTime?
-  // Periodo y recurrencia
-  periodoInicio        DateTime?
-  periodoFin           DateTime?
+  empresaId            Int?
   esRecurrente         Boolean                   @default(false)
   frecuencia           FrecuenciaContrato?
-  renovacionAutomatica Boolean                   @default(false)
+  periodoFin           DateTime?
+  periodoInicio        DateTime?
   precioPeriodo        Decimal?                  @db.Decimal(15, 2)
+  renovacionAutomatica Boolean                   @default(false)
   asignacionesGasto    AsignacionGastoProyecto[]
+  cobrosCliente        CobroCliente[]
   facturas             Factura[]
   items                Item[]
+  pagosAdmin           PagoAdmin[]
   cliente              Persona                   @relation("ClientePresupuestos", fields: [clienteId], references: [id])
   empresa              Empresa?                  @relation("EmpresaPresupuestos", fields: [empresaId], references: [id])
   moneda               Moneda                    @relation(fields: [monedaId], references: [id])
   presupuestoImpuestos PresupuestoImpuesto[]
+  versiones            PresupuestoVersion[]
   recibos              Recibo[]
-  pagosAdmin           PagoAdmin[]
-  // Relación a cobros directos de cliente (sin factura)
-  cobrosCliente        CobroCliente[]
+}
+
+model PresupuestoVersion {
+  id                    Int                @id @default(autoincrement())
+  presupuestoId         Int
+  versionNumero         Int
+  subtotalAnterior      Decimal?           @db.Decimal(15, 2)
+  subtotalNuevo         Decimal            @db.Decimal(15, 2)
+  impuestosAnterior     Decimal?           @db.Decimal(15, 2)
+  impuestosNuevo        Decimal            @db.Decimal(15, 2)
+  totalAnterior         Decimal?           @db.Decimal(15, 2)
+  totalNuevo            Decimal            @db.Decimal(15, 2)
+  estadoAnterior        EstadoPresupuesto?
+  estadoNuevo           EstadoPresupuesto
+  usuarioModificacionId Int?
+  motivoCambio          String?
+  fechaCambio           DateTime           @default(now())
+  snapshotData          Json
+  tipoOperacion         String             @default("UPDATE")
+  presupuesto           Presupuesto        @relation(fields: [presupuestoId], references: [id], onDelete: Cascade)
+  usuarioModificacion   Persona?           @relation("PresupuestoVersionUsuario", fields: [usuarioModificacionId], references: [id])
+
+  @@unique([presupuestoId, versionNumero])
+  @@index([presupuestoId])
+  @@index([fechaCambio])
+  @@index([usuarioModificacionId])
 }
 
 model Item {
@@ -190,7 +211,6 @@ model Factura {
   id                 Int           @id @default(autoincrement())
   numero             String        @unique
   presupuestoId      Int
-  empresaId          Int?
   fecha              DateTime
   subtotal           Decimal       @db.Decimal(15, 2)
   impuestos          Decimal       @db.Decimal(15, 2)
@@ -201,6 +221,7 @@ model Factura {
   updatedAt          DateTime      @updatedAt
   monedaId           Int           @default(1)
   tipoCambioFecha    DateTime?
+  empresaId          Int?
   empresa            Empresa?      @relation("EmpresaFacturas", fields: [empresaId], references: [id])
   impuestoAplicado   Impuesto      @relation(fields: [impuestoAplicadoId], references: [id])
   moneda             Moneda        @relation(fields: [monedaId], references: [id])
@@ -208,20 +229,20 @@ model Factura {
 }
 
 model Recibo {
-  id         Int      @id @default(autoincrement())
-  personaId  Int
+  id            Int          @id @default(autoincrement())
+  personaId     Int
+  concepto      String
+  monto         Decimal      @db.Decimal(15, 2)
+  fecha         DateTime
+  metodoPago    String
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  monedaId      Int          @default(1)
   presupuestoId Int?
-  concepto   String
-  monto      Decimal  @db.Decimal(15, 2)
-  fecha      DateTime
-  metodoPago String
-  tipo       ReciboTipo @default(PROVEEDOR)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  persona    Persona  @relation(fields: [personaId], references: [id])
-  presupuesto Presupuesto? @relation(fields: [presupuestoId], references: [id])
-  monedaId   Int      @default(1)
-  moneda     Moneda   @relation(fields: [monedaId], references: [id])
+  tipo          ReciboTipo   @default(PROVEEDOR)
+  moneda        Moneda       @relation(fields: [monedaId], references: [id])
+  persona       Persona      @relation(fields: [personaId], references: [id])
+  presupuesto   Presupuesto? @relation(fields: [presupuestoId], references: [id])
 }
 
 model Impuesto {
@@ -256,7 +277,7 @@ model GastoOperativo {
   monto         Decimal                   @db.Decimal(15, 2)
   monedaId      Int
   fecha         DateTime
-  categoriaId   Int
+  categoria     CategoriaGasto
   esRecurrente  Boolean                   @default(false)
   frecuencia    String?
   proveedorId   Int?
@@ -265,10 +286,11 @@ model GastoOperativo {
   activo        Boolean                   @default(true)
   createdAt     DateTime                  @default(now())
   updatedAt     DateTime                  @updatedAt
+  tipoId        Int?
   asignaciones  AsignacionGastoProyecto[]
   moneda        Moneda                    @relation(fields: [monedaId], references: [id])
   proveedor     Persona?                  @relation("GastoProveedor", fields: [proveedorId], references: [id])
-  categoria     Categoria                 @relation(fields: [categoriaId], references: [id])
+  TipoGasto     TipoGasto?                @relation(fields: [tipoId], references: [id])
 }
 
 model AsignacionGastoProyecto {
@@ -320,12 +342,23 @@ model PagoAdmin {
   concepto      String?
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
-
   admin         Persona     @relation(fields: [adminId], references: [id])
-  presupuesto   Presupuesto @relation(fields: [presupuestoId], references: [id])
   moneda        Moneda      @relation(fields: [monedaId], references: [id])
+  presupuesto   Presupuesto @relation(fields: [presupuestoId], references: [id])
 
   @@index([presupuestoId])
+}
+
+model TipoGasto {
+  id             Int              @id @default(autoincrement())
+  nombre         String
+  slug           String           @unique
+  color          String?
+  descripcion    String?
+  activo         Boolean          @default(true)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime
+  GastoOperativo GastoOperativo[]
 }
 
 enum TipoPersona {
@@ -359,15 +392,6 @@ enum CodigoMoneda {
   EUR
 }
 
-model Categoria {
-  id        Int               @id @default(autoincrement())
-  nombre    String            @unique
-  activo    Boolean           @default(true)
-  createdAt DateTime          @default(now())
-  updatedAt DateTime          @updatedAt
-  gastos    GastoOperativo[]
-}
-
 enum TipoCotizacion {
   OFICIAL
   BLUE
@@ -384,4 +408,15 @@ enum FrecuenciaContrato {
   MENSUAL
   TRIMESTRAL
   ANUAL
+}
+
+enum CategoriaGasto {
+  OFICINA
+  PERSONAL
+  MARKETING
+  TECNOLOGIA
+  SERVICIOS
+  TRANSPORTE
+  COMUNICACION
+  OTROS
 }
