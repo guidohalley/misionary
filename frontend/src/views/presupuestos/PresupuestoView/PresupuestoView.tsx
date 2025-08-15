@@ -120,7 +120,7 @@ const PresupuestoView: React.FC = () => {
   return (
     <>
       {/* Estilos para impresión */}
-      <style jsx>{`
+      <style>{`
         @media print {
           .no-print {
             display: none !important;
@@ -283,8 +283,8 @@ const PresupuestoView: React.FC = () => {
                     <div className="font-medium text-gray-900">
                       {item.producto?.nombre || item.servicio?.nombre || 'N/A'}
                     </div>
-                    {item.producto?.descripcion && (
-                      <div className="text-sm text-gray-600">{item.producto.descripcion}</div>
+                    {item.producto?.nombre && (
+                      <div className="text-sm text-gray-600">{item.producto.nombre}</div>
                     )}
                     {item.servicio?.descripcion && (
                       <div className="text-sm text-gray-600">{item.servicio.descripcion}</div>
