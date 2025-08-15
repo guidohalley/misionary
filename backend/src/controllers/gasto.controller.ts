@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { gastoService } from '../services/gasto.service';
 import { HttpError } from '../utils/http-error';
+import { CategoriaGasto } from '@prisma/client';
 
 export class GastoController {
   // ─────────────────── GASTOS OPERATIVOS ─────────────────── 
@@ -8,7 +9,7 @@ export class GastoController {
   async getGastosOperativos(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const {
-        categoriaId,
+        categoria,
         proveedorId,
         monedaId,
         fechaDesde,
@@ -20,7 +21,9 @@ export class GastoController {
 
       const filters: any = {};
       
-      if (categoriaId) filters.categoriaId = parseInt(categoriaId as string);
+      if (categoria && Object.values(CategoriaGasto).includes(categoria as CategoriaGasto)) {
+        filters.categoria = categoria as CategoriaGasto;
+      }
       if (proveedorId) filters.proveedorId = parseInt(proveedorId as string);
       if (monedaId) filters.monedaId = parseInt(monedaId as string);
   if (fechaDesde) filters.fechaDesde = new Date(fechaDesde as string);
@@ -63,7 +66,7 @@ export class GastoController {
         monto,
         monedaId,
         fecha,
-        categoriaId,
+        categoria,
         esRecurrente,
         frecuencia,
         proveedorId,
@@ -72,8 +75,13 @@ export class GastoController {
       } = req.body;
 
       // Validaciones básicas
-      if (!concepto || !monto || !monedaId || !fecha || !categoriaId) {
-        throw new HttpError(400, 'Los campos concepto, monto, monedaId, fecha y categoriaId son obligatorios');
+      if (!concepto || !monto || !monedaId || !fecha || !categoria) {
+        throw new HttpError(400, 'Los campos concepto, monto, monedaId, fecha y categoria son obligatorios');
+      }
+
+      // Validar que la categoría sea válida
+      if (!Object.values(CategoriaGasto).includes(categoria)) {
+        throw new HttpError(400, 'Categoría inválida');
       }
 
       if (monto <= 0) {
@@ -86,7 +94,7 @@ export class GastoController {
         monto: parseFloat(monto),
         monedaId: parseInt(monedaId),
         fecha: new Date(fecha),
-  categoriaId: parseInt(categoriaId),
+        categoria: categoria as CategoriaGasto,
         esRecurrente: esRecurrente || false,
         frecuencia,
         proveedorId: proveedorId ? parseInt(proveedorId) : undefined,

@@ -6,39 +6,88 @@ export interface CreateCategoriaData {
   activo?: boolean;
 }
 
+import { CategoriaGasto } from '@prisma/client';
+
 export class CategoriaService {
+  static async list(activo?: boolean) {
+    // Convertir enum a formato compatible con la API existente
+    const categorias = Object.values(CategoriaGasto).map((categoria, index) => ({
+      id: index + 1,
+      nombre: categoria,
+      activo: true,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }));
+
+    if (activo !== undefined) {
+      return categorias.filter(cat => cat.activo === activo);
+    }
+    return categorias;
+  }
+
+  static async getById(id: number) {
+    const categorias = Object.values(CategoriaGasto);
+    const categoria = categorias[id - 1];
+    
+    if (!categoria) return null;
+    
+    return {
+      id,
+      nombre: categoria,
+      activo: true,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+  }
+
+  static async create(data: { nombre: string; activo?: boolean }) {
+    // Los enums no se pueden crear dinámicamente
+    throw new Error('No se pueden crear nuevas categorías. Use las categorías predefinidas del sistema.');
+  }
+
+  static async update(id: number, data: any) {
+    // Los enums no se pueden actualizar
+    throw new Error('No se pueden modificar las categorías del sistema.');
+  }
+
+  static async remove(id: number) {
+    // Verificar si hay gastos usando esta categoría
+    const categorias = Object.values(CategoriaGasto);
+    const categoria = categorias[id - 1];
+    
+    if (!categoria) {
+      throw new Error('Categoría no encontrada');
+    }
+
+    const prisma = (await import('../config/prisma')).default;
+    const count = await prisma.gastoOperativo.count({ where: { categoria } });
+    
+    if (count > 0) {
+      throw new Error('No se puede eliminar la categoría porque tiene gastos asociados');
+    }
+    
+    throw new Error('No se pueden eliminar las categorías del sistema.');
+  }
+
+  // Métodos de instancia para compatibilidad
   async list(activo?: boolean) {
-    return prisma.categoria.findMany({
-      where: activo === undefined ? {} : { activo },
-      orderBy: { nombre: 'asc' }
-    });
+    return CategoriaService.list(activo);
   }
 
   async getById(id: number) {
-    const cat = await prisma.categoria.findUnique({ where: { id } });
-    if (!cat) throw new HttpError(404, 'Categoría no encontrada');
-    return cat;
+    return CategoriaService.getById(id);
   }
 
-  async create(data: CreateCategoriaData) {
-    const nombre = data.nombre.trim().toUpperCase();
-    return prisma.categoria.create({ data: { nombre, activo: data.activo ?? true } });
+  async create(data: { nombre: string; activo?: boolean }) {
+    return CategoriaService.create(data);
   }
 
-  async update(id: number, data: Partial<CreateCategoriaData>) {
-    if (data.nombre !== undefined) data.nombre = data.nombre.trim().toUpperCase();
-    try {
-      return await prisma.categoria.update({ where: { id }, data });
-    } catch (e) {
-      throw new HttpError(404, 'Categoría no encontrada');
-    }
+  async update(id: number, data: any) {
+    return CategoriaService.update(id, data);
   }
 
   async remove(id: number) {
-    // Validar que no tenga gastos asociados activos
-    const count = await prisma.gastoOperativo.count({ where: { categoriaId: id } });
-    if (count > 0) throw new HttpError(400, 'No se puede eliminar: tiene gastos asociados');
-    await prisma.categoria.delete({ where: { id } });
+    return CategoriaService.remove(id);
   }
 }
 

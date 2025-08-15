@@ -23,26 +23,6 @@ async function main() {
 
   console.log('Monedas básicas creadas');
   
-  // 1.5) Categorías iniciales
-  const categorias = [
-    'OFICINA',
-    'PERSONAL',
-    'MARKETING',
-    'TECNOLOGIA',
-    'SERVICIOS',
-    'TRANSPORTE',
-    'COMUNICACION',
-    'OTROS'
-  ];
-
-  for (const nombre of categorias) {
-    await prisma.categoria.upsert({
-      where: { nombre },
-      update: {},
-      create: { nombre, activo: true }
-    });
-  }
-  console.log('Categorías iniciales creadas');
   
   // 2) Usuario administrador único
   const emailAdmin = 'guido@misionary.com';

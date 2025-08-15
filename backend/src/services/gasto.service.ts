@@ -1,5 +1,6 @@
 import prisma from '../config/prisma';
 import { HttpError } from '../utils/http-error';
+import { CategoriaGasto } from '@prisma/client';
 
 
 export interface CreateGastoOperativoData {
@@ -8,7 +9,7 @@ export interface CreateGastoOperativoData {
   monto: number;
   monedaId: number;
   fecha: Date;
-  categoriaId: number;
+  categoria: CategoriaGasto;
   esRecurrente?: boolean;
   frecuencia?: string;
   proveedorId?: number;
@@ -28,7 +29,7 @@ export interface CreateAsignacionData {
 }
 
 export interface GastoOperativoFilter {
-  categoriaId?: number;
+  categoria?: CategoriaGasto;
   proveedorId?: number;
   monedaId?: number;
   fechaDesde?: Date;
@@ -45,7 +46,7 @@ class GastoService {
     const where: any = {};
 
     if (filters) {
-  if (filters.categoriaId) where.categoriaId = filters.categoriaId;
+      if (filters.categoria) where.categoria = filters.categoria;
       if (filters.proveedorId) where.proveedorId = filters.proveedorId;
       if (filters.monedaId) where.monedaId = filters.monedaId;
       if (filters.esRecurrente !== undefined) where.esRecurrente = filters.esRecurrente;
@@ -78,7 +79,6 @@ class GastoService {
             telefono: true
           }
         },
-        categoria: true,
         asignaciones: {
           include: {
             presupuesto: {
@@ -112,7 +112,6 @@ class GastoService {
             telefono: true
           }
         },
-        categoria: true,
         asignaciones: {
           include: {
             presupuesto: {
@@ -159,10 +158,9 @@ class GastoService {
       }
     }
 
-    // Validar categoría
-    const categoria = await prisma.categoria.findUnique({ where: { id: data.categoriaId } });
-    if (!categoria) {
-      throw new HttpError(400, 'Categoría no encontrada');
+    // Validar que la categoría sea válida
+    if (!Object.values(CategoriaGasto).includes(data.categoria)) {
+      throw new HttpError(400, 'Categoría no válida');
     }
 
   return await prisma.gastoOperativo.create({
@@ -172,7 +170,7 @@ class GastoService {
         monto: data.monto,
         monedaId: data.monedaId,
         fecha: data.fecha,
-        categoriaId: data.categoriaId,
+        categoria: data.categoria,
         esRecurrente: data.esRecurrente || false,
         frecuencia: data.frecuencia,
         proveedorId: data.proveedorId,
@@ -188,8 +186,7 @@ class GastoService {
             email: true,
             telefono: true
           }
-        },
-        categoria: true
+        }
       }
     });
   }
@@ -224,10 +221,9 @@ class GastoService {
       }
     }
 
-    if (data.categoriaId) {
-      const categoria = await prisma.categoria.findUnique({ where: { id: data.categoriaId } });
-      if (!categoria) {
-        throw new HttpError(400, 'Categoría no encontrada');
+    if (data.categoria) {
+      if (!Object.values(CategoriaGasto).includes(data.categoria)) {
+        throw new HttpError(400, 'Categoría no válida');
       }
     }
 
@@ -239,7 +235,7 @@ class GastoService {
         monto: data.monto,
         monedaId: data.monedaId,
         fecha: data.fecha,
-        categoriaId: data.categoriaId,
+        categoria: data.categoria,
         esRecurrente: data.esRecurrente,
         frecuencia: data.frecuencia,
         proveedorId: data.proveedorId,
@@ -256,8 +252,7 @@ class GastoService {
             email: true,
             telefono: true
           }
-        },
-        categoria: true
+        }
       }
     });
   }
@@ -471,20 +466,17 @@ class GastoService {
     }
 
     const grouped = await prisma.gastoOperativo.groupBy({
-      by: ['categoriaId'],
+      by: ['categoria'],
       where,
       _sum: { monto: true },
       _count: { id: true }
     });
 
-    type Grouped = { categoriaId: number | null; _sum: { monto: any }; _count: { id: number } };
-    const ids = (grouped as Grouped[]).map((g) => g.categoriaId).filter((v): v is number => v !== null);
-  const categorias: { id: number; nombre: string }[] = await prisma.categoria.findMany({ where: { id: { in: ids } }, select: { id: true, nombre: true } });
-  const byId = new Map<number, { id: number; nombre: string }>(categorias.map((c) => [c.id, { id: c.id, nombre: c.nombre }]));
+    type Grouped = { categoria: CategoriaGasto | null; _sum: { monto: any }; _count: { id: number } };
 
     return (grouped as Grouped[]).map((g) => ({
-      categoriaId: g.categoriaId,
-      categoriaNombre: g.categoriaId ? (byId.get(g.categoriaId)?.nombre ?? 'SIN CATEGORÍA') : 'SIN CATEGORÍA',
+      categoria: g.categoria,
+      categoriaNombre: g.categoria || 'SIN CATEGORÍA',
       _sum: g._sum,
       _count: g._count
     }));

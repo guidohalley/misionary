@@ -16,6 +16,16 @@ const navigationConfig: NavigationTree[] = [
         authority: [],
         subMenu: [],
     },
+    {
+        key: 'analytics',
+        path: '/dashboard/analytics',
+        title: 'Proyecciones',
+        translateKey: 'nav.analytics',
+        icon: 'chartLine',
+        type: NAV_ITEM_TYPE_ITEM,
+        authority: ['ADMIN'],
+        subMenu: [],
+    },
     
     // === GESTIÓN DE CATÁLOGOS ===
     {
