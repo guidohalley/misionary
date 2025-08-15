@@ -1,6 +1,9 @@
 import { Request, Response } from 'express';
 import { HistorialPrecioService } from '../services/historialPrecio.service';
 import { body, param, query, validationResult } from 'express-validator';
+import { RolUsuario } from '@prisma/client';
+import { ProductoService } from '../services/producto.service';
+import { ServicioService } from '../services/servicio.service';
 
 export class HistorialPrecioController {
   /**
@@ -20,6 +23,16 @@ export class HistorialPrecioController {
 
       const productoId = parseInt(req.params.id);
       const { monedaId, limit } = req.query;
+      const user = (req as any).user;
+
+      // Verificar permisos para ver el historial de precios
+      const canAccessPricing = await HistorialPrecioControllerHelper.canAccessProductPricing(user, productoId);
+      if (!canAccessPricing) {
+        return res.status(403).json({
+          success: false,
+          message: 'No tienes permisos para ver el historial de precios de este producto'
+        });
+      }
 
       const historial = await HistorialPrecioService.getHistorialProducto(
         productoId,
@@ -27,14 +40,14 @@ export class HistorialPrecioController {
         limit ? parseInt(limit as string) : undefined
       );
 
-  return res.json({
+      return res.json({
         success: true,
         data: historial,
         message: 'Historial de precios obtenido exitosamente'
       });
     } catch (error) {
       console.error('Error al obtener historial de precios del producto:', error);
-  return res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: 'Error interno del servidor',
         error: error instanceof Error ? error.message : 'Error desconocido'
@@ -59,6 +72,16 @@ export class HistorialPrecioController {
 
       const servicioId = parseInt(req.params.id);
       const { monedaId, limit } = req.query;
+      const user = (req as any).user;
+
+      // Verificar permisos para ver el historial de precios
+      const canAccessPricing = await HistorialPrecioControllerHelper.canAccessServicePricing(user, servicioId);
+      if (!canAccessPricing) {
+        return res.status(403).json({
+          success: false,
+          message: 'No tienes permisos para ver el historial de precios de este servicio'
+        });
+      }
 
       const historial = await HistorialPrecioService.getHistorialServicio(
         servicioId,
@@ -66,7 +89,7 @@ export class HistorialPrecioController {
         limit ? parseInt(limit as string) : undefined
       );
 
-  return res.json({
+      return res.json({
         success: true,
         data: historial,
         message: 'Historial de precios obtenido exitosamente'
@@ -98,6 +121,16 @@ export class HistorialPrecioController {
 
       const productoId = parseInt(req.params.id);
       const monedaId = parseInt(req.params.monedaId);
+      const user = (req as any).user;
+
+      // Verificar permisos para ver el precio actual
+      const canAccessPricing = await HistorialPrecioControllerHelper.canAccessProductPricing(user, productoId);
+      if (!canAccessPricing) {
+        return res.status(403).json({
+          success: false,
+          message: 'No tienes permisos para ver el precio actual de este producto'
+        });
+      }
 
       const precioActual = await HistorialPrecioService.getPrecioActualProducto(
         productoId,
@@ -111,7 +144,7 @@ export class HistorialPrecioController {
         });
       }
 
-  return res.json({
+      return res.json({
         success: true,
         data: precioActual,
         message: 'Precio actual obtenido exitosamente'
@@ -143,6 +176,16 @@ export class HistorialPrecioController {
 
       const servicioId = parseInt(req.params.id);
       const monedaId = parseInt(req.params.monedaId);
+      const user = (req as any).user;
+
+      // Verificar permisos para ver el precio actual
+      const canAccessPricing = await HistorialPrecioControllerHelper.canAccessServicePricing(user, servicioId);
+      if (!canAccessPricing) {
+        return res.status(403).json({
+          success: false,
+          message: 'No tienes permisos para ver el precio actual de este servicio'
+        });
+      }
 
       const precioActual = await HistorialPrecioService.getPrecioActualServicio(
         servicioId,
@@ -156,7 +199,7 @@ export class HistorialPrecioController {
         });
       }
 
-  return res.json({
+      return res.json({
         success: true,
         data: precioActual,
         message: 'Precio actual obtenido exitosamente'
@@ -414,3 +457,42 @@ export const validarFechas = [
     .isISO8601()
     .withMessage('La fecha hasta debe ser una fecha válida (ISO 8601)')
 ];
+
+// Métodos auxiliares agregados al final de la clase HistorialPrecioController
+export class HistorialPrecioControllerHelper {
+  /**
+   * Verifica si un usuario puede acceder a la información de precios de un producto
+   */
+  static async canAccessProductPricing(user: any, productoId: number): Promise<boolean> {
+    // ADMIN y CONTADOR siempre pueden acceder
+    if (user.roles.includes(RolUsuario.ADMIN) || user.roles.includes(RolUsuario.CONTADOR)) {
+      return true;
+    }
+    
+    // PROVEEDOR solo puede acceder a sus propios productos
+    if (user.roles.includes(RolUsuario.PROVEEDOR)) {
+      const producto = await ProductoService.findById(productoId);
+      return producto ? producto.proveedorId === user.id : false;
+    }
+    
+    return false;
+  }
+
+  /**
+   * Verifica si un usuario puede acceder a la información de precios de un servicio
+   */
+  static async canAccessServicePricing(user: any, servicioId: number): Promise<boolean> {
+    // ADMIN y CONTADOR siempre pueden acceder
+    if (user.roles.includes(RolUsuario.ADMIN) || user.roles.includes(RolUsuario.CONTADOR)) {
+      return true;
+    }
+    
+    // PROVEEDOR solo puede acceder a sus propios servicios
+    if (user.roles.includes(RolUsuario.PROVEEDOR)) {
+      const servicio = await ServicioService.findById(servicioId);
+      return servicio ? servicio.proveedorId === user.id : false;
+    }
+    
+    return false;
+  }
+}
