@@ -1,6 +1,10 @@
 import prisma from '../config/prisma';
 import { EstadoPresupuesto } from '@prisma/client';
 
+// Compatibilidad temporal: usar cast a any para acceder a modelos añadidos recientemente
+// en el cliente Prisma si los tipos no se regeneraron correctamente.
+// Se debe eliminar esta solución cuando `@prisma/client` incluya el modelo en sus tipos.
+
 export interface PresupuestoSnapshot {
   id: number;
   clienteId: number;
@@ -43,7 +47,7 @@ export class PresupuestoHistorialService {
   static async registrarCambio(cambio: CambioPresupuesto): Promise<void> {
     try {
       // Obtener el último número de versión
-      const ultimaVersion = await prisma.presupuestoVersion.findFirst({
+      const ultimaVersion = await (prisma as any).presupuestoVersion.findFirst({
         where: { presupuestoId: cambio.presupuestoId },
         orderBy: { versionNumero: 'desc' },
         select: { versionNumero: true }
@@ -52,7 +56,7 @@ export class PresupuestoHistorialService {
       const nuevoNumeroVersion = (ultimaVersion?.versionNumero || 0) + 1;
 
       // Crear el registro de historial
-      await prisma.presupuestoVersion.create({
+      await (prisma as any).presupuestoVersion.create({
         data: {
           presupuestoId: cambio.presupuestoId,
           versionNumero: nuevoNumeroVersion,
@@ -136,7 +140,7 @@ export class PresupuestoHistorialService {
    * Obtener historial completo de un presupuesto
    */
   static async obtenerHistorial(presupuestoId: number) {
-    return prisma.presupuestoVersion.findMany({
+    return (prisma as any).presupuestoVersion.findMany({
       where: { presupuestoId },
       orderBy: { versionNumero: 'asc' },
       include: {
@@ -176,7 +180,7 @@ export class PresupuestoHistorialService {
       where.estadoNuevo = params.estadoPresupuesto;
     }
 
-    const cambios = await prisma.presupuestoVersion.findMany({
+    const cambios = await (prisma as any).presupuestoVersion.findMany({
       where,
       include: {
         presupuesto: {
