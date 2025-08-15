@@ -3,8 +3,10 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
 
+ARG CACHEBUST=0
 COPY package.json package-lock.json ./
-RUN npm ci
+# Forzar invalidación de cache de dependencias cuando cambie CACHEBUST
+RUN echo "CACHEBUST=${CACHEBUST}" > /tmp/CACHEBUST && npm ci
 
 COPY . .
 # Generar Prisma Client con el schema ya copiado y luego compilar TypeScript
@@ -16,8 +18,10 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
+ARG CACHEBUST=0
 COPY package.json package-lock.json ./
-RUN npm ci --omit=dev
+# Forzar invalidación de cache de dependencias de runtime cuando cambie CACHEBUST
+RUN echo "CACHEBUST=${CACHEBUST}" > /tmp/CACHEBUST && npm ci --omit=dev
 
 # Copiamos solo lo necesario para correr
 COPY --from=builder /app/dist ./dist

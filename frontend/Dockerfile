@@ -1,19 +1,20 @@
 FROM node:20-alpine AS builder
 
-# Aca se construye la aplicacion usando vite
+# Construcción con Vite
 ARG VITE_API_URL
+ARG CACHEBUST=0
 
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm ci
+COPY package.json package-lock.json ./
+# Usar npm ci y forzar bust de cache si cambia CACHEBUST
+RUN echo "CACHEBUST=${CACHEBUST}" > /tmp/CACHEBUST && npm ci
 
 COPY . .
 
 # Pasar variable al build de Vite (prefijo VITE_)
 ENV VITE_API_URL=$VITE_API_URL
-RUN echo "VITE_API_URL=$VITE_API_URL"
-RUN npm run build
+RUN echo "VITE_API_URL=$VITE_API_URL" && npm run build
 
 # Etapa 2: Servidor Nginx
 FROM nginx:alpine
