@@ -43,7 +43,7 @@ services:
     volumes:
       - ./backend:/app
       - /app/node_modules
-    command: sh -c "npm run db:migrate && npm run start:dev"
+    command: sh -c "npx prisma generate && npm run db:migrate && npm run start:dev"
 
   frontend:
     build:
@@ -58,6 +58,7 @@ services:
       - /app/node_modules
     environment:
       - VITE_API_URL=${VITE_API_URL:-http://localhost:3001/api}
+    command: sh -c "npm install --legacy-peer-deps && npm install @rollup/rollup-linux-x64-musl --force && npm run dev"
 
 volumes:
   postgres_data:

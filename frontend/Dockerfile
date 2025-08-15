@@ -7,8 +7,8 @@ ARG CACHEBUST=20250815-192339
 WORKDIR /app
 
 COPY package.json package-lock.json ./
-# Usar npm ci y forzar bust de cache si cambia CACHEBUST
-RUN echo "CACHEBUST=${CACHEBUST}" > /tmp/CACHEBUST && npm ci
+# Usar npm install simple en Alpine - esto funciona sin problemas
+RUN npm install
 
 COPY . .
 

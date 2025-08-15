@@ -2,12 +2,25 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Instalar dependencias
+# Instalar dependencias siguiendo la recomendación del error de Rollup
 COPY package*.json ./
-RUN npm ci
+
+# Limpiar y reinstalar como sugiere el error de Rollup
+RUN rm -f package-lock.json && \
+    rm -rf node_modules && \
+    npm install --legacy-peer-deps
 
 # Copiar el resto del código
 COPY . .
+
+# Instalar dependencias opcionales específicamente para evitar error de Rollup
+RUN npm install --optional
+
+# Copiar el resto del código
+COPY . .
+
+# Reinstalar dependencias opcionales que pueden necesitar recompilación
+RUN npm rebuild
 
 # Exponer el puerto para Vite dev server
 EXPOSE 5173
