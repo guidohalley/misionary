@@ -50,7 +50,7 @@ const CompleteProviderRegistration: React.FC = () => {
       setIsSubmitting(true);
       setError(null);
 
-      // Enviar datos del proveedor junto con el token para completar registro
+      // Enviar datos completos del proveedor con el token (crea usuario completo)
       await ApiService.fetchData({
         url: '/auth/invite/complete-provider',
         method: 'post',
@@ -60,7 +60,7 @@ const CompleteProviderRegistration: React.FC = () => {
         }
       });
 
-      // Redirigir a página de éxito o login
+      // Redirigir a página de éxito
       navigate('/provider-registration-success');
 
     } catch (err: any) {
