@@ -109,8 +109,8 @@ const AcceptInvitePage: React.FC = () => {
       setSuccess(true);
       
       setTimeout(() => {
-        navigate('/sign-in', { 
-          state: { message: '¡Cuenta creada exitosamente! Ya puedes iniciar sesión.' }
+        navigate(`/complete-provider-registration?token=${token}`, { 
+          state: { message: '¡Cuenta básica creada! Ahora completa tu perfil de proveedor.' }
         });
       }, 2000);
     } catch (err: any) {

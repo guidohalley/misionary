@@ -1,0 +1,3 @@
+import CompleteProviderRegistration from './CompleteProviderRegistration'
+
+export default CompleteProviderRegistration

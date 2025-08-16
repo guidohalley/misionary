@@ -32,6 +32,18 @@ const authRoute: Routes = [
         component: lazy(() => import('@/views/auth/AcceptInvite')),
         authority: [],
     },
+    {
+        key: 'completeProviderRegistration',
+        path: `/complete-provider-registration`,
+        component: lazy(() => import('@/views/auth/CompleteProviderRegistration')),
+        authority: [],
+    },
+    {
+        key: 'providerRegistrationSuccess',
+        path: `/provider-registration-success`,
+        component: lazy(() => import('@/views/auth/ProviderRegistrationSuccess')),
+        authority: [],
+    },
 ]
 
 export default authRoute
