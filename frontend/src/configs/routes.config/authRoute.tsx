@@ -26,6 +26,12 @@ const authRoute: Routes = [
         component: lazy(() => import('@/views/auth/ResetPassword')),
         authority: [],
     },
+    {
+        key: 'acceptInvite',
+        path: `/accept-invite`,
+        component: lazy(() => import('@/views/auth/AcceptInvite')),
+        authority: [],
+    },
 ]
 
 export default authRoute

@@ -1,6 +1,16 @@
 import ApiService from './ApiService';
 import type { LoginCredentials, RegisterCredentials, AuthResponse, AuthState } from '@/@types/auth';
 
+export interface AcceptInviteData {
+    token: string;
+    nombre: string;
+    password: string;
+    confirmPassword: string;
+    providerArea: string;
+    providerRoles: string[];
+    email?: string;
+}
+
 class AuthService {
     private static TOKEN_KEY = 'auth_token';
     private static USER_KEY = 'auth_user';
@@ -100,6 +110,29 @@ class AuthService {
             token,
         };
     }
+
+    static async validateInviteToken(token: string): Promise<{ valid: boolean }> {
+        const response = await ApiService.fetchData<{ valid: boolean }>({
+            url: `/auth/invite/validate?token=${encodeURIComponent(token)}`,
+            method: 'get',
+        });
+        return response.data;
+    }
+
+    static async acceptInviteToken(data: AcceptInviteData): Promise<AuthResponse> {
+        const response = await ApiService.fetchData<AuthResponse>({
+            url: '/auth/invite/accept',
+            method: 'post',
+            data,
+        });
+
+        this.storeAuthData(response.data);
+        return response.data;
+    }
 }
+
+// Export named functions for easier import
+export const validateInviteToken = (token: string) => AuthService.validateInviteToken(token);
+export const acceptInviteToken = (data: AcceptInviteData) => AuthService.acceptInviteToken(data);
 
 export default AuthService;

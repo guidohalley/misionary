@@ -4,9 +4,12 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Card, Button } from '@/components/ui';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
 import PersonaList from './PersonaList';
+import InviteProviderModal from './InviteProviderModal';
 import { usePersona } from './hooks';
 import { Persona, UpdatePersonaDTO } from './types';
 import { TipoPersona } from './schemas';
+import useAuth from '@/utils/hooks/useAuth';
+import { HiOutlinePlus, HiOutlineMail } from 'react-icons/hi';
 
 interface PersonasViewProps {
   tipoFiltro?: TipoPersona;
@@ -14,9 +17,11 @@ interface PersonasViewProps {
 
 const PersonasView: React.FC<PersonasViewProps> = ({ tipoFiltro }) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [personaToDelete, setPersonaToDelete] = useState<number | null>(null);
+  const [showInviteModal, setShowInviteModal] = useState(false);
 
   // Obtener tipo de filtro desde URL o prop
   const tipoFromUrl = searchParams.get('tipo') as TipoPersona | null;
@@ -29,6 +34,9 @@ const PersonasView: React.FC<PersonasViewProps> = ({ tipoFiltro }) => {
     updatePersona,
     deletePersona,
   } = usePersona(tipoActivo);
+
+  // Verificar si el usuario es admin
+  const isAdmin = user?.authority?.includes('ADMIN');
 
   // Obtener título según el tipo de filtro
   const getTitulo = () => {
@@ -90,14 +98,28 @@ const PersonasView: React.FC<PersonasViewProps> = ({ tipoFiltro }) => {
         <motion.div
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
+          className="flex gap-3"
         >
           <Button 
             variant="solid" 
             onClick={handleCreate}
             className="bg-blue-600 hover:bg-blue-700"
           >
+            <HiOutlinePlus className="w-4 h-4 mr-2" />
             {getBotonTexto()}
           </Button>
+          
+          {/* Botón de invitar proveedor solo para admins y cuando estamos viendo proveedores */}
+          {isAdmin && tipoActivo === TipoPersona.PROVEEDOR && (
+            <Button 
+              variant="outline" 
+              onClick={() => setShowInviteModal(true)}
+              className="border-green-500 text-green-600 hover:bg-green-50"
+            >
+              <HiOutlineMail className="w-4 h-4 mr-2" />
+              Invitar por Email
+            </Button>
+          )}
         </motion.div>
       </motion.div>
 
@@ -130,6 +152,16 @@ const PersonasView: React.FC<PersonasViewProps> = ({ tipoFiltro }) => {
         confirmText="Eliminar"
         cancelText="Cancelar"
         type="danger"
+      />
+
+      {/* Modal de invitación */}
+      <InviteProviderModal
+        isOpen={showInviteModal}
+        onClose={() => setShowInviteModal(false)}
+        onSuccess={() => {
+          setShowInviteModal(false);
+          // Podrías refrescar la lista aquí si lo deseas
+        }}
       />
     </motion.div>
   );
