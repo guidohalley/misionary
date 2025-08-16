@@ -1,53 +1,100 @@
 @layer components {
   .input {
-    @apply border border-msgray-300 dark:border-msgray-600 dark:bg-transparent rounded-lg w-full py-3 px-4 focus:outline-none appearance-none dark:text-msgray-100;
+    @apply border border-msgray-300 dark:border-msgray-600 dark:bg-transparent rounded-xl w-full py-4 px-5 focus:outline-none appearance-none dark:text-msgray-100;
     background-color: rgba(255, 255, 255, 0.98);
-    backdrop-filter: blur(8px);
+    backdrop-filter: blur(12px);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    font-size: 0.95rem;
+    font-size: 1rem;
     line-height: 1.5;
-    border-color: rgba(204, 204, 204, 0.3);
+    border-color: rgba(229, 231, 235, 0.3);
     box-shadow: 
-      0 1px 2px 0 rgba(0, 0, 0, 0.05),
+      0 2px 4px -2px rgba(0, 0, 0, 0.05),
+      0 1px 2px -1px rgba(0, 0, 0, 0.04),
       inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+    font-weight: 500;
+    min-height: 52px;
+    position: relative;
   }
 
   .input.dark,
   .dark .input {
-    background-color: rgba(20, 20, 20, 0.8);
+    background-color: rgba(20, 20, 20, 0.95);
     border-color: rgba(31, 31, 31, 0.4);
+    box-shadow: 
+      0 2px 4px -2px rgba(0, 0, 0, 0.2),
+      0 1px 2px -1px rgba(0, 0, 0, 0.15),
+      inset 0 1px 0 0 rgba(233, 252, 135, 0.05);
+  }
+
+  .input:hover {
+    border-color: rgba(233, 252, 135, 0.4);
+    box-shadow: 
+      0 4px 6px -4px rgba(0, 0, 0, 0.1),
+      0 2px 4px -2px rgba(0, 0, 0, 0.06),
+      inset 0 1px 0 0 rgba(233, 252, 135, 0.1);
+    transform: translateY(-1px);
   }
 
   .input:focus,
   .input:focus-within {
     border-color: #E9FC87;
     box-shadow: 
-      0 0 0 3px rgba(233, 252, 135, 0.1),
-      0 1px 2px 0 rgba(0, 0, 0, 0.05),
+      0 0 0 3px rgba(233, 252, 135, 0.15),
+      0 4px 8px -4px rgba(233, 252, 135, 0.25),
+      0 2px 4px -2px rgba(233, 252, 135, 0.2),
       inset 0 1px 0 0 rgba(233, 252, 135, 0.1);
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    background-color: rgba(255, 255, 255, 1);
+  }
+
+  .dark .input:focus,
+  .dark .input:focus-within {
+    background-color: rgba(20, 20, 20, 1);
   }
 
   .input::placeholder {
     @apply text-msgray-400;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    font-weight: 400;
+  }
+
+  .input:focus::placeholder {
+    color: rgba(107, 114, 128, 0.6);
+    transform: translateY(-1px);
   }
 
   .input.input-invalid {
     border-color: #ef4444;
     box-shadow: 
-      0 0 0 3px rgba(239, 68, 68, 0.1),
-      0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      0 0 0 3px rgba(239, 68, 68, 0.15),
+      0 2px 4px -2px rgba(239, 68, 68, 0.25),
+      0 1px 2px -1px rgba(239, 68, 68, 0.2);
+    animation: inputShake 0.3s ease-in-out;
   }
 
+  .input.input-valid {
+    border-color: #10b981;
+    box-shadow: 
+      0 0 0 3px rgba(16, 185, 129, 0.15),
+      0 2px 4px -2px rgba(16, 185, 129, 0.25),
+      0 1px 2px -1px rgba(16, 185, 129, 0.2);
+  }
+
+  /* Input Sizes */
   .input.input-lg {
-    @apply text-lg py-4 px-5;
-    font-size: 1.1rem;
+    @apply text-lg py-5 px-6;
+    font-size: 1.125rem;
+    min-height: 60px;
+    border-radius: 1rem;
   }
 
   .input.input-sm {
-    @apply py-2 px-3;
-    font-size: 0.9rem;
+    @apply py-3 px-4;
+    font-size: 0.875rem;
+    min-height: 44px;
+    border-radius: 0.75rem;
+  }
   }
 
   /* Floating label enhancement */
@@ -167,7 +214,7 @@
     0% { left: -100%; }
     100% { left: 100%; }
   }
-  }
+  
 
   .input-suffix-start {
     position: absolute;
