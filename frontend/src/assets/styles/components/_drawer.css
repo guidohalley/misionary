@@ -1,26 +1,139 @@
 @layer components {
   .drawer-content {
     @apply bg-white dark:bg-msgray-800 shadow-xl absolute flex flex-col;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(229, 231, 235, 0.2);
+    box-shadow: 
+      0 25px 50px -12px rgba(0, 0, 0, 0.25),
+      0 0 0 1px rgba(255, 255, 255, 0.1);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 
     &.vertical {
       @apply h-full;
+      width: min(90vw, 400px);
     }
 
     &.horizontal {
       @apply w-full;
+      height: min(80vh, 600px);
+    }
+
+    /* Sliding animations */
+    &.slide-left {
+      transform: translateX(-100%);
+    }
+
+    &.slide-right {
+      transform: translateX(100%);
+    }
+
+    &.slide-up {
+      transform: translateY(-100%);
+    }
+
+    &.slide-down {
+      transform: translateY(100%);
+    }
+
+    &.open {
+      transform: translateX(0) translateY(0);
     }
   }
 
+  .dark .drawer-content {
+    background: rgba(20, 20, 20, 0.98);
+    border: 1px solid rgba(31, 31, 31, 0.3);
+    box-shadow: 
+      0 25px 50px -12px rgba(0, 0, 0, 0.5),
+      0 0 0 1px rgba(233, 252, 135, 0.1);
+  }
+
   .drawer-header {
-    @apply flex items-center justify-between py-4 px-6 border-b border-gray-200 dark:border-gray-700;
+    @apply flex items-center justify-between py-6 px-6 border-b border-msgray-200 dark:border-msgray-700;
+    background: linear-gradient(135deg, rgba(233, 252, 135, 0.05) 0%, transparent 100%);
+    position: relative;
+  }
+
+  .drawer-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 2rem;
+    right: 2rem;
+    height: 2px;
+    background: linear-gradient(90deg, transparent 0%, #E9FC87 50%, transparent 100%);
+    opacity: 0.3;
+  }
+
+  .drawer-title {
+    @apply text-xl font-bold text-msgray-900 dark:text-msgray-100;
+    background: linear-gradient(135deg, #262626 0%, #6B7280 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .dark .drawer-title {
+    background: linear-gradient(135deg, #F2F2F2 0%, #E9FC87 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .drawer-close-button {
+    @apply w-10 h-10 rounded-lg flex items-center justify-center text-msgray-500 hover:text-msgray-700 dark:hover:text-msgray-300;
+    background: rgba(243, 244, 246, 0.5);
+    backdrop-filter: blur(8px);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .drawer-close-button:hover {
+    background: rgba(233, 252, 135, 0.2);
+    transform: scale(1.05) rotate(90deg);
+    box-shadow: 0 4px 6px -1px rgba(233, 252, 135, 0.25);
+  }
+
+  .dark .drawer-close-button {
+    background: rgba(31, 31, 31, 0.5);
+  }
+
+  .dark .drawer-close-button:hover {
+    background: rgba(233, 252, 135, 0.1);
   }
 
   .drawer-body {
     @apply p-6 h-full overflow-y-auto;
+    /* Custom scrollbar */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(233, 252, 135, 0.3) transparent;
+  }
+
+  .drawer-body::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .drawer-body::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .drawer-body::-webkit-scrollbar-thumb {
+    background: rgba(233, 252, 135, 0.3);
+    border-radius: 3px;
+  }
+
+  .drawer-body::-webkit-scrollbar-thumb:hover {
+    background: rgba(233, 252, 135, 0.5);
   }
 
   .drawer-footer {
-    @apply flex items-center justify-between py-4 px-6 border-t border-gray-200 dark:border-gray-700;
+    @apply flex items-center justify-between py-6 px-6 border-t border-msgray-200 dark:border-msgray-700;
+    background: linear-gradient(135deg, rgba(243, 244, 246, 0.5) 0%, transparent 100%);
+    backdrop-filter: blur(8px);
+  }
+
+  .dark .drawer-footer {
+    background: linear-gradient(135deg, rgba(31, 31, 31, 0.5) 0%, transparent 100%);
   }
 
   .drawer-open {
@@ -30,15 +143,154 @@
   }
 
   .drawer-overlay {
-    transition: all 0.3s ease-in-out;
-    @apply bg-black/80 top-0 bottom-0 left-0 right-0 fixed z-30;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    @apply top-0 bottom-0 left-0 right-0 fixed z-40;
+    background: rgba(0, 0, 0, 0);
+    backdrop-filter: blur(0px);
   }
 
   .drawer-overlay-after-open {
-    opacity: 1;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
   }
 
   .drawer-overlay-before-close {
-    opacity: 0;
+    background: rgba(0, 0, 0, 0);
+    backdrop-filter: blur(0px);
+  }
+
+  /* Touch swipe indicators */
+  .drawer-swipe-indicator {
+    @apply absolute bg-msgray-300 dark:bg-msgray-600 rounded-full;
+    transition: all 0.2s ease;
+  }
+
+  .drawer-content.vertical .drawer-swipe-indicator {
+    width: 4px;
+    height: 40px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .drawer-content.vertical.slide-left .drawer-swipe-indicator {
+    right: -2px;
+  }
+
+  .drawer-content.vertical.slide-right .drawer-swipe-indicator {
+    left: -2px;
+  }
+
+  .drawer-content.horizontal .drawer-swipe-indicator {
+    width: 40px;
+    height: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .drawer-content.horizontal.slide-up .drawer-swipe-indicator {
+    bottom: -2px;
+  }
+
+  .drawer-content.horizontal.slide-down .drawer-swipe-indicator {
+    top: -2px;
+  }
+
+  .drawer-swipe-indicator:hover {
+    background: #E9FC87;
+    transform: scale(1.2) translateY(-50%);
+  }
+
+  .drawer-content.horizontal .drawer-swipe-indicator:hover {
+    transform: scale(1.2) translateX(-50%);
+  }
+
+  /* Mobile optimizations */
+  @media (max-width: 640px) {
+    .drawer-content.vertical {
+      width: min(100vw, 320px);
+    }
+    
+    .drawer-content.horizontal {
+      height: min(90vh, 500px);
+    }
+
+    .drawer-header {
+      @apply py-4 px-4;
+    }
+
+    .drawer-body {
+      @apply p-4;
+    }
+
+    .drawer-footer {
+      @apply py-4 px-4;
+    }
+
+    .drawer-title {
+      @apply text-lg;
+    }
+  }
+
+  /* Drawer variants */
+  .drawer-content.glass {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(24px);
+  }
+
+  .dark .drawer-content.glass {
+    background: rgba(20, 20, 20, 0.85);
+  }
+
+  .drawer-content.solid {
+    background: rgb(255, 255, 255);
+    backdrop-filter: none;
+  }
+
+  .dark .drawer-content.solid {
+    background: rgb(20, 20, 20);
+  }
+
+  /* Drawer sizes */
+  .drawer-content.sm.vertical {
+    width: min(90vw, 280px);
+  }
+
+  .drawer-content.md.vertical {
+    width: min(90vw, 400px);
+  }
+
+  .drawer-content.lg.vertical {
+    width: min(90vw, 500px);
+  }
+
+  .drawer-content.xl.vertical {
+    width: min(90vw, 640px);
+  }
+
+  .drawer-content.sm.horizontal {
+    height: min(80vh, 400px);
+  }
+
+  .drawer-content.md.horizontal {
+    height: min(80vh, 500px);
+  }
+
+  .drawer-content.lg.horizontal {
+    height: min(80vh, 600px);
+  }
+
+  .drawer-content.xl.horizontal {
+    height: min(80vh, 720px);
+  }
+
+  /* Performance optimizations */
+  .drawer-content {
+    will-change: transform;
+    contain: layout style paint;
+  }
+
+  .drawer-overlay {
+    will-change: background-color, backdrop-filter;
+    contain: layout style paint;
   }
 }

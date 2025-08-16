@@ -1,14 +1,164 @@
 @layer components {
   .badge {
-    @apply rounded-full px-2 py-0.5 text-xs bg-red-500 text-white;
+    @apply rounded-full px-3 py-1 text-xs font-bold text-white;
+    background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+    box-shadow: 
+      0 2px 4px -1px rgba(239, 68, 68, 0.4),
+      0 1px 2px -1px rgba(239, 68, 68, 0.3);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(8px);
+    animation: badgeGlow 2s ease-in-out infinite alternate;
+  }
+
+  .badge:hover {
+    transform: scale(1.05);
+    box-shadow: 
+      0 4px 6px -1px rgba(239, 68, 68, 0.5),
+      0 2px 4px -1px rgba(239, 68, 68, 0.4);
+  }
+
+  /* Badge variants */
+  .badge-primary {
+    background: linear-gradient(135deg, #E9FC87 0%, #CBE65D 100%);
+    color: #262626;
+    box-shadow: 
+      0 2px 4px -1px rgba(233, 252, 135, 0.4),
+      0 1px 2px -1px rgba(233, 252, 135, 0.3);
+  }
+
+  .badge-primary:hover {
+    box-shadow: 
+      0 4px 6px -1px rgba(233, 252, 135, 0.5),
+      0 2px 4px -1px rgba(233, 252, 135, 0.4);
+  }
+
+  .badge-success {
+    background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+    box-shadow: 
+      0 2px 4px -1px rgba(16, 185, 129, 0.4),
+      0 1px 2px -1px rgba(16, 185, 129, 0.3);
+  }
+
+  .badge-warning {
+    background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+    box-shadow: 
+      0 2px 4px -1px rgba(245, 158, 11, 0.4),
+      0 1px 2px -1px rgba(245, 158, 11, 0.3);
+  }
+
+  .badge-info {
+    background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+    box-shadow: 
+      0 2px 4px -1px rgba(59, 130, 246, 0.4),
+      0 1px 2px -1px rgba(59, 130, 246, 0.3);
+  }
+
+  .badge-secondary {
+    background: linear-gradient(135deg, #6B7280 0%, #4B5563 100%);
+    box-shadow: 
+      0 2px 4px -1px rgba(107, 114, 128, 0.4),
+      0 1px 2px -1px rgba(107, 114, 128, 0.3);
+  }
+
+  /* Badge sizes */
+  .badge-sm {
+    @apply px-2 py-0.5 text-xs;
+    font-size: 10px;
+  }
+
+  .badge-md {
+    @apply px-3 py-1 text-sm;
+  }
+
+  .badge-lg {
+    @apply px-4 py-1.5 text-base;
+    font-weight: 600;
+  }
+
+  /* Badge styles */
+  .badge-outline {
+    background: transparent;
+    border: 2px solid currentColor;
+    color: #EF4444;
+    box-shadow: none;
+  }
+
+  .badge-outline.badge-primary {
+    color: #E9FC87;
+    border-color: #E9FC87;
+  }
+
+  .badge-outline.badge-success {
+    color: #10B981;
+    border-color: #10B981;
+  }
+
+  .badge-outline:hover {
+    background: currentColor;
+    color: white;
+  }
+
+  .badge-outline.badge-primary:hover {
+    color: #262626;
+  }
+
+  .badge-soft {
+    background: rgba(239, 68, 68, 0.1);
+    color: #EF4444;
+    box-shadow: none;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+  }
+
+  .badge-soft.badge-primary {
+    background: rgba(233, 252, 135, 0.15);
+    color: #6B7280;
+  }
+
+  .badge-soft.badge-success {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10B981;
+  }
+
+  .badge-glass {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+  }
+
+  .dark .badge-glass {
+    background: rgba(31, 31, 31, 0.4);
+    border: 1px solid rgba(68, 68, 68, 0.3);
   }
 
   .badge-dot {
-    @apply rounded-full text-xs bg-red-500 text-white w-2 h-2;
+    @apply rounded-full text-xs w-3 h-3;
+    background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+    box-shadow: 
+      0 2px 4px -1px rgba(239, 68, 68, 0.4),
+      0 0 0 2px rgba(255, 255, 255, 0.8);
+    animation: badgeDotPulse 2s infinite;
+    border: 2px solid rgba(255, 255, 255, 0.9);
+  }
+
+  .badge-dot-primary {
+    background: linear-gradient(135deg, #E9FC87 0%, #CBE65D 100%);
+    box-shadow: 
+      0 2px 4px -1px rgba(233, 252, 135, 0.4),
+      0 0 0 2px rgba(255, 255, 255, 0.8);
+  }
+
+  .badge-dot-success {
+    background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+    box-shadow: 
+      0 2px 4px -1px rgba(16, 185, 129, 0.4),
+      0 0 0 2px rgba(255, 255, 255, 0.8);
   }
 
   .badge-wrapper {
     @apply relative flex;
+    display: inline-flex;
   }
 
   .badge-inner {
@@ -20,5 +170,216 @@
           -translate-y-2/4  
           ltr:right-0 
           rtl:left-0;
+    
+    /* Enhanced positioning */
+    animation: badgeFloat 3s ease-in-out infinite;
+  }
+
+  .badge-inner-bottom {
+    @apply absolute z-10 
+          transform
+          bottom-0
+          ltr:translate-x-2/4 
+          rtl:-translate-x-2/4 
+          translate-y-2/4  
+          ltr:right-0 
+          rtl:left-0;
+  }
+
+  .badge-inner-left {
+    @apply absolute z-10 
+          transform
+          top-0
+          -translate-x-2/4 
+          -translate-y-2/4  
+          left-0;
+  }
+
+  /* Badge with icon */
+  .badge-icon {
+    @apply flex items-center gap-1;
+  }
+
+  .badge-icon svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  .badge-lg.badge-icon svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  /* Badge with close button */
+  .badge-closable {
+    @apply flex items-center gap-1 pr-1;
+  }
+
+  .badge-close {
+    @apply w-4 h-4 rounded-full flex items-center justify-center ml-1 hover:bg-black/20 transition-colors;
+    font-size: 10px;
+    line-height: 1;
+  }
+
+  .badge-close:hover {
+    transform: scale(1.1);
+  }
+
+  /* Badge group */
+  .badge-group {
+    @apply flex flex-wrap gap-1;
+  }
+
+  .badge-group .badge {
+    margin: 1px;
+  }
+
+  /* Badge with number */
+  .badge-number {
+    min-width: 20px;
+    height: 20px;
+    @apply flex items-center justify-center;
+    font-size: 11px;
+    line-height: 1;
+  }
+
+  .badge-number.badge-lg {
+    min-width: 24px;
+    height: 24px;
+    font-size: 13px;
+  }
+
+  /* Progress badge */
+  .badge-progress {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .badge-progress::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.3);
+    transition: width 0.3s ease;
+    width: var(--progress, 0%);
+  }
+
+  .badge-progress .badge-text {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Notification styles */
+  .badge-notification {
+    animation: badgeNotification 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+
+  /* Animations */
+  @keyframes badgeGlow {
+    0% {
+      box-shadow: 
+        0 2px 4px -1px rgba(239, 68, 68, 0.4),
+        0 1px 2px -1px rgba(239, 68, 68, 0.3);
+    }
+    100% {
+      box-shadow: 
+        0 4px 8px -2px rgba(239, 68, 68, 0.5),
+        0 2px 4px -1px rgba(239, 68, 68, 0.4),
+        0 0 0 1px rgba(239, 68, 68, 0.1);
+    }
+  }
+
+  @keyframes badgeDotPulse {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.2);
+      opacity: 0.8;
+    }
+  }
+
+  @keyframes badgeFloat {
+    0%, 100% {
+      transform: translate(50%, -50%) translateY(0);
+    }
+    50% {
+      transform: translate(50%, -50%) translateY(-2px);
+    }
+  }
+
+  @keyframes badgeNotification {
+    0% {
+      transform: scale(0);
+      opacity: 0;
+    }
+    80% {
+      transform: scale(1.1);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  /* Mobile responsive */
+  @media (max-width: 640px) {
+    .badge {
+      @apply px-2 py-0.5 text-xs;
+    }
+
+    .badge-lg {
+      @apply px-3 py-1 text-sm;
+    }
+
+    .badge-number {
+      min-width: 18px;
+      height: 18px;
+      font-size: 10px;
+    }
+  }
+
+  /* Dark mode adjustments */
+  .dark .badge-soft {
+    background: rgba(239, 68, 68, 0.15);
+  }
+
+  .dark .badge-soft.badge-primary {
+    background: rgba(233, 252, 135, 0.1);
+    color: #E9FC87;
+  }
+
+  .dark .badge-dot {
+    box-shadow: 
+      0 2px 4px -1px rgba(239, 68, 68, 0.6),
+      0 0 0 2px rgba(31, 31, 31, 0.9);
+    border: 2px solid rgba(31, 31, 31, 0.9);
+  }
+
+  /* Badge states */
+  .badge-loading {
+    position: relative;
+  }
+
+  .badge-loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 6px;
+    width: 8px;
+    height: 8px;
+    border: 1px solid currentColor;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: badgeSpin 1s linear infinite;
+  }
+
+  @keyframes badgeSpin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
   }
 }
