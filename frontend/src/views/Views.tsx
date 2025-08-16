@@ -25,6 +25,24 @@ const AllRoutes = (props: AllRoutesProps) => {
 
     return (
         <Routes>
+            {/* Rutas públicas primero */}
+            <Route element={<PublicRoute />}>
+                {publicRoutes.map((route) => (
+                    <Route
+                        key={route.path}
+                        path={route.path}
+                        element={
+                            <AppRoute
+                                routeKey={route.key}
+                                component={route.component}
+                                {...route.meta}
+                            />
+                        }
+                    />
+                ))}
+            </Route>
+            
+            {/* Rutas protegidas */}
             <Route path="/" element={<ProtectedRoute />}>
                 <Route
                     path="/"
@@ -51,21 +69,6 @@ const AllRoutes = (props: AllRoutesProps) => {
                     />
                 ))}
                 <Route path="*" element={<Navigate replace to="/" />} />
-            </Route>
-            <Route path="/" element={<PublicRoute />}>
-                {publicRoutes.map((route) => (
-                    <Route
-                        key={route.path}
-                        path={route.path}
-                        element={
-                            <AppRoute
-                                routeKey={route.key}
-                                component={route.component}
-                                {...route.meta}
-                            />
-                        }
-                    />
-                ))}
             </Route>
         </Routes>
     )
