@@ -11,6 +11,6 @@ export const config = {
   cors: {
     origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
   },
-  frontendUrl: process.env.FRONTEND_URL,
+  frontendUrl: 'https://ad.misionary.com/',
   // frontendUrldev:'http://localhost:5173'
 };
