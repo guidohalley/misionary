@@ -81,6 +81,21 @@ module.exports = {
 						900: '#0A0A0A',
 						950: '#000000',
 					},
+					// NUEVOS COLORES MISIONARY - Solo para emails y branding específico
+					brand: {
+						// Verde Neón oficial
+						primary: '#E9FC87',
+						'primary-light': '#F3FF9C',
+						'primary-dark': '#CBE65D',
+						// Gris Oscuro oficial
+						dark: '#262626',
+						'dark-light': '#404040',
+						// Violeta Claro oficial
+						accent: '#BCB4FF',
+						'accent-light': '#D4C7FF',
+						// Blanco oficial
+						light: '#F2F2F2',
+					},
 				},
 				typography: (theme) => ({
 					DEFAULT: {

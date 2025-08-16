@@ -27,10 +27,20 @@ const MsnrLogo = (props: MsnrLogoProps) => {
         >
             <div className="flex items-center gap-3">
                 <img
-                    className={classNames(imgClass, 'h-8 w-8')}
-                    src="/msnr.svg"
+                    className={classNames(imgClass, 'h-10 w-10')}
+                    src="/img/logo/msnr.svg"
                     alt={`${APP_NAME} logo`}
-                />                
+                />
+                {type === 'full' && (
+                    <div className="flex flex-col">
+                        <span className="text-2xl font-bold text-dark-700" style={{ color: '#262626' }}>
+                            MISIONARY
+                        </span>
+                        <span className="text-xs text-gray-500 font-medium tracking-wide">
+                            Gestión Empresarial
+                        </span>
+                    </div>
+                )}
             </div>
         </div>
     )
