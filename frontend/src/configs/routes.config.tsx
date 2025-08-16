@@ -43,7 +43,22 @@ const publicRoutes = [
     key: 'login',
     path: '/login',
     component: LoginView,
-  }
+  },
+  {
+    key: 'acceptInvite',
+    path: '/accept-invite',
+    component: lazy(() => import('@/views/auth/AcceptInvite')),
+  },
+  {
+    key: 'completeProviderRegistration',
+    path: '/complete-provider-registration',
+    component: lazy(() => import('@/views/auth/CompleteProviderRegistration')),
+  },
+  {
+    key: 'providerRegistrationSuccess',
+    path: '/provider-registration-success',
+    component: lazy(() => import('@/views/auth/ProviderRegistrationSuccess')),
+  },
 ];
 
 const protectedRoutes = [

@@ -23,11 +23,34 @@ const { authenticatedEntryPath } = appConfig
 const AllRoutes = (props: AllRoutesProps) => {
     const userAuthority = useAppSelector((state) => state.auth.user.authority)
 
+    // Encontrar las rutas de invitación específicas
+    const invitationRoutes = publicRoutes.filter(route => 
+        ['/complete-provider-registration', '/provider-registration-success', '/accept-invite'].includes(route.path)
+    );
+    
+    const otherPublicRoutes = publicRoutes.filter(route => 
+        !['/complete-provider-registration', '/provider-registration-success', '/accept-invite'].includes(route.path)
+    );
+
     return (
         <Routes>
-            {/* Rutas públicas primero */}
+            {/* Rutas de invitación específicas que no deben pasar por ProtectedRoute */}
+            {invitationRoutes.map((route) => (
+                <Route
+                    key={route.path + '-direct'}
+                    path={route.path}
+                    element={
+                        <AppRoute
+                            routeKey={route.key}
+                            component={route.component}
+                        />
+                    }
+                />
+            ))}
+            
+            {/* Otras rutas públicas */}
             <Route element={<PublicRoute />}>
-                {publicRoutes.map((route) => (
+                {otherPublicRoutes.map((route) => (
                     <Route
                         key={route.path}
                         path={route.path}

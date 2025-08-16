@@ -6,10 +6,9 @@ import {
   Button,
   Alert
 } from '@/components/ui';
-import { HiOutlineUserAdd, HiOutlineX } from 'react-icons/hi';
+import { HiOutlineX } from 'react-icons/hi';
 import { validateInviteToken } from '@/services/AuthService';
-import { ProveedorForm } from '@/views/personas/ProveedorForm/ProveedorForm';
-import { ProveedorFormData } from '@/views/personas/schemas';
+import { MultiStepProviderForm } from './MultiStepProviderForm';
 import ApiService from '@/services/ApiService';
 
 const CompleteProviderRegistration: React.FC = () => {
@@ -43,7 +42,17 @@ const CompleteProviderRegistration: React.FC = () => {
     validateToken();
   }, [token]);
 
-  const handleSubmit = async (data: ProveedorFormData) => {
+  const handleSubmit = async (data: {
+    nombre: string;
+    email: string;
+    telefono?: string;
+    cvu?: string;
+    password: string;
+    tipo: any;
+    roles: any[];
+    esUsuario: boolean;
+    activo: boolean;
+  }) => {
     if (!token) return;
 
     try {
@@ -76,10 +85,10 @@ const CompleteProviderRegistration: React.FC = () => {
 
   if (validating) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md text-center p-8">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Validando invitación...</p>
+      <div className="min-h-screen bg-gradient-to-br from-msgray-50 to-white flex items-center justify-center p-4">
+        <Card className="w-full max-w-md text-center p-8 shadow-xl border-0">
+          <div className="w-12 h-12 border-2 border-msgray-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-msgray-500">Validando invitación...</p>
         </Card>
       </div>
     );
@@ -87,17 +96,19 @@ const CompleteProviderRegistration: React.FC = () => {
 
   if (!validToken || error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 to-pink-100 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md text-center p-8">
-          <HiOutlineX className="w-16 h-16 text-red-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Invitación no válida</h2>
-          <p className="text-gray-600 mb-6">
+      <div className="min-h-screen bg-gradient-to-br from-red-50 to-white flex items-center justify-center p-4">
+        <Card className="w-full max-w-md text-center p-8 shadow-xl border-0">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <HiOutlineX className="w-8 h-8 text-red-600" />
+          </div>
+          <h2 className="text-2xl font-bold text-msgray-600 mb-4">Invitación no válida</h2>
+          <p className="text-msgray-400 mb-8">
             {error || 'El enlace de invitación ha expirado o no es válido'}
           </p>
           <Button 
             variant="solid" 
             onClick={() => navigate('/')}
-            className="w-full"
+            className="w-full bg-msgray-600 hover:bg-msgray-700 text-white"
           >
             Ir al inicio
           </Button>
@@ -107,34 +118,32 @@ const CompleteProviderRegistration: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8">
+    <div className="min-h-screen to-white py-54 px-2">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="container mx-auto px-4"
+        className="container mx-auto"
       >
-        <div className="text-center mb-8">
-          <HiOutlineUserAdd className="w-16 h-16 text-blue-600 mx-auto mb-4" />
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Completa tu registro como proveedor
+        <div className="text-center mt-4 md:mt-6 mb-4">
+          <h1 className="text-2xl font-semibold text-msgray-50">
+            Bienvenido a Misionary
           </h1>
-          <p className="text-gray-600">
-            Completa todos los datos para finalizar tu registro en Misionary
+          <p className="text-msgray-100 text-sm max-w-sm mx-auto mt-1">
+            Completa tu información para comenzar a trabajar con nosotros
           </p>
         </div>
 
         {error && (
-          <Alert type="danger" showIcon className="mb-6 max-w-4xl mx-auto">
+          <Alert type="danger" showIcon className="mb-6 max-w-2xl mx-auto">
             {error}
           </Alert>
         )}
 
-        <ProveedorForm
+        <MultiStepProviderForm
           onSubmit={handleSubmit}
           onCancel={handleCancel}
           isLoading={isSubmitting}
-          mode="create"
         />
       </motion.div>
     </div>

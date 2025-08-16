@@ -1,4 +1,5 @@
 import React, { cloneElement, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import Avatar from '@/components/ui/Avatar'
 import { APP_NAME } from '@/constants/app.constant'
 import type { CommonProps } from '@/@types/common'
@@ -8,6 +9,9 @@ interface SideProps extends CommonProps {
 }
 
 const Side = ({ children, content, ...rest }: SideProps) => {
+    const location = useLocation()
+    const isInviteRegistration = location.pathname?.startsWith('/complete-provider-registration')
+
     // Estado para cambiar entre patrones
     const [currentPattern, setCurrentPattern] = useState(1)
     
@@ -52,8 +56,8 @@ const Side = ({ children, content, ...rest }: SideProps) => {
                 />
             </div>
 
-            {/* Selector de patrones - FLOTANTE EN LA ESQUINA */}
-            <div className="absolute top-4 right-4 z-50">
+            {/* Selector de patrones - FLOTANTE EN LA ESQUINA (oculto en mobile) */}
+            <div className="absolute top-4 right-4 z-50 hidden md:block">
                 <div className="bg-white/20 backdrop-blur-xl rounded-2xl p-3 border border-white/30 shadow-lg">
                     <div className="text-xs text-white/80 mb-2 font-semibold text-center">Background</div>
                     <div className="flex gap-2">
@@ -190,44 +194,36 @@ const Side = ({ children, content, ...rest }: SideProps) => {
                 <div className="absolute top-1/2 right-12 w-16 h-16 bg-gradient-to-br from-[#E9FC87]/6 to-transparent rounded-full blur-xl animate-pulse" style={{ animationDelay: '4s' }}></div>
 
                 {/* Contenedor del formulario con glass morphism mejorado */}
-                <div className="relative z-10 w-full xl:max-w-[520px] px-8 max-w-[460px]">
+        <div className="relative z-10 w-full xl:max-w-[720px] px-6 max-w-[640px]">
                     <div className="relative">
                         {/* Glass card container AJUSTADO PARA OVERLAY NEGRO */}
-                        <div className="relative bg-white/95 backdrop-blur-xl rounded-3xl p-8 border border-white/20 shadow-[0_20px_60px_rgba(0,0,0,0.3)] hover:shadow-[0_25px_70px_rgba(233,252,135,0.4)] transition-all duration-500">
-                            {/* Bordes decorativos con animación */}
-                            <div className="absolute -top-px left-8 right-8 h-px bg-gradient-to-r from-transparent via-[#E9FC87]/40 to-transparent animate-pulse"></div>
-                            <div className="absolute -bottom-px left-8 right-8 h-px bg-gradient-to-r from-transparent via-[#E9FC87]/40 to-transparent animate-pulse" style={{ animationDelay: '1s' }}></div>
-                            <div className="absolute -left-px top-8 bottom-8 w-px bg-gradient-to-b from-transparent via-[#E9FC87]/30 to-transparent animate-pulse" style={{ animationDelay: '2s' }}></div>
-                            <div className="absolute -right-px top-8 bottom-8 w-px bg-gradient-to-b from-transparent via-[#E9FC87]/30 to-transparent animate-pulse" style={{ animationDelay: '3s' }}></div>
-                            
-                            {/* Efectos de luz en las esquinas con animación */}
-                            <div className="absolute top-4 left-4 w-3 h-3 bg-[#E9FC87]/30 rounded-full blur-sm animate-pulse"></div>
-                            <div className="absolute top-4 right-4 w-2 h-2 bg-[#E9FC87]/35 rounded-full blur-sm animate-pulse" style={{ animationDelay: '0.5s' }}></div>
-                            <div className="absolute bottom-4 left-4 w-2 h-2 bg-[#E9FC87]/35 rounded-full blur-sm animate-pulse" style={{ animationDelay: '1.5s' }}></div>
-                            <div className="absolute bottom-4 right-4 w-3 h-3 bg-[#E9FC87]/30 rounded-full blur-sm animate-pulse" style={{ animationDelay: '2.5s' }}></div>
+            <div className="relative bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/10 shadow-none transition-all duration-300">
+                            {/* Decoraciones suavizadas (removidas para un look más limpio) */}
 
-                            {/* Header del formulario con branding mejorado */}
-                            <div className="text-center mb-8">
-                                <div className="flex items-center justify-center gap-3 mb-6 group">
-                                    <div className="relative">
-                                        <img 
-                                            src="/msnr.svg" 
-                                            alt="Misionary" 
-                                            className="h-10 w-auto drop-shadow-[0_4px_12px_rgba(233,252,135,0.4)] transition-all duration-300 group-hover:scale-105 group-hover:drop-shadow-[0_6px_16px_rgba(233,252,135,0.5)]" 
-                                        />
-                                        <div className="absolute inset-0 bg-gradient-to-br from-[#E9FC87]/20 to-transparent rounded-lg blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                            {/* Header del formulario: oculto en registro por invitación para evitar redundancia */}
+                            {!isInviteRegistration && (
+                                <div className="text-center mb-6">
+                                    <div className="flex items-center justify-center gap-3 mb-6 group">
+                                        <div className="relative">
+                                            <img 
+                                                src="/msnr.svg" 
+                                                alt="Misionary" 
+                                                className="h-8 w-auto drop-shadow-[0_4px_10px_rgba(233,252,135,0.35)] transition-all duration-300 group-hover:scale-105 group-hover:drop-shadow-[0_6px_14px_rgba(233,252,135,0.45)]" 
+                                            />
+                                            <div className="absolute inset-0 bg-gradient-to-br from-[#E9FC87]/20 to-transparent rounded-lg blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                        </div>
+                                        <div className="h-8 w-px bg-gradient-to-b from-transparent via-[#E9FC87]/50 to-transparent"></div>
+                                        <span className="text-[#262626] font-bold text-lg tracking-wide">
+                                            M<span className="text-[#E9FC87] drop-shadow-sm">S</span>NR
+                                        </span>
                                     </div>
-                                    <div className="h-8 w-px bg-gradient-to-b from-transparent via-[#E9FC87]/50 to-transparent"></div>
-                                    <span className="text-[#262626] font-bold text-xl tracking-wide">
-                                        M<span className="text-[#E9FC87] drop-shadow-sm">I</span>SIONARY
-                                    </span>
+                                    <div className="w-16 h-px bg-gradient-to-r from-transparent via-[#E9FC87]/60 to-transparent mx-auto mb-2"></div>
+                                    <p className="text-xs text-gray-600 font-medium">Enterprise Management System</p>
                                 </div>
-                                <div className="w-20 h-px bg-gradient-to-r from-transparent via-[#E9FC87]/60 to-transparent mx-auto mb-2"></div>
-                                <p className="text-sm text-gray-600 font-medium">Enterprise Management System</p>
-                            </div>
+                            )}
 
                             {/* Contenido del formulario */}
-                            <div className="space-y-6">
+                            <div className={`space-y-5 ${isInviteRegistration ? 'mt-0' : ''}`}>
                                 <div>{content}</div>
                                 {children
                                     ? cloneElement(children as React.ReactElement, {
@@ -236,33 +232,29 @@ const Side = ({ children, content, ...rest }: SideProps) => {
                                     : null}
                             </div>
 
-                            {/* Footer del card con indicadores de seguridad AJUSTADOS */}
-                            <div className="mt-8 pt-6 border-t border-gradient-to-r from-transparent via-[#E9FC87]/20 to-transparent">
-                                <div className="flex items-center justify-center gap-8 text-xs text-gray-600 mb-4">
+                {/* Footer del card con indicadores de seguridad minimal */}
+                <div className="mt-5 pt-4 border-t border-white/10">
+                <div className="flex items-center justify-center gap-6 text-[11px] text-white/70 mb-2">
                                     <div className="flex items-center gap-2 group">
-                                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]"></div>
-                                        <span className="group-hover:text-green-600 transition-colors">Conexión Segura</span>
+                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                    <span className="transition-colors">Conexión Segura</span>
                                     </div>
                                     <div className="w-px h-4 bg-gradient-to-b from-transparent via-gray-400 to-transparent"></div>
                                     <div className="flex items-center gap-2 group">
-                                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.5)]" style={{ animationDelay: '1s' }}></div>
-                                        <span className="group-hover:text-blue-600 transition-colors">SSL Encriptado</span>
+                    <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                    <span className="transition-colors">SSL Encriptado</span>
                                     </div>
                                     <div className="w-px h-4 bg-gradient-to-b from-transparent via-gray-400 to-transparent"></div>
                                     <div className="flex items-center gap-2 group">
-                                        <div className="w-2 h-2 bg-[#E9FC87] rounded-full animate-pulse shadow-[0_0_8px_rgba(233,252,135,0.6)]" style={{ animationDelay: '2s' }}></div>
-                                        <span className="group-hover:text-[#6B7280] transition-colors font-medium">Enterprise Ready</span>
+                    <div className="w-2 h-2 bg-[#E9FC87] rounded-full"></div>
+                    <span className="transition-colors font-medium">Enterprise Ready</span>
                                     </div>
                                 </div>
-                                
-                                {/* Línea decorativa final */}
-                                <div className="w-full h-px bg-gradient-to-r from-transparent via-[#E9FC87]/30 to-transparent"></div>
+                {/* Línea fina */}
+                <div className="w-full h-px bg-white/10"></div>
                             </div>
                         </div>
-
-                        {/* Sombra externa mejorada para el glass card */}
-                        <div className="absolute inset-0 bg-gradient-to-br from-[#E9FC87]/8 via-[#E9FC87]/5 to-[#E9FC87]/3 rounded-3xl blur-2xl transform translate-y-3 -z-10 animate-pulse"></div>
-                        <div className="absolute inset-0 bg-gradient-to-tr from-[#E9FC87]/5 to-transparent rounded-3xl blur-xl transform translate-y-1 -z-10"></div>
+            {/* Sombras externas removidas para mayor simpleza */}
                     </div>
                 </div>
 
