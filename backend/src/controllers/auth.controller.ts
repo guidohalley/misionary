@@ -4,6 +4,8 @@ import jwt, { Secret, SignOptions } from 'jsonwebtoken';
 import prisma from '../config/prisma';
 import { config } from '../config/config';
 import { TipoPersona, RolUsuario } from '@prisma/client';
+import { AuthTokenService } from '../services/authToken.service';
+import { sendMail } from '../config/mailer';
 
 export class AuthController {
   static async register(req: Request, res: Response) {
@@ -80,6 +82,170 @@ export class AuthController {
   return res.json({ user: safeUser, token });
     } catch (error) {
   return res.status(500).json({ error: 'Error al iniciar sesión' });
+    }
+  }
+
+  // POST /api/auth/invite
+  static async invite(req: Request, res: Response) {
+    try {
+      const currentUser = (req as any).user;
+      if (!currentUser || !currentUser.roles.includes('ADMIN')) {
+        return res.status(403).json({ error: 'Solo administradores pueden invitar usuarios' });
+      }
+
+      const { email, tipo, providerArea, providerRoles, personalNote } = req.body;
+      const normalizedEmail = (email || '').trim().toLowerCase();
+
+      if (!normalizedEmail) {
+        return res.status(400).json({ error: 'Email es requerido' });
+      }
+
+      // Verificar si ya existe un usuario con ese email
+      const existingUser = await prisma.persona.findFirst({
+        where: { email: { equals: normalizedEmail, mode: 'insensitive' } }
+      });
+
+      if (existingUser) {
+        return res.status(400).json({ error: 'Ya existe un usuario con ese email' });
+      }
+
+      // Crear token asociado al email
+      const { token, record } = await AuthTokenService.createToken('INVITE', normalizedEmail, null, 24);
+
+      const acceptUrl = `${config.frontendUrl}/accept-invite?token=${token}`;
+
+      // Crear mensaje personalizado
+      const personalMessage = personalNote ? `\n\n${personalNote}` : '';
+
+      // Enviar email
+      await sendMail({
+        to: normalizedEmail,
+        subject: 'Invitación a Misionary - Únete a nuestro equipo',
+        text: `Has sido invitado a formar parte del equipo de Misionary. Completa tu registro en: ${acceptUrl}${personalMessage}`,
+        html: `
+          <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; max-width: 600px; margin: 0 auto; background: #F2F2F2; padding: 32px;">
+            <div style="background: white; padding: 32px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+              <div style="text-align: center; margin-bottom: 32px;">
+                <h1 style="color: #262626; font-size: 32px; font-weight: bold; margin: 0;">MISIONARY</h1>
+                <div style="height: 4px; background: linear-gradient(90deg, #E9FC87, #BCB4FF); margin: 8px auto; width: 100px; border-radius: 2px;"></div>
+              </div>
+              
+              <h2 style="color: #262626; font-size: 24px; font-weight: 600; margin-bottom: 16px;">¡Bienvenido a nuestro equipo!</h2>
+              
+              <p style="color: #666666; line-height: 1.6; margin-bottom: 24px;">
+                Has sido invitado a formar parte del equipo de <strong>MISIONARY</strong> como proveedor. 
+                Estamos emocionados de tenerte con nosotros.
+              </p>
+              
+              <p style="color: #666666; line-height: 1.6; margin-bottom: 32px;">
+                Para completar tu registro y configurar tu perfil, haz clic en el siguiente enlace:
+              </p>
+              
+              <div style="text-align: center; margin: 32px 0;">
+                <a href="${acceptUrl}" style="display: inline-block; background: #E9FC87; color: #262626; padding: 16px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; border: 2px solid #262626; transition: all 0.3s;">
+                  Completar Registro
+                </a>
+              </div>
+              
+              ${personalNote ? `
+                <div style="margin: 32px 0; padding: 20px; background: #F9FFCC; border-left: 4px solid #E9FC87; border-radius: 6px;">
+                  <h4 style="color: #262626; margin: 0 0 8px 0; font-size: 16px;">Mensaje personal:</h4>
+                  <p style="color: #666666; margin: 0; line-height: 1.5;">${personalNote}</p>
+                </div>
+              ` : ''}
+              
+              <div style="margin-top: 40px; padding-top: 24px; border-top: 1px solid #E6E6E6;">
+                <p style="color: #999999; font-size: 14px; line-height: 1.5; margin: 0;">
+                  <strong>Importante:</strong> Este enlace expirará en 24 horas por seguridad.
+                </p>
+                <p style="color: #999999; font-size: 14px; line-height: 1.5; margin: 8px 0 0 0;">
+                  Si no solicitaste esta invitación, puedes ignorar este email.
+                </p>
+              </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 24px;">
+              <p style="color: #999999; font-size: 12px; margin: 0;">
+                © ${new Date().getFullYear()} MISIONARY - Gestión Empresarial
+              </p>
+            </div>
+          </div>
+        `
+      });
+
+      return res.status(201).json({ 
+        success: true, 
+        message: 'Invitación enviada exitosamente',
+        email: normalizedEmail
+      });
+    } catch (error) {
+      console.error('Error invite:', error);
+      return res.status(500).json({ error: 'Error al generar invitación' });
+    }
+  }
+
+  // GET /api/auth/invite/validate?token=...
+  static async validateInvite(req: Request, res: Response) {
+    try {
+      const { token } = req.query;
+      if (!token || typeof token !== 'string') return res.status(400).json({ error: 'Token requerido' });
+
+      const record = await AuthTokenService.validateToken(token, 'INVITE');
+      if (!record) return res.status(404).json({ error: 'Token inválido o expirado' });
+
+      return res.json({ valid: true });
+    } catch (error) {
+      console.error('Error validateInvite:', error);
+      return res.status(500).json({ error: 'Error al validar token' });
+    }
+  }
+
+  // POST /api/auth/invite/accept
+  static async acceptInvite(req: Request, res: Response) {
+    try {
+      const { token, nombre, password, providerArea, providerRoles } = req.body;
+      if (!token || !password || !nombre) return res.status(400).json({ error: 'Datos incompletos' });
+
+      const record = await AuthTokenService.validateToken(token, 'INVITE');
+      if (!record) return res.status(400).json({ error: 'Token inválido o expirado' });
+
+      if (!record.email) return res.status(400).json({ error: 'Token inválido' });
+
+      // Verificar que no exista ya un usuario con ese email
+      const existingUser = await prisma.persona.findFirst({
+        where: { email: { equals: record.email, mode: 'insensitive' } }
+      });
+
+      if (existingUser) {
+        return res.status(400).json({ error: 'Ya existe un usuario con ese email' });
+      }
+
+      // Crear persona
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const persona = await prisma.persona.create({
+        data: {
+          nombre,
+          email: record.email,
+          password: hashedPassword,
+          tipo: 'PROVEEDOR' as any,
+          roles: ['PROVEEDOR'] as any,
+          esUsuario: true,
+          providerArea: providerArea || null,
+          providerRoles: providerRoles || []
+        }
+      });
+
+      await AuthTokenService.markUsed(record.id);
+
+      const secret = config.jwtSecret as Secret;
+      const expiresIn = config.jwtExpiresIn as SignOptions['expiresIn'];
+      const jwtToken = jwt.sign({ id: persona.id }, secret, { expiresIn });
+
+      const { password: _pwd, ...safeUser } = persona as any;
+      return res.status(201).json({ user: safeUser, token: jwtToken });
+    } catch (error) {
+      console.error('Error acceptInvite:', error);
+      return res.status(500).json({ error: 'Error al aceptar invitación' });
     }
   }
 }

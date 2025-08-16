@@ -58,7 +58,7 @@ services:
       - /app/node_modules
     environment:
       - VITE_API_URL=${VITE_API_URL:-http://localhost:3001/api}
-    command: sh -c "npm install --legacy-peer-deps && npm install @rollup/rollup-linux-x64-musl --force && npm run dev"
+    command: sh -c "npm install --legacy-peer-deps && npm install @rollup/rollup-linux-x64-musl @tailwindcss/oxide-linux-x64-musl lightningcss-linux-x64-musl --force && npm run dev -- --host 0.0.0.0"
 
 volumes:
   postgres_data:
