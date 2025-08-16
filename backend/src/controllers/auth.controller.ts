@@ -112,7 +112,7 @@ export class AuthController {
       // Crear token asociado al email
       const { token, record } = await AuthTokenService.createToken('INVITE', normalizedEmail, null, 24);
 
-      const acceptUrl = `${config.frontendUrl}/accept-invite?token=${token}`;
+      const acceptUrl = `${config.frontendUrl}/complete-provider-registration?token=${token}`;
 
       // Crear mensaje personalizado
       const personalMessage = personalNote ? `\n\n${personalNote}` : '';
@@ -246,6 +246,54 @@ export class AuthController {
     } catch (error) {
       console.error('Error acceptInvite:', error);
       return res.status(500).json({ error: 'Error al aceptar invitación' });
+    }
+  }
+
+  // POST /api/auth/invite/complete-provider
+  static async completeProviderRegistration(req: Request, res: Response) {
+    try {
+      const { token, password, ...providerData } = req.body;
+      if (!token || !password) return res.status(400).json({ error: 'Token y contraseña son requeridos' });
+
+      const record = await AuthTokenService.validateToken(token, 'INVITE');
+      if (!record) return res.status(400).json({ error: 'Token inválido o expirado' });
+
+      if (!record.email) return res.status(400).json({ error: 'Token inválido' });
+
+      // Verificar que no exista ya un usuario con ese email
+      const existingUser = await prisma.persona.findFirst({
+        where: { email: { equals: record.email, mode: 'insensitive' } }
+      });
+
+      if (existingUser) {
+        return res.status(400).json({ error: 'Ya existe un usuario con ese email' });
+      }
+
+      // Crear proveedor completo de una vez
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const newProvider = await prisma.persona.create({
+        data: {
+          email: record.email,
+          password: hashedPassword,
+          tipo: 'PROVEEDOR' as any,
+          roles: ['PROVEEDOR'] as any,
+          esUsuario: true,
+          ...providerData
+        }
+      });
+
+      // Marcar token como usado
+      await AuthTokenService.markUsed(record.id);
+
+      const { password: _pwd, ...safeUser } = newProvider as any;
+      return res.status(201).json({ 
+        success: true, 
+        message: 'Proveedor registrado exitosamente',
+        user: safeUser 
+      });
+    } catch (error) {
+      console.error('Error completeProviderRegistration:', error);
+      return res.status(500).json({ error: 'Error al registrar proveedor' });
     }
   }
 }
