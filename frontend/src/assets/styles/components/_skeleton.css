@@ -1,13 +1,189 @@
 @layer components {
   .skeleton {
-    @apply bg-gray-200 dark:bg-gray-600 flex;
+    @apply bg-msgray-200 dark:bg-msgray-600 flex;
+    background: linear-gradient(110deg, rgba(204, 204, 204, 0.8) 8%, rgba(233, 252, 135, 0.2) 18%, rgba(204, 204, 204, 0.8) 33%);
+    background-size: 200% 100%;
+    animation: skeletonShimmer 1.5s ease-in-out infinite;
+    border-radius: 0.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .dark .skeleton {
+    background: linear-gradient(110deg, rgba(31, 31, 31, 0.8) 8%, rgba(233, 252, 135, 0.1) 18%, rgba(31, 31, 31, 0.8) 33%);
+    background-size: 200% 100%;
+  }
+
+  @keyframes skeletonShimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
   }
 
   .skeleton-circle {
     @apply rounded-full w-10 h-10;
+    background: linear-gradient(110deg, rgba(204, 204, 204, 0.8) 8%, rgba(233, 252, 135, 0.3) 18%, rgba(204, 204, 204, 0.8) 33%);
+    background-size: 200% 100%;
+    animation: skeletonShimmer 1.5s ease-in-out infinite;
+  }
+
+  .skeleton-circle-sm {
+    @apply w-6 h-6;
+  }
+
+  .skeleton-circle-lg {
+    @apply w-16 h-16;
+  }
+
+  .skeleton-circle-xl {
+    @apply w-24 h-24;
   }
 
   .skeleton-block {
-    @apply rounded h-2.5 w-full;
+    @apply rounded-lg h-3 w-full;
+    background: linear-gradient(110deg, rgba(204, 204, 204, 0.8) 8%, rgba(233, 252, 135, 0.2) 18%, rgba(204, 204, 204, 0.8) 33%);
+    background-size: 200% 100%;
+    animation: skeletonShimmer 1.5s ease-in-out infinite;
+  }
+
+  .skeleton-block-sm {
+    @apply h-2;
+  }
+
+  .skeleton-block-lg {
+    @apply h-4;
+  }
+
+  .skeleton-block-xl {
+    @apply h-6;
+  }
+
+  /* Skeleton text variations */
+  .skeleton-text {
+    @apply h-4 rounded;
+    background: linear-gradient(110deg, rgba(204, 204, 204, 0.8) 8%, rgba(233, 252, 135, 0.2) 18%, rgba(204, 204, 204, 0.8) 33%);
+    background-size: 200% 100%;
+    animation: skeletonShimmer 1.5s ease-in-out infinite;
+  }
+
+  .skeleton-text-xs {
+    @apply h-3;
+  }
+
+  .skeleton-text-sm {
+    @apply h-3.5;
+  }
+
+  .skeleton-text-lg {
+    @apply h-5;
+  }
+
+  .skeleton-text-xl {
+    @apply h-6;
+  }
+
+  /* Skeleton card layout */
+  .skeleton-card {
+    @apply p-6 bg-white dark:bg-msgray-800 rounded-xl;
+    backdrop-filter: blur(8px);
+    background-color: rgba(255, 255, 255, 0.95);
+  }
+
+  .dark .skeleton-card {
+    background-color: rgba(20, 20, 20, 0.9);
+  }
+
+  .skeleton-card-header {
+    @apply flex items-center space-x-4 mb-4;
+  }
+
+  .skeleton-card-content {
+    @apply space-y-3;
+  }
+
+  .skeleton-card-footer {
+    @apply flex justify-between items-center mt-6 pt-4 border-t border-msgray-200 dark:border-msgray-700;
+  }
+
+  /* Skeleton table */
+  .skeleton-table {
+    @apply w-full;
+  }
+
+  .skeleton-table-row {
+    @apply flex items-center space-x-4 py-3 border-b border-msgray-200 dark:border-msgray-700;
+  }
+
+  .skeleton-table-cell {
+    @apply flex-1;
+  }
+
+  /* Skeleton list */
+  .skeleton-list {
+    @apply space-y-3;
+  }
+
+  .skeleton-list-item {
+    @apply flex items-center space-x-3 p-3 bg-white dark:bg-msgray-800 rounded-lg;
+  }
+
+  /* Pulse animation variation */
+  .skeleton-pulse {
+    animation: skeletonPulse 2s ease-in-out infinite;
+  }
+
+  @keyframes skeletonPulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+  }
+
+  /* Wave animation */
+  .skeleton-wave {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .skeleton-wave::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: linear-gradient(90deg, transparent, rgba(233, 252, 135, 0.3), transparent);
+    transform: translateX(-100%);
+    animation: skeletonWave 2s infinite;
+  }
+
+  @keyframes skeletonWave {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  /* Skeleton button */
+  .skeleton-button {
+    @apply rounded-lg h-10 w-24;
+    background: linear-gradient(110deg, rgba(204, 204, 204, 0.8) 8%, rgba(233, 252, 135, 0.2) 18%, rgba(204, 204, 204, 0.8) 33%);
+    background-size: 200% 100%;
+    animation: skeletonShimmer 1.5s ease-in-out infinite;
+  }
+
+  .skeleton-button-sm {
+    @apply h-8 w-20;
+  }
+
+  .skeleton-button-lg {
+    @apply h-12 w-32;
   }
 }

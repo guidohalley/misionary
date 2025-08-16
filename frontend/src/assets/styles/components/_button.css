@@ -1,17 +1,269 @@
 @layer components {
   .button {
-    @apply font-semibold focus:outline-none whitespace-nowrap;
+    @apply font-semibold focus:outline-none whitespace-nowrap inline-flex items-center justify-center;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.75rem;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(8px);
+    cursor: pointer;
+    user-select: none;
+    text-decoration: none;
+    border: 1px solid transparent;
+  }
 
-    &.radius-round {
-      @apply rounded-md;
-    }
+  .button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+  }
 
-    &.radius-circle {
-      @apply rounded-full;
-    }
+  .button:hover::before {
+    left: 100%;
+  }
 
-    &.radius-none {
-      @apply rounded-none;
-    }
+  .button:hover {
+    transform: translateY(-1px);
+  }
+
+  .button:active {
+    transform: translateY(0);
+  }
+
+  .button:focus {
+    box-shadow: 0 0 0 3px rgba(233, 252, 135, 0.3);
+  }
+
+  /* Primary Button - MISIONARY Green */
+  .button-primary {
+    background: linear-gradient(135deg, #E9FC87 0%, #CBE65D 100%);
+    color: #262626;
+    border-color: #CBE65D;
+    box-shadow: 
+      0 4px 6px -1px rgba(233, 252, 135, 0.3),
+      0 2px 4px -1px rgba(233, 252, 135, 0.2);
+  }
+
+  .button-primary:hover {
+    background: linear-gradient(135deg, #F3FF9C 0%, #E9FC87 100%);
+    box-shadow: 
+      0 10px 15px -3px rgba(233, 252, 135, 0.4),
+      0 4px 6px -2px rgba(233, 252, 135, 0.3);
+  }
+
+  .button-primary:active {
+    background: linear-gradient(135deg, #CBE65D 0%, #A8C93A 100%);
+  }
+
+  /* Secondary Button */
+  .button-secondary {
+    background: rgba(255, 255, 255, 0.95);
+    color: #262626;
+    border-color: rgba(204, 204, 204, 0.3);
+    backdrop-filter: blur(12px);
+    box-shadow: 
+      0 2px 4px -1px rgba(0, 0, 0, 0.1),
+      0 1px 2px -1px rgba(0, 0, 0, 0.06);
+  }
+
+  .button-secondary:hover {
+    background: rgba(255, 255, 255, 1);
+    border-color: #E9FC87;
+    box-shadow: 
+      0 4px 6px -1px rgba(0, 0, 0, 0.1),
+      0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+
+  .dark .button-secondary {
+    background: rgba(20, 20, 20, 0.9);
+    color: #F2F2F2;
+    border-color: rgba(31, 31, 31, 0.5);
+  }
+
+  .dark .button-secondary:hover {
+    background: rgba(31, 31, 31, 0.95);
+    border-color: #E9FC87;
+  }
+
+  /* Danger Button */
+  .button-danger {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    border-color: #dc2626;
+    box-shadow: 
+      0 4px 6px -1px rgba(239, 68, 68, 0.3),
+      0 2px 4px -1px rgba(239, 68, 68, 0.2);
+  }
+
+  .button-danger:hover {
+    background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
+    box-shadow: 
+      0 10px 15px -3px rgba(239, 68, 68, 0.4),
+      0 4px 6px -2px rgba(239, 68, 68, 0.3);
+  }
+
+  /* Success Button */
+  .button-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border-color: #059669;
+    box-shadow: 
+      0 4px 6px -1px rgba(16, 185, 129, 0.3),
+      0 2px 4px -1px rgba(16, 185, 129, 0.2);
+  }
+
+  .button-success:hover {
+    background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+    box-shadow: 
+      0 10px 15px -3px rgba(16, 185, 129, 0.4),
+      0 4px 6px -2px rgba(16, 185, 129, 0.3);
+  }
+
+  /* Ghost Button */
+  .button-ghost {
+    background: transparent;
+    color: #666666;
+    border-color: rgba(204, 204, 204, 0.3);
+  }
+
+  .button-ghost:hover {
+    background: rgba(233, 252, 135, 0.1);
+    color: #262626;
+    border-color: #E9FC87;
+  }
+
+  .dark .button-ghost {
+    color: #B3B3B3;
+    border-color: rgba(31, 31, 31, 0.5);
+  }
+
+  .dark .button-ghost:hover {
+    background: rgba(233, 252, 135, 0.05);
+    color: #F2F2F2;
+    border-color: #E9FC87;
+  }
+
+  /* Size variations */
+  .button-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    border-radius: 0.5rem;
+  }
+
+  .button-lg {
+    padding: 1rem 2rem;
+    font-size: 1.125rem;
+    border-radius: 1rem;
+  }
+
+  .button-xl {
+    padding: 1.25rem 2.5rem;
+    font-size: 1.25rem;
+    border-radius: 1rem;
+  }
+
+  /* Icon buttons */
+  .button-icon {
+    padding: 0.75rem;
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .button-icon-sm {
+    padding: 0.5rem;
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .button-icon-lg {
+    padding: 1rem;
+    width: 3.5rem;
+    height: 3.5rem;
+  }
+
+  /* Loading state */
+  .button-loading {
+    position: relative;
+    color: transparent;
+  }
+
+  .button-loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: buttonSpin 1s linear infinite;
+  }
+
+  @keyframes buttonSpin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+  }
+
+  /* Disabled state */
+  .button:disabled,
+  .button-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+  }
+
+  .button:disabled:hover,
+  .button-disabled:hover {
+    transform: none !important;
+  }
+
+  /* Radius variations */
+  .button.radius-round {
+    border-radius: 0.75rem;
+  }
+
+  .button.radius-circle {
+    border-radius: 9999px;
+  }
+
+  .button.radius-none {
+    border-radius: 0;
+  }
+
+  /* Block button */
+  .button-block {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Floating Action Button */
+  .button-fab {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    box-shadow: 
+      0 10px 25px -5px rgba(0, 0, 0, 0.3),
+      0 10px 10px -5px rgba(0, 0, 0, 0.1);
+    z-index: 50;
+  }
+
+  .button-fab:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 
+      0 25px 50px -12px rgba(0, 0, 0, 0.4),
+      0 20px 25px -5px rgba(0, 0, 0, 0.2);
   }
 }
