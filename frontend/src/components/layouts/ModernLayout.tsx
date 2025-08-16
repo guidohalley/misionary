@@ -1,5 +1,6 @@
 import Header from '@/components/template/Header'
 import UserDropdown from '@/components/template/UserDropdown'
+import ThemeModeSwitcher from '@/components/template/ThemeModeSwitcher'
 import SideNavToggle from '@/components/template/SideNavToggle'
 import MobileNav from '@/components/template/MobileNav'
 import SideNav from '@/components/template/SideNav'
@@ -22,7 +23,8 @@ const HeaderActionsMiddle = () => {
 
 const HeaderActionsEnd = () => {
     return (
-        <div className="flex items-center">
+        <div className="flex items-center gap-2">
+            <ThemeModeSwitcher hoverable={false} />
             <UserDropdown hoverable={false} />
         </div>
     )

@@ -1,6 +1,7 @@
 import Header from '@/components/template/Header'
 import SidePanel from '@/components/template/SidePanel'
 import UserDropdown from '@/components/template/UserDropdown'
+import ThemeModeSwitcher from '@/components/template/ThemeModeSwitcher'
 import HeaderLogo from '@/components/template/HeaderLogo'
 import SecondaryHeader from '@/components/template/SecondaryHeader'
 import MobileNav from '@/components/template/MobileNav'
@@ -17,10 +18,10 @@ const HeaderActionsStart = () => {
 
 const HeaderActionsEnd = () => {
     return (
-        <>
-            {/* SidePanel removido temporalmente */}
+        <div className="flex items-center gap-2 md:gap-3">
+            <ThemeModeSwitcher hoverable={false} />
             <UserDropdown hoverable={false} />
-        </>
+        </div>
     )
 }
 

@@ -1,6 +1,6 @@
 @layer components {
   .card {
-    @apply bg-white rounded-lg dark:bg-gray-800;
+    @apply bg-white rounded-lg dark:bg-msgray-800;
   }
 
   .card-border {

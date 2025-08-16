@@ -4,7 +4,7 @@
   }
   
   .secondary-header-dark {
-    @apply bg-gray-800 border-b border-gray-700 print:hidden;
+    @apply bg-msgray-800 border-b border-msgray-700 print:hidden;
   }
   
   .secondary-header-themed {

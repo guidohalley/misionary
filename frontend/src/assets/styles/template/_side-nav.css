@@ -17,7 +17,7 @@
   }
   
   .side-nav-dark {
-    @apply bg-gray-800 border-r border-gray-600;
+    @apply bg-msgray-800 border-r border-msgray-600;
   }
   
   .side-nav-transparent {
