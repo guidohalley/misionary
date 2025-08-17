@@ -7,9 +7,23 @@ export class ServicioController {
     try {
       const user = (req as any).user;
       
-      // Si es PROVEEDOR, asegurar que solo cree servicios para sí mismo
-      if (user.roles.includes(RolUsuario.PROVEEDOR) && !user.roles.includes(RolUsuario.ADMIN)) {
+      // Lógica de permisos para creación de servicios
+      if (user.roles.includes(RolUsuario.ADMIN)) {
+        // ADMIN puede crear servicios para cualquier proveedor
+        // No modificamos req.body.proveedorId, respetamos lo enviado
+      } else if (user.roles.includes(RolUsuario.PROVEEDOR)) {
+        // PROVEEDOR solo puede crear servicios para sí mismo
+        if (req.body.proveedorId && req.body.proveedorId !== user.id) {
+          return res.status(403).json({ 
+            error: 'No tienes permiso para crear servicios para otros proveedores' 
+          });
+        }
+        // Asegurar que el servicio sea para el usuario actual
         req.body.proveedorId = user.id;
+      } else {
+        return res.status(403).json({ 
+          error: 'No tienes permisos para crear servicios' 
+        });
       }
       
       const servicio = await ServicioService.create(req.body);
@@ -46,18 +60,38 @@ export class ServicioController {
       const id = parseInt(req.params.id);
       const user = (req as any).user;
       
-      // Si es PROVEEDOR, verificar que solo actualice sus propios servicios
-      if (user.roles.includes(RolUsuario.PROVEEDOR) && !user.roles.includes(RolUsuario.ADMIN)) {
-        const servicio = await ServicioService.findById(id);
-        if (!servicio || servicio.proveedorId !== user.id) {
-          return res.status(403).json({ error: 'No tienes permiso para actualizar este servicio' });
-        }
-        // Asegurar que no cambie el proveedor
-        delete req.body.proveedorId;
+      const servicio = await ServicioService.findById(id);
+      if (!servicio) {
+        return res.status(404).json({ error: 'Servicio no encontrado' });
       }
       
-      const servicio = await ServicioService.update(id, req.body);
-      return res.json(servicio);
+      // Lógica de permisos para actualización
+      if (user.roles.includes(RolUsuario.ADMIN)) {
+        // ADMIN puede actualizar cualquier servicio
+        // No aplicamos restricciones
+      } else if (user.roles.includes(RolUsuario.PROVEEDOR)) {
+        // PROVEEDOR solo puede actualizar sus propios servicios
+        if (servicio.proveedorId !== user.id) {
+          return res.status(403).json({ 
+            error: 'No tienes permiso para actualizar este servicio' 
+          });
+        }
+        // Verificar que no intente cambiar el proveedor a otro
+        if (req.body.proveedorId && req.body.proveedorId !== user.id) {
+          return res.status(403).json({ 
+            error: 'No puedes cambiar el proveedor a otro usuario' 
+          });
+        }
+        // Asegurar que el proveedor siga siendo el usuario actual
+        req.body.proveedorId = user.id;
+      } else {
+        return res.status(403).json({ 
+          error: 'No tienes permisos para actualizar servicios' 
+        });
+      }
+      
+      const servicioActualizado = await ServicioService.update(id, req.body);
+      return res.json(servicioActualizado);
     } catch (error) {
       console.error('Error en ServicioController.update:', error);
       return res.status(500).json({ error: 'Error al actualizar el servicio' });
@@ -69,12 +103,26 @@ export class ServicioController {
       const id = parseInt(req.params.id);
       const user = (req as any).user;
       
-      // Si es PROVEEDOR, verificar que solo elimine sus propios servicios
-      if (user.roles.includes(RolUsuario.PROVEEDOR) && !user.roles.includes(RolUsuario.ADMIN)) {
-        const servicio = await ServicioService.findById(id);
-        if (!servicio || servicio.proveedorId !== user.id) {
-          return res.status(403).json({ error: 'No tienes permiso para eliminar este servicio' });
+      const servicio = await ServicioService.findById(id);
+      if (!servicio) {
+        return res.status(404).json({ error: 'Servicio no encontrado' });
+      }
+      
+      // Lógica de permisos para eliminación
+      if (user.roles.includes(RolUsuario.ADMIN)) {
+        // ADMIN puede eliminar cualquier servicio
+        // No aplicamos restricciones
+      } else if (user.roles.includes(RolUsuario.PROVEEDOR)) {
+        // PROVEEDOR solo puede eliminar sus propios servicios
+        if (servicio.proveedorId !== user.id) {
+          return res.status(403).json({ 
+            error: 'No tienes permiso para eliminar este servicio' 
+          });
         }
+      } else {
+        return res.status(403).json({ 
+          error: 'No tienes permisos para eliminar servicios' 
+        });
       }
       
       await ServicioService.delete(id);
@@ -92,8 +140,12 @@ export class ServicioController {
       
       let efectiveProveedorId = proveedorId ? parseInt(proveedorId as string) : undefined;
       
-      // Si es PROVEEDOR, solo mostrar sus propios servicios
-      if (user.roles.includes(RolUsuario.PROVEEDOR) && !user.roles.includes(RolUsuario.ADMIN)) {
+      // Lógica de permisos para listado
+      if (user.roles.includes(RolUsuario.ADMIN)) {
+        // ADMIN puede ver todos los servicios, respetar filtro enviado
+        // efectiveProveedorId ya está configurado del query param
+      } else if (user.roles.includes(RolUsuario.PROVEEDOR)) {
+        // PROVEEDOR solo puede ver sus propios servicios
         efectiveProveedorId = user.id;
       }
       

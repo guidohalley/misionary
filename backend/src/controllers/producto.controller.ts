@@ -7,9 +7,23 @@ export class ProductoController {
     try {
       const user = (req as any).user;
       
-      // Si es PROVEEDOR, asegurar que solo cree productos para sí mismo
-      if (user.roles.includes(RolUsuario.PROVEEDOR) && !user.roles.includes(RolUsuario.ADMIN)) {
+      // Lógica de permisos para creación de productos
+      if (user.roles.includes(RolUsuario.ADMIN)) {
+        // ADMIN puede crear productos para cualquier proveedor
+        // No modificamos req.body.proveedorId, respetamos lo enviado
+      } else if (user.roles.includes(RolUsuario.PROVEEDOR)) {
+        // PROVEEDOR solo puede crear productos para sí mismo
+        if (req.body.proveedorId && req.body.proveedorId !== user.id) {
+          return res.status(403).json({ 
+            error: 'No tienes permiso para crear productos para otros proveedores' 
+          });
+        }
+        // Asegurar que el producto sea para el usuario actual
         req.body.proveedorId = user.id;
+      } else {
+        return res.status(403).json({ 
+          error: 'No tienes permisos para crear productos' 
+        });
       }
       
       const producto = await ProductoService.create(req.body);
@@ -44,18 +58,38 @@ export class ProductoController {
       const id = parseInt(req.params.id);
       const user = (req as any).user;
       
-      // Si es PROVEEDOR, verificar que solo actualice sus propios productos
-      if (user.roles.includes(RolUsuario.PROVEEDOR) && !user.roles.includes(RolUsuario.ADMIN)) {
-        const producto = await ProductoService.findById(id);
-        if (!producto || producto.proveedorId !== user.id) {
-          return res.status(403).json({ error: 'No tienes permiso para actualizar este producto' });
-        }
-        // Asegurar que no cambie el proveedor
-        delete req.body.proveedorId;
+      const producto = await ProductoService.findById(id);
+      if (!producto) {
+        return res.status(404).json({ error: 'Producto no encontrado' });
       }
       
-      const producto = await ProductoService.update(id, req.body);
-      return res.json(producto);
+      // Lógica de permisos para actualización
+      if (user.roles.includes(RolUsuario.ADMIN)) {
+        // ADMIN puede actualizar cualquier producto
+        // No aplicamos restricciones
+      } else if (user.roles.includes(RolUsuario.PROVEEDOR)) {
+        // PROVEEDOR solo puede actualizar sus propios productos
+        if (producto.proveedorId !== user.id) {
+          return res.status(403).json({ 
+            error: 'No tienes permiso para actualizar este producto' 
+          });
+        }
+        // Verificar que no intente cambiar el proveedor a otro
+        if (req.body.proveedorId && req.body.proveedorId !== user.id) {
+          return res.status(403).json({ 
+            error: 'No puedes cambiar el proveedor a otro usuario' 
+          });
+        }
+        // Asegurar que el proveedor siga siendo el usuario actual
+        req.body.proveedorId = user.id;
+      } else {
+        return res.status(403).json({ 
+          error: 'No tienes permisos para actualizar productos' 
+        });
+      }
+      
+      const productoActualizado = await ProductoService.update(id, req.body);
+      return res.json(productoActualizado);
     } catch (error) {
       return res.status(500).json({ error: 'Error al actualizar el producto' });
     }
@@ -66,12 +100,26 @@ export class ProductoController {
       const id = parseInt(req.params.id);
       const user = (req as any).user;
       
-      // Si es PROVEEDOR, verificar que solo elimine sus propios productos
-      if (user.roles.includes(RolUsuario.PROVEEDOR) && !user.roles.includes(RolUsuario.ADMIN)) {
-        const producto = await ProductoService.findById(id);
-        if (!producto || producto.proveedorId !== user.id) {
-          return res.status(403).json({ error: 'No tienes permiso para eliminar este producto' });
+      const producto = await ProductoService.findById(id);
+      if (!producto) {
+        return res.status(404).json({ error: 'Producto no encontrado' });
+      }
+      
+      // Lógica de permisos para eliminación
+      if (user.roles.includes(RolUsuario.ADMIN)) {
+        // ADMIN puede eliminar cualquier producto
+        // No aplicamos restricciones
+      } else if (user.roles.includes(RolUsuario.PROVEEDOR)) {
+        // PROVEEDOR solo puede eliminar sus propios productos
+        if (producto.proveedorId !== user.id) {
+          return res.status(403).json({ 
+            error: 'No tienes permiso para eliminar este producto' 
+          });
         }
+      } else {
+        return res.status(403).json({ 
+          error: 'No tienes permisos para eliminar productos' 
+        });
       }
       
       await ProductoService.delete(id);
@@ -88,8 +136,12 @@ export class ProductoController {
       
       let efectiveProveedorId = proveedorId ? parseInt(proveedorId as string) : undefined;
       
-      // Si es PROVEEDOR, solo mostrar sus propios productos
-      if (user.roles.includes(RolUsuario.PROVEEDOR) && !user.roles.includes(RolUsuario.ADMIN)) {
+      // Lógica de permisos para listado
+      if (user.roles.includes(RolUsuario.ADMIN)) {
+        // ADMIN puede ver todos los productos, respetar filtro enviado
+        // efectiveProveedorId ya está configurado del query param
+      } else if (user.roles.includes(RolUsuario.PROVEEDOR)) {
+        // PROVEEDOR solo puede ver sus propios productos
         efectiveProveedorId = user.id;
       }
       

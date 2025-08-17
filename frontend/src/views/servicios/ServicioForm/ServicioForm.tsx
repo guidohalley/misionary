@@ -20,6 +20,7 @@ import type { ServicioFormData } from '../types';
 import { usePersona } from '@/modules/persona/hooks/usePersona';
 import { useServicioAuxiliarData } from '@/modules/servicio/hooks/useServicio';
 import { TipoPersona, RolUsuario } from '@/views/personas/schemas';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface ServicioFormProps {
   initialData?: ServicioFormData;
@@ -38,6 +39,13 @@ const ServicioForm: React.FC<ServicioFormProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { personas, refreshPersonas } = usePersona();
   const { monedas, loading: loadingMonedas } = useServicioAuxiliarData();
+  const { user } = useAuth();
+
+  // Determinar permisos del usuario actual
+  const isAdmin = user?.roles.includes('ADMIN') || false;
+  const isProveedor = user?.roles.includes('PROVEEDOR') || false;
+  const canSelectAnyProvider = isAdmin; // Solo ADMIN puede elegir cualquier proveedor
+  const mustUseOwnId = isProveedor && !isAdmin; // PROVEEDOR puro debe usar su propio ID
 
   const {
     control,
@@ -54,7 +62,7 @@ const ServicioForm: React.FC<ServicioFormProps> = ({
       costoProveedor: 0,
       margenAgencia: 0,
       precio: 0,
-      proveedorId: undefined,
+      proveedorId: mustUseOwnId ? user?.id : undefined, // Precargar ID si es proveedor puro
       monedaId: 1, // ARS por defecto
     },
   });
@@ -83,6 +91,13 @@ const ServicioForm: React.FC<ServicioFormProps> = ({
       reset(initialData);
     }
   }, [initialData, reset]);
+
+  // Efecto para precargar el proveedor si es un proveedor puro y no hay datos iniciales
+  useEffect(() => {
+    if (mustUseOwnId && user?.id && !initialData) {
+      setValue('proveedorId', user.id);
+    }
+  }, [mustUseOwnId, user?.id, initialData, setValue]);
 
   const handleFormSubmit = async (data: ServicioFormData) => {
     try {
@@ -382,7 +397,10 @@ const ServicioForm: React.FC<ServicioFormProps> = ({
                         Proveedor
                       </h3>
                       <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                        Seleccione el proveedor del servicio
+                        {mustUseOwnId 
+                          ? 'Como proveedor, solo puedes crear servicios para tu cuenta'
+                          : 'Seleccione el proveedor del servicio'
+                        }
                       </p>
                     </div>
 
@@ -401,8 +419,8 @@ const ServicioForm: React.FC<ServicioFormProps> = ({
                             options={proveedorOptions}
                             value={proveedorOptions.find(option => option.value === field.value)}
                             onChange={option => field.onChange(option?.value)}
-                            isDisabled={isSubmitting}
-                            placeholder="Seleccionar proveedor..."
+                            isDisabled={isSubmitting || mustUseOwnId} // Deshabilitar si es proveedor puro
+                            placeholder={mustUseOwnId ? "Tu cuenta (automático)" : "Seleccionar proveedor..."}
                             className="rounded-lg"
                           />
                         )}
