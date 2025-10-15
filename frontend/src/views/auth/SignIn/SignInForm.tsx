@@ -18,14 +18,16 @@ interface SignInFormProps extends CommonProps {
 }
 
 type SignInFormSchema = {
-    userName: string
+    email: string
     password: string
     rememberMe: boolean
 }
 
 const validationSchema = Yup.object().shape({
-    userName: Yup.string().required('Please enter your user name'),
-    password: Yup.string().required('Please enter your password'),
+    email: Yup.string()
+        .email('Ingresa un email válido')
+        .required('El email es requerido'),
+    password: Yup.string().required('La contraseña es requerida'),
     rememberMe: Yup.bool(),
 })
 
@@ -45,10 +47,10 @@ const SignInForm = (props: SignInFormProps) => {
         values: SignInFormSchema,
         setSubmitting: (isSubmitting: boolean) => void,
     ) => {
-        const { userName, password } = values
+        const { email, password } = values
         setSubmitting(true)
 
-        const result = await signIn({ userName, password })
+        const result = await signIn({ email, password })
 
         if (result?.status === 'failed') {
             setMessage(result.message)
@@ -66,8 +68,8 @@ const SignInForm = (props: SignInFormProps) => {
             )}
             <Formik
                 initialValues={{
-                    userName: 'admin',
-                    password: '123Qwe',
+                    email: '',
+                    password: '',
                     rememberMe: true,
                 }}
                 validationSchema={validationSchema}
@@ -83,23 +85,20 @@ const SignInForm = (props: SignInFormProps) => {
                     <Form>
                         <FormContainer>
                             <FormItem
-                                label="User Name"
-                                invalid={
-                                    (errors.userName &&
-                                        touched.userName) as boolean
-                                }
-                                errorMessage={errors.userName}
+                                label="Email"
+                                invalid={(errors.email && touched.email) as boolean}
+                                errorMessage={errors.email}
                             >
                                 <Field
-                                    type="text"
-                                    autoComplete="off"
-                                    name="userName"
-                                    placeholder="User Name"
+                                    type="email"
+                                    autoComplete="email"
+                                    name="email"
+                                    placeholder="usuario@ejemplo.com"
                                     component={Input}
                                 />
                             </FormItem>
                             <FormItem
-                                label="Password"
+                                label="Contraseña"
                                 invalid={
                                     (errors.password &&
                                         touched.password) as boolean
@@ -109,7 +108,7 @@ const SignInForm = (props: SignInFormProps) => {
                                 <Field
                                     autoComplete="off"
                                     name="password"
-                                    placeholder="Password"
+                                    placeholder="Tu contraseña"
                                     component={PasswordInput}
                                 />
                             </FormItem>
@@ -119,10 +118,10 @@ const SignInForm = (props: SignInFormProps) => {
                                     name="rememberMe"
                                     component={Checkbox}
                                 >
-                                    Remember Me
+                                    Recordarme
                                 </Field>
                                 <ActionLink to={forgotPasswordUrl}>
-                                    Forgot Password?
+                                    ¿Olvidaste tu contraseña?
                                 </ActionLink>
                             </div>
                             <Button
@@ -131,11 +130,11 @@ const SignInForm = (props: SignInFormProps) => {
                                 variant="solid"
                                 type="submit"
                             >
-                                {isSubmitting ? 'Signing in...' : 'Sign In'}
+                                {isSubmitting ? 'Iniciando sesión...' : 'Iniciar Sesión'}
                             </Button>
                             <div className="mt-4 text-center">
-                                <span>{`Don't have an account yet?`} </span>
-                                <ActionLink to={signUpUrl}>Sign up</ActionLink>
+                                <span>{`¿No tienes cuenta aún?`} </span>
+                                <ActionLink to={signUpUrl}>Crear cuenta</ActionLink>
                             </div>
                         </FormContainer>
                     </Form>

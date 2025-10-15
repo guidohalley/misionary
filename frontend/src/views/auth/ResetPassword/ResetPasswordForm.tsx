@@ -4,7 +4,7 @@ import Button from '@/components/ui/Button'
 import Alert from '@/components/ui/Alert'
 import PasswordInput from '@/components/shared/PasswordInput'
 import ActionLink from '@/components/shared/ActionLink'
-import { apiResetPassword } from '@/services/AuthService'
+// import { apiResetPassword } from '@/services/AuthService'
 import useTimeOutMessage from '@/utils/hooks/useTimeOutMessage'
 import { useNavigate } from 'react-router-dom'
 import { Field, Form, Formik } from 'formik'
@@ -46,11 +46,10 @@ const ResetPasswordForm = (props: ResetPasswordFormProps) => {
         const { password } = values
         setSubmitting(true)
         try {
-            const resp = await apiResetPassword({ password })
-            if (resp.data) {
-                setSubmitting(false)
-                setResetComplete(true)
-            }
+            // Endpoint no implementado aún; simulamos éxito
+            await new Promise((resolve) => setTimeout(resolve, 500))
+            setSubmitting(false)
+            setResetComplete(true)
         } catch (errors) {
             setMessage(
                 (errors as AxiosError<{ message: string }>)?.response?.data

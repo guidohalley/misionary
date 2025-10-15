@@ -2,7 +2,11 @@ import { lazy } from 'react';
 import { HOME_PREFIX_PATH } from '@/constants/route.constant';
 
 const Home = lazy(() => import('@/views/Home'));
+const SignInPage = lazy(() => import('@/views/auth/SignIn'));
 const LoginView = lazy(() => import('@/views/auth/LoginView'));
+const ForgotPassword = lazy(() => import('@/views/auth/ForgotPassword'));
+const ResetPassword = lazy(() => import('@/views/auth/ResetPassword'));
+const SignUp = lazy(() => import('@/views/auth/SignUp'));
 const PersonasView = lazy(() => import('@/views/personas'));
 const PersonaNew = lazy(() => import('@/views/personas/PersonaNew'));
 const PersonaEdit = lazy(() => import('@/views/personas/PersonaEdit'));
@@ -40,9 +44,29 @@ const RentabilidadMain = lazy(() => import('@/views/rentabilidad/RentabilidadMai
 
 const publicRoutes = [
   {
-    key: 'login',
+    key: 'signIn',
+    path: '/sign-in',
+    component: SignInPage,
+  },
+  {
+    key: 'login-legacy',
     path: '/login',
     component: LoginView,
+  },
+  {
+    key: 'forgotPassword',
+    path: '/forgot-password',
+    component: ForgotPassword,
+  },
+  {
+    key: 'resetPassword',
+    path: '/reset-password',
+    component: ResetPassword,
+  },
+  {
+    key: 'signUp',
+    path: '/sign-up',
+    component: SignUp,
   },
   {
     key: 'acceptInvite',

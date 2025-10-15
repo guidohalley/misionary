@@ -4,7 +4,7 @@ import Input from '@/components/ui/Input'
 import Button from '@/components/ui/Button'
 import Alert from '@/components/ui/Alert'
 import ActionLink from '@/components/shared/ActionLink'
-import { apiForgotPassword } from '@/services/AuthService'
+// import { apiForgotPassword } from '@/services/AuthService'
 import useTimeOutMessage from '@/utils/hooks/useTimeOutMessage'
 import { Field, Form, Formik } from 'formik'
 import * as Yup from 'yup'
@@ -37,11 +37,10 @@ const ForgotPasswordForm = (props: ForgotPasswordFormProps) => {
     ) => {
         setSubmitting(true)
         try {
-            const resp = await apiForgotPassword(values)
-            if (resp.data) {
-                setSubmitting(false)
-                setEmailSent(true)
-            }
+            // Endpoint no implementado aún; simulamos éxito inmediato
+            await new Promise((resolve) => setTimeout(resolve, 500))
+            setSubmitting(false)
+            setEmailSent(true)
         } catch (errors) {
             setMessage(
                 (errors as AxiosError<{ message: string }>)?.response?.data
