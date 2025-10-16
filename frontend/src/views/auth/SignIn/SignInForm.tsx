@@ -114,13 +114,16 @@ const SignInForm = (props: SignInFormProps) => {
                             </FormItem>
                             <div className="flex justify-between mb-6">
                                 <Field
-                                    className="mb-0"
+                                    className="mb-0 text-white/80"
                                     name="rememberMe"
                                     component={Checkbox}
                                 >
                                     Recordarme
                                 </Field>
-                                <ActionLink to={forgotPasswordUrl}>
+                                <ActionLink 
+                                    to={forgotPasswordUrl}
+                                    className="text-[#E9FC87] hover:text-[#E9FC87]/80 transition-colors duration-200 font-medium"
+                                >
                                     ¿Olvidaste tu contraseña?
                                 </ActionLink>
                             </div>
@@ -128,14 +131,11 @@ const SignInForm = (props: SignInFormProps) => {
                                 block
                                 loading={isSubmitting}
                                 variant="solid"
+                                className="bg-black hover:bg-black/80 text-[#E9FC87] font-semibold py-3 shadow-lg shadow-black/25 border border-[#E9FC87]/20 transition-all duration-300"
                                 type="submit"
                             >
                                 {isSubmitting ? 'Iniciando sesión...' : 'Iniciar Sesión'}
                             </Button>
-                            <div className="mt-4 text-center">
-                                <span>{`¿No tienes cuenta aún?`} </span>
-                                <ActionLink to={signUpUrl}>Crear cuenta</ActionLink>
-                            </div>
                         </FormContainer>
                     </Form>
                 )}

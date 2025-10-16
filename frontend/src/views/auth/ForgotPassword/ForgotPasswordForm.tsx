@@ -21,7 +21,9 @@ type ForgotPasswordFormSchema = {
 }
 
 const validationSchema = Yup.object().shape({
-    email: Yup.string().required('Please enter your email'),
+    email: Yup.string()
+        .email('Ingresa un email válido')
+        .required('El email es requerido'),
 })
 
 const ForgotPasswordForm = (props: ForgotPasswordFormProps) => {
@@ -55,18 +57,16 @@ const ForgotPasswordForm = (props: ForgotPasswordFormProps) => {
             <div className="mb-6">
                 {emailSent ? (
                     <>
-                        <h3 className="mb-1">Check your email</h3>
-                        <p>
-                            We have sent a password recovery instruction to your
-                            email
+                        <h3 className="mb-1 text-xl font-semibold text-[#E9FC87]">Revisa tu correo</h3>
+                        <p className="text-white/80">
+                            Hemos enviado las instrucciones de recuperación a tu correo electrónico
                         </p>
                     </>
                 ) : (
                     <>
-                        <h3 className="mb-1">Forgot Password</h3>
-                        <p>
-                            Please enter your email address to receive a
-                            verification code
+                        <h3 className="mb-1 text-xl font-semibold text-[#E9FC87]">Recuperar Contraseña</h3>
+                        <p className="text-white/80">
+                            Ingresa tu correo electrónico para recibir las instrucciones
                         </p>
                     </>
                 )}
@@ -101,7 +101,7 @@ const ForgotPasswordForm = (props: ForgotPasswordFormProps) => {
                                         type="email"
                                         autoComplete="off"
                                         name="email"
-                                        placeholder="Email"
+                                        placeholder="Ingresa tu email"
                                         component={Input}
                                     />
                                 </FormItem>
@@ -110,13 +110,19 @@ const ForgotPasswordForm = (props: ForgotPasswordFormProps) => {
                                 block
                                 loading={isSubmitting}
                                 variant="solid"
+                                className="bg-black hover:bg-black/80 text-[#E9FC87] font-semibold py-3 shadow-lg shadow-black/25 border border-[#E9FC87]/20 transition-all duration-300"
                                 type="submit"
                             >
-                                {emailSent ? 'Resend Email' : 'Send Email'}
+                                {emailSent ? 'Reenviar Email' : 'Enviar Email'}
                             </Button>
-                            <div className="mt-4 text-center">
-                                <span>Back to </span>
-                                <ActionLink to={signInUrl}>Sign in</ActionLink>
+                            <div className="mt-4 text-center text-white/80">
+                                <span>Volver a </span>
+                                <ActionLink 
+                                    to={signInUrl}
+                                    className="text-[#E9FC87] hover:text-[#E9FC87]/80 transition-colors duration-200 font-medium"
+                                >
+                                    Iniciar Sesión
+                                </ActionLink>
                             </div>
                         </FormContainer>
                     </Form>

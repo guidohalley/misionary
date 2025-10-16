@@ -197,7 +197,7 @@ const Side = ({ children, content, ...rest }: SideProps) => {
         <div className="relative z-10 w-full xl:max-w-[720px] px-6 max-w-[640px]">
                     <div className="relative">
                         {/* Glass card container AJUSTADO PARA OVERLAY NEGRO */}
-            <div className="relative bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/10 shadow-none transition-all duration-300">
+            <div className="relative bg-black/40 backdrop-blur-md rounded-2xl p-6 border border-white/20 shadow-lg transition-all duration-300">
                             {/* Decoraciones suavizadas (removidas para un look más limpio) */}
 
                             {/* Header del formulario: oculto en registro por invitación para evitar redundancia */}
@@ -213,12 +213,12 @@ const Side = ({ children, content, ...rest }: SideProps) => {
                                             <div className="absolute inset-0 bg-gradient-to-br from-[#E9FC87]/20 to-transparent rounded-lg blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                                         </div>
                                         <div className="h-8 w-px bg-gradient-to-b from-transparent via-[#E9FC87]/50 to-transparent"></div>
-                                        <span className="text-[#262626] font-bold text-lg tracking-wide">
+                                        <span className="text-white font-bold text-lg tracking-wide">
                                             M<span className="text-[#E9FC87] drop-shadow-sm">S</span>NR
                                         </span>
                                     </div>
                                     <div className="w-16 h-px bg-gradient-to-r from-transparent via-[#E9FC87]/60 to-transparent mx-auto mb-2"></div>
-                                    <p className="text-xs text-gray-600 font-medium">Enterprise Management System</p>
+                                    <p className="text-xs text-white/70 font-medium">Enterprise Management System</p>
                                 </div>
                             )}
 
