@@ -150,19 +150,21 @@ const HistorialPrecioList = () => {
       header: 'Acciones',
       accessorKey: 'actions',
       cell: ({ row }) => (
-        <div className="flex space-x-2">
-          <Button
-            size="sm"
-            variant="plain"
-            icon={<HiEye />}
+        <div className="flex items-center gap-2">
+          <button
+            className="p-2 rounded-full transition-all duration-200 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 hover:shadow-md hover:shadow-blue-200 dark:hover:shadow-blue-900/30 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400"
             onClick={() => handleView(row.original)}
-          />
-          <Button
-            size="sm"
-            variant="plain"
-            icon={<HiPencil />}
+            title="Ver detalles"
+          >
+            <HiEye className="w-4 h-4" />
+          </button>
+          <button
+            className="p-2 rounded-full transition-all duration-200 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 hover:shadow-md hover:shadow-amber-200 dark:hover:shadow-amber-900/30 text-slate-600 dark:text-slate-300 hover:text-amber-600 dark:hover:text-amber-400"
             onClick={() => handleEdit(row.original)}
-          />
+            title="Editar"
+          >
+            <HiPencil className="w-4 h-4" />
+          </button>
         </div>
       ),
     },

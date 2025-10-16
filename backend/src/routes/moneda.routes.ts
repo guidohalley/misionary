@@ -23,12 +23,6 @@ const router = Router();
 router.get('/', asyncHandler(MonedaController.getAllMonedas));
 
 /**
- * GET /api/monedas/:codigo
- * Obtener una moneda por código
- */
-router.get('/:codigo', validarCodigoMoneda, asyncHandler(MonedaController.getMonedaByCodigo));
-
-/**
  * GET /api/monedas/tipo-cambio/:monedaDesde/:monedaHacia
  * Obtener tipo de cambio actual entre dos monedas
  */
@@ -47,6 +41,12 @@ router.get(
   validarHistorialQuery,
   asyncHandler(MonedaController.getHistorialTipoCambio)
 );
+
+/**
+ * GET /api/monedas/:codigo
+ * Obtener una moneda por código
+ */
+router.get('/:codigo', validarCodigoMoneda, asyncHandler(MonedaController.getMonedaByCodigo));
 
 // ─────────────────── RUTAS PROTEGIDAS (requieren autenticación) ─────────────────── 
 

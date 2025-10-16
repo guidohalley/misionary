@@ -103,16 +103,16 @@ const ClienteConEmpresaForm: React.FC<ClienteConEmpresaFormProps> = ({
       className="max-w-6xl mx-auto p-6"
     >
       <Card className="rounded-lg shadow-lg border-0">
-        <div className="mb-6 p-6 bg-gradient-to-r from-blue-50 to-sky-50 rounded-t-lg">
+        <div className="mb-6 p-6 bg-gradient-to-r from-blue-50 to-sky-50 dark:from-slate-700 dark:to-slate-800 rounded-t-lg">
           <div className="flex items-center space-x-3">
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-              <HiOutlineUser className="h-6 w-6 text-blue-600" />
+            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+              <HiOutlineUser className="h-6 w-6 text-blue-600 dark:text-blue-400" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                 Nuevo Cliente
               </h2>
-              <p className="text-gray-600 mt-1">
+              <p className="text-gray-600 dark:text-gray-400 mt-1">
                 Registra un nuevo cliente y opcionalmente su empresa
               </p>
             </div>
@@ -123,8 +123,8 @@ const ClienteConEmpresaForm: React.FC<ClienteConEmpresaFormProps> = ({
           <FormContainer>
             {/* SECCIÓN CLIENTE */}
             <div className="mb-8">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <HiOutlineUser className="h-5 w-5 mr-2 text-blue-600" />
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                <HiOutlineUser className="h-5 w-5 mr-2 text-blue-600 dark:text-blue-400" />
                 Información del Cliente
               </h3>
               
@@ -193,17 +193,17 @@ const ClienteConEmpresaForm: React.FC<ClienteConEmpresaFormProps> = ({
 
             {/* CHECKBOX PARA CREAR EMPRESA */}
             <div className="mb-6">
-              <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg border">
+              <div className="flex items-center space-x-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
                 <Checkbox
                   checked={crearEmpresa}
                   onChange={handleCrearEmpresaChange}
                   disabled={isSubmitting}
                 />
                 <div>
-                  <label className="text-sm font-medium text-gray-900">
+                  <label className="text-sm font-medium text-gray-900 dark:text-white">
                     Crear empresa para este cliente
                   </label>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
                     Registra los datos de la empresa para facturación y gestión comercial
                   </p>
                 </div>
@@ -218,8 +218,8 @@ const ClienteConEmpresaForm: React.FC<ClienteConEmpresaFormProps> = ({
                 transition={{ duration: 0.3 }}
                 className="mb-8"
               >
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                  <HiOutlineOfficeBuilding className="h-5 w-5 mr-2 text-green-600" />
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                  <HiOutlineOfficeBuilding className="h-5 w-5 mr-2 text-green-600 dark:text-green-400" />
                   Información de la Empresa
                 </h3>
                 
@@ -311,14 +311,14 @@ const ClienteConEmpresaForm: React.FC<ClienteConEmpresaFormProps> = ({
                   </FormItem>
                 </div>
 
-                <div className="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                <div className="mt-4 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
                   <div className="flex items-start space-x-3">
-                    <div className="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mt-0.5">
-                      <div className="w-2 h-2 bg-green-600 rounded-full"></div>
+                    <div className="w-5 h-5 bg-green-100 dark:bg-green-900/50 rounded-full flex items-center justify-center mt-0.5">
+                      <div className="w-2 h-2 bg-green-600 dark:bg-green-400 rounded-full"></div>
                     </div>
                     <div>
-                      <h4 className="text-sm font-medium text-green-900">Datos de facturación</h4>
-                      <p className="text-sm text-green-700 mt-1">
+                      <h4 className="text-sm font-medium text-green-900 dark:text-green-300">Datos de facturación</h4>
+                      <p className="text-sm text-green-700 dark:text-green-400 mt-1">
                         El CUIT y la razón social son importantes para la facturación. 
                         Puedes completar estos datos más tarde si no los tienes disponibles.
                       </p>
@@ -328,14 +328,14 @@ const ClienteConEmpresaForm: React.FC<ClienteConEmpresaFormProps> = ({
               </motion.div>
             )}
 
-            <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
               <div className="flex items-start space-x-3">
-                <div className="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center mt-0.5">
-                  <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                <div className="w-5 h-5 bg-blue-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center mt-0.5">
+                  <div className="w-2 h-2 bg-blue-600 dark:bg-blue-400 rounded-full"></div>
                 </div>
                 <div>
-                  <h4 className="text-sm font-medium text-blue-900">Información sobre clientes</h4>
-                  <p className="text-sm text-blue-700 mt-1">
+                  <h4 className="text-sm font-medium text-blue-900 dark:text-blue-300">Información sobre clientes</h4>
+                  <p className="text-sm text-blue-700 dark:text-blue-400 mt-1">
                     Los clientes son registrados únicamente para datos comerciales y facturación. 
                     No tienen acceso al sistema interno de la empresa.
                     {crearEmpresa && ' La empresa asociada facilitará la gestión de presupuestos y facturas.'}
@@ -344,7 +344,7 @@ const ClienteConEmpresaForm: React.FC<ClienteConEmpresaFormProps> = ({
               </div>
             </div>
 
-            <div className="flex justify-end space-x-4 mt-8 p-6 bg-gray-50 rounded-b-lg">
+            <div className="flex justify-end space-x-4 mt-8 p-6 bg-gray-50 dark:bg-gray-800 rounded-b-lg border-t border-gray-200 dark:border-gray-700">
               <Button
                 type="button"
                 variant="plain"

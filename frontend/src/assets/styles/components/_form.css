@@ -20,7 +20,7 @@
   }
 
   .form-label {
-    @apply flex items-center font-semibold text-white/90;
+    @apply flex items-center font-semibold text-gray-700 dark:text-white/90;
 
     &.invalid {
       @apply text-red-400;

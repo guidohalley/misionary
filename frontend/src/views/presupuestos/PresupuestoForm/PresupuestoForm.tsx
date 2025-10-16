@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useForm, Controller, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Card, Button, FormItem, FormContainer, Input, Select, Notification, toast, Checkbox, DatePicker } from '@/components/ui';
-import { HiOutlinePlus, HiOutlineTrash } from 'react-icons/hi';
+import { HiOutlinePlus, HiOutlineTrash, HiOutlineCalendar } from 'react-icons/hi';
+import { HiOutlineSparkles, HiCheck, HiOutlineChartBar, HiOutlineLightBulb, HiOutlineCalculator } from 'react-icons/hi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { presupuestoSchema } from '../schemas';
 import type { PresupuestoFormData, ItemFormData } from '../types';
@@ -287,10 +288,10 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
     >
       <Card className="max-w-4xl mx-auto">
         <div className="mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
             {isEdit ? 'Editar Presupuesto' : 'Nuevo Presupuesto'}
           </h2>
-          <p className="text-gray-600 mt-1">
+          <p className="text-gray-600 dark:text-gray-400 mt-1">
             {isEdit ? 'Modifica la información del presupuesto' : 'Completa los datos del nuevo presupuesto'}
           </p>
         </div>
@@ -386,21 +387,44 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
               {/* Indicador de duración */}
               {duracion && (
                 <div className="mb-4">
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                    <div className="flex items-center gap-2">
-                      <span className="text-blue-600 text-sm font-medium">
-                        📏 Duración: {duracion}
-                      </span>
+                  <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded-lg p-3">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <div className="flex items-center gap-1">
+                        <HiOutlineCalculator className="text-blue-600 dark:text-blue-400 w-5 h-5" />
+                        <span className="text-blue-600 dark:text-blue-400 text-sm font-medium">
+                          Duración: {duracion}
+                        </span>
+                      </div>
                       {watchPeriodoInicio && watchPeriodoFin && (() => {
                         const diffDays = Math.ceil(Math.abs(new Date(watchPeriodoFin).getTime() - new Date(watchPeriodoInicio).getTime()) / (1000 * 60 * 60 * 24));
                         if (diffDays >= 365) {
-                          return <span className="text-orange-600 text-xs">🎯 Ideal para proyecciones anuales</span>;
+                          return (
+                            <div className="flex items-center gap-1">
+                              <HiOutlineSparkles className="text-orange-600 dark:text-orange-400 w-4 h-4" />
+                              <span className="text-orange-600 dark:text-orange-400 text-xs">Ideal para proyecciones anuales</span>
+                            </div>
+                          );
                         } else if (diffDays >= 90) {
-                          return <span className="text-green-600 text-xs">✅ Buena para análisis trimestral</span>;
+                          return (
+                            <div className="flex items-center gap-1">
+                              <HiCheck className="text-green-600 dark:text-green-400 w-4 h-4" />
+                              <span className="text-green-600 dark:text-green-400 text-xs">Buena para análisis trimestral</span>
+                            </div>
+                          );
                         } else if (diffDays >= 30) {
-                          return <span className="text-blue-600 text-xs">📊 Válida para análisis mensual</span>;
+                          return (
+                            <div className="flex items-center gap-1">
+                              <HiOutlineChartBar className="text-blue-600 dark:text-blue-400 w-4 h-4" />
+                              <span className="text-blue-600 dark:text-blue-400 text-xs">Válida para análisis mensual</span>
+                            </div>
+                          );
                         } else if (diffDays >= 7) {
-                          return <span className="text-gray-600 text-xs">⚡ Vigencia corta</span>;
+                          return (
+                            <div className="flex items-center gap-1">
+                              <HiOutlineSparkles className="text-gray-600 dark:text-gray-400 w-4 h-4" />
+                              <span className="text-gray-600 dark:text-gray-400 text-xs">Vigencia corta</span>
+                            </div>
+                          );
                         }
                         return null;
                       })()}
@@ -411,62 +435,67 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
 
               {/* Presets de duración */}
               <div className="mb-2">
-                <div className="text-sm font-medium text-gray-700 mb-2">⚡ Duración rápida</div>
+                <div className="flex items-center gap-1 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <HiOutlineSparkles className="w-4 h-4" />
+                  Duración rápida
+                </div>
                 <div className="flex flex-wrap gap-2">
                   <Button
                     type="button"
                     size="sm"
                     variant={vigenciaPreset === 'NONE' ? 'solid' : 'twoTone'}
-                    className={vigenciaPreset === 'NONE' ? 'bg-gray-600 text-white' : ''}
+                    className={vigenciaPreset === 'NONE' ? 'bg-gray-600 text-white dark:bg-gray-700 dark:text-white' : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600'}
                     onClick={() => setVigenciaPreset('NONE')}
                   >
-                    🔓 Manual
+                    Manual
                   </Button>
                   <Button
                     type="button"
                     size="sm"
                     variant={vigenciaPreset === '1M' ? 'solid' : 'twoTone'}
-                    className={vigenciaPreset === '1M' ? 'bg-green-600 text-white' : ''}
+                    className={vigenciaPreset === '1M' ? 'bg-green-600 text-white dark:bg-green-700 dark:text-white' : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600'}
                     onClick={() => setVigenciaPreset('1M')}
                   >
-                    📅 1 mes
+                    1 mes
                   </Button>
                   <Button
                     type="button"
                     size="sm"
                     variant={vigenciaPreset === '3M' ? 'solid' : 'twoTone'}
-                    className={vigenciaPreset === '3M' ? 'bg-blue-600 text-white' : ''}
+                    className={vigenciaPreset === '3M' ? 'bg-blue-600 text-white dark:bg-blue-700 dark:text-white' : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600'}
                     onClick={() => setVigenciaPreset('3M')}
                   >
-                    🗓️ 3 meses
+                    3 meses
                   </Button>
                   <Button
                     type="button"
                     size="sm"
                     variant={vigenciaPreset === '6M' ? 'solid' : 'twoTone'}
-                    className={vigenciaPreset === '6M' ? 'bg-purple-600 text-white' : ''}
+                    className={vigenciaPreset === '6M' ? 'bg-purple-600 text-white dark:bg-purple-700 dark:text-white' : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600'}
                     onClick={() => setVigenciaPreset('6M')}
                   >
-                    📆 6 meses
+                    6 meses
                   </Button>
                   <Button
                     type="button"
                     size="sm"
                     variant={vigenciaPreset === '1Y' ? 'solid' : 'twoTone'}
-                    className={vigenciaPreset === '1Y' ? 'bg-orange-600 text-white' : ''}
+                    className={vigenciaPreset === '1Y' ? 'bg-orange-600 text-white dark:bg-orange-700 dark:text-white' : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600'}
                     onClick={() => setVigenciaPreset('1Y')}
                   >
-                    🗓️ 1 año
+                    1 año
                   </Button>
                 </div>
-                <div className="text-xs text-gray-500 mt-1">
-                  💡 Se calcula automáticamente desde "Vigencia desde". Para proyecciones anuales usa 1 año.
+                <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  <HiOutlineLightBulb className="w-3 h-3" />
+                  Se calcula automáticamente desde "Vigencia desde". Para proyecciones anuales usa 1 año.
                 </div>
               </div>
 
               {/* Impuestos */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">
+                <label className="flex items-center gap-1 block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                  <HiOutlineCalculator className="w-4 h-4" />
                   Impuestos a Aplicar
                 </label>
                 <div className="space-y-2 max-h-32 overflow-y-auto">
@@ -477,10 +506,10 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
                         onChange={(checked) => handleImpuestoToggle(impuesto, checked)}
                         disabled={isSubmitting}
                       />
-                      <label className="ml-2 text-sm text-gray-700">
+                      <label className="ml-2 text-sm text-gray-700 dark:text-gray-300">
                         {impuesto.nombre} ({impuesto.porcentaje}%)
                         {impuesto.descripcion && (
-                          <span className="text-gray-500 text-xs block">
+                          <span className="text-gray-500 dark:text-gray-400 text-xs block">
                             {impuesto.descripcion}
                           </span>
                         )}
@@ -488,11 +517,11 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
                     </div>
                   ))}
                   {impuestosDisponibles.length === 0 && (
-                    <p className="text-sm text-gray-500">No hay impuestos configurados</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">No hay impuestos configurados</p>
                   )}
                 </div>
                 {impuestosSeleccionados.length === 0 && (
-                  <p className="text-sm text-red-600 mt-1">
+                  <p className="text-sm text-red-600 dark:text-red-400 mt-1">
                     Debe seleccionar al menos un impuesto
                   </p>
                 )}
@@ -503,8 +532,8 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
             <div className="mb-8">
               <div className="flex justify-between items-center mb-4">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Items del Presupuesto</h3>
-                  <p className="text-sm text-gray-600">Cada item puede ser un producto o un servicio. Agrega múltiples items para combinar productos y servicios.</p>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Items del Presupuesto</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Cada item puede ser un producto o un servicio. Agrega múltiples items para combinar productos y servicios.</p>
                 </div>
                 <Button
                   type="button"
@@ -512,7 +541,7 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
                   icon={<HiOutlinePlus />}
                   onClick={handleAddItem}
                   disabled={isSubmitting}
-                  className="bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100"
+                  className="bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 border-blue-200 dark:border-blue-700 hover:bg-blue-100 dark:hover:bg-blue-900/50"
                 >
                   Agregar Otro Item
                 </Button>
@@ -526,12 +555,12 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
                     transition={{ duration: 0.3 }}
-                    className="mb-4 p-4 border border-gray-200 rounded-lg"
+                    className="mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg dark:bg-gray-800/50"
                   >
                     <div className="flex justify-between items-start mb-4">
                       <div>
-                        <h4 className="font-medium text-gray-700">Item #{index + 1}</h4>
-                        <p className="text-xs text-gray-500">Selecciona un producto O un servicio para este item</p>
+                        <h4 className="font-medium text-gray-700 dark:text-gray-300">Item #{index + 1}</h4>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">Selecciona un producto O un servicio para este item</p>
                       </div>
                       {fields.length > 1 && (
                         <Button
@@ -663,17 +692,17 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
                     <div className="mt-4 flex justify-between items-center">
                       <div className="flex items-center space-x-2">
                         {watchItems?.[index]?.productoId && (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300">
                             Producto
                           </span>
                         )}
                         {watchItems?.[index]?.servicioId && (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300">
                             Servicio
                           </span>
                         )}
                       </div>
-                      <span className="text-sm font-semibold text-gray-900">
+                      <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                         Subtotal: {formatPrice((watchItems?.[index]?.cantidad || 0) * (watchItems?.[index]?.precioUnitario || 0))}
                       </span>
                     </div>
@@ -682,38 +711,39 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
               </AnimatePresence>
 
               {errors.items?.message && (
-                <p className="text-red-600 text-sm mt-2">{errors.items.message}</p>
+                <p className="text-red-600 dark:text-red-400 text-sm mt-2">{errors.items.message}</p>
               )}
             </div>
 
             {/* Totales */}
-            <div className="mb-8 p-6 bg-gray-50 rounded-lg">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Resumen</h3>
+            <div className="mb-8 p-6 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Resumen</h3>
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Subtotal:</span>
-                  <span className="font-medium">{formatPrice(subtotal)}</span>
+                  <span className="text-gray-600 dark:text-gray-400">Subtotal:</span>
+                  <span className="font-medium text-gray-900 dark:text-gray-100">{formatPrice(subtotal)}</span>
                 </div>
                 
                 {detalleImpuestos.map((detalle) => (
                   <div key={detalle.impuesto.id} className="flex justify-between">
-                    <span className="text-gray-600">
+                    <span className="text-gray-600 dark:text-gray-400">
                       {detalle.impuesto.nombre} ({detalle.impuesto.porcentaje}%):
                     </span>
-                    <span className="font-medium">{formatPrice(detalle.monto)}</span>
+                    <span className="font-medium text-gray-900 dark:text-gray-100">{formatPrice(detalle.monto)}</span>
                   </div>
                 ))}
                 
-                <div className="flex justify-between text-lg font-bold border-t pt-2">
-                  <span>Total:</span>
-                  <span className="text-green-600">{formatPrice(total)}</span>
+                <div className="flex justify-between text-lg font-bold border-t border-gray-300 dark:border-gray-600 pt-2">
+                  <span className="text-gray-900 dark:text-gray-100">Total:</span>
+                  <span className="text-green-600 dark:text-green-400">{formatPrice(total)}</span>
                 </div>
               </div>
               
               {impuestosSeleccionados.length === 0 && (
-                <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-                  <p className="text-sm text-yellow-800">
-                    ⚠️ No se han seleccionado impuestos. El total no incluye impuestos.
+                <div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-700 rounded-md">
+                  <p className="text-sm text-yellow-800 dark:text-yellow-400 flex items-center gap-2">
+                    <HiOutlineLightBulb className="w-4 h-4" />
+                    No se han seleccionado impuestos. El total no incluye impuestos.
                   </p>
                 </div>
               )}

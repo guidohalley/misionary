@@ -59,7 +59,7 @@ const ProductoForm: React.FC<ProductoFormProps> = ({
     defaultValues: initialData || {
       nombre: '',
       costoProveedor: 0,
-      margenAgencia: 0,
+      margenAgencia: 35, // Preestablecido a 35%
       precio: 0,
       proveedorId: mustUseOwnId ? user?.id : undefined, // Precargar ID si es proveedor puro
       monedaId: 1, // ARS por defecto
@@ -308,7 +308,7 @@ const ProductoForm: React.FC<ProductoFormProps> = ({
                           control={control}
                           rules={{ 
                             required: 'El margen de agencia es requerido',
-                            min: { value: 0, message: 'El margen debe ser mayor o igual a 0' },
+                            min: { value: 35, message: 'El margen mínimo debe ser 35%' },
                             max: { value: 1000, message: 'El margen no puede exceder 1000%' }
                           }}
                           render={({ field }) => (
@@ -316,14 +316,14 @@ const ProductoForm: React.FC<ProductoFormProps> = ({
                               {...field}
                               type="number"
                               step="0.01"
-                              min="0"
+                              min="35"
                               max="1000"
                               value={field.value ?? ''}
                               onChange={(e) => {
                                 const val = e.target.value;
                                 field.onChange(val === '' ? undefined : Number(val));
                               }}
-                              placeholder="Ej: 25 (para 25%)"
+                              placeholder="Ej: 35 (para 35% ganancia mínima)"
                               disabled={isSubmitting}
                               className="rounded-lg"
                               suffix="%"
@@ -358,27 +358,29 @@ const ProductoForm: React.FC<ProductoFormProps> = ({
                         />
                       </FormItem>
 
-                      <FormItem
-                        label="Precio Final (Calculado automáticamente)"
-                        invalid={!!errors.precio}
-                        errorMessage={errors.precio?.message}
-                      >
-                        <Controller
-                          name="precio"
-                          control={control}
-                          render={({ field }) => (
-                            <MoneyInput
-                              value={field.value || 0}
-                              onChange={field.onChange}
-                              currency={monedaSeleccionada?.codigo || 'ARS'}
-                              currencySymbol={monedaSeleccionada?.simbolo || '$'}
-                              placeholder="0,00"
-                              disabled={true}
-                              className="bg-gray-50 dark:bg-gray-700"
-                            />
-                          )}
-                        />
-                      </FormItem>
+                      {isAdmin && (
+                        <FormItem
+                          label="Precio Final (Calculado automáticamente)"
+                          invalid={!!errors.precio}
+                          errorMessage={errors.precio?.message}
+                        >
+                          <Controller
+                            name="precio"
+                            control={control}
+                            render={({ field }) => (
+                              <MoneyInput
+                                value={field.value || 0}
+                                onChange={field.onChange}
+                                currency={monedaSeleccionada?.codigo || 'ARS'}
+                                currencySymbol={monedaSeleccionada?.simbolo || '$'}
+                                placeholder="0,00"
+                                disabled={true}
+                                className="bg-gray-50 dark:bg-gray-700"
+                              />
+                            )}
+                          />
+                        </FormItem>
+                      )}
                     </div>
                   </div>
                 </Card>

@@ -6,7 +6,7 @@ export interface GastoOperativo {
   monto: number;
   monedaId: number;
   fecha: Date;
-  categoriaId: number;
+  categoria: string;
   tipoId?: number;
   esRecurrente: boolean;
   frecuencia?: string;
@@ -22,7 +22,6 @@ export interface GastoOperativo {
   proveedor?: Persona;
   asignaciones: AsignacionGastoProyecto[];
   tipo?: TipoGasto;
-  categoria?: Categoria;
 }
 
 export interface AsignacionGastoProyecto {
@@ -78,7 +77,7 @@ export interface CreateGastoOperativoDTO extends Record<string, unknown> {
   monto: number;
   monedaId: number;
   fecha: Date;
-  categoriaId: number;
+  categoria: string;
   tipoId?: number;
   esRecurrente?: boolean;
   frecuencia?: string;

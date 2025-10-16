@@ -8,7 +8,7 @@ import { asyncHandler } from '../utils/asyncHandler';
 const router = Router();
 
 router.post('/', 
-  [auth, checkRole([RolUsuario.ADMIN, RolUsuario.CONTADOR])], 
+  [auth, checkRole([RolUsuario.ADMIN, RolUsuario.CONTADOR, RolUsuario.PROVEEDOR])], 
   asyncHandler(PresupuestoController.create)
 );
 
@@ -23,7 +23,7 @@ router.get('/:id',
 );
 
 router.put('/:id', 
-  [auth, checkRole([RolUsuario.ADMIN, RolUsuario.CONTADOR])], 
+  [auth, checkRole([RolUsuario.ADMIN, RolUsuario.CONTADOR, RolUsuario.PROVEEDOR])], 
   asyncHandler(PresupuestoController.update)
 );
 

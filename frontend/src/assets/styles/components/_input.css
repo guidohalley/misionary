@@ -1,7 +1,7 @@
 @layer components {
   .input {
-    @apply border border-white/20 text-white rounded-xl w-full py-4 px-5 focus:outline-none appearance-none;
-    background-color: rgba(0, 0, 0, 0.2);
+    @apply border border-gray-300 text-gray-900 dark:text-white rounded-xl w-full py-4 px-5 focus:outline-none appearance-none;
+    background-color: #ffffff;
     backdrop-filter: blur(12px);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     font-size: 1rem;
@@ -26,24 +26,24 @@
   }
 
   .input:hover {
-    border-color: rgba(233, 252, 135, 0.4);
+    border-color: #000000;
     box-shadow: 
       0 4px 6px -4px rgba(0, 0, 0, 0.1),
       0 2px 4px -2px rgba(0, 0, 0, 0.06),
-      inset 0 1px 0 0 rgba(233, 252, 135, 0.1);
+      inset 0 1px 0 0 rgba(0, 0, 0, 0.1);
     transform: translateY(-1px);
   }
 
   .input:focus,
   .input:focus-within {
-    border-color: #E9FC87;
+    border-color: #000000;
     box-shadow: 
-      0 0 0 3px rgba(233, 252, 135, 0.15),
-      0 4px 8px -4px rgba(233, 252, 135, 0.25),
-      0 2px 4px -2px rgba(233, 252, 135, 0.2),
-      inset 0 1px 0 0 rgba(233, 252, 135, 0.1);
+      0 0 0 3px rgba(0, 0, 0, 0.15),
+      0 4px 8px -4px rgba(0, 0, 0, 0.25),
+      0 2px 4px -2px rgba(0, 0, 0, 0.2),
+      inset 0 1px 0 0 rgba(0, 0, 0, 0.1);
     transform: translateY(-2px);
-    background-color: rgba(255, 255, 255, 1);
+    background-color: #ffffff;
   }
 
   .dark .input:focus,
@@ -52,7 +52,7 @@
   }
 
   .input::placeholder {
-    @apply text-msgray-400;
+    @apply text-gray-500 dark:text-gray-400;
     font-size: 0.95rem;
     transition: all 0.2s ease;
     font-weight: 400;

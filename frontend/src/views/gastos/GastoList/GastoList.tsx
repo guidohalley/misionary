@@ -364,42 +364,42 @@ const GastoList: React.FC<GastoListProps> = ({
       {/* Cotizaciones públicas */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
         <Card className="p-4">
-          <div className="text-sm text-gray-500">Dólar Blue</div>
-          <div className="text-2xl font-bold">$ {publicRates.blue ? publicRates.blue.toLocaleString('es-AR', { minimumFractionDigits: 2 }) : '—'}</div>
+          <div className="text-sm text-gray-500 dark:text-gray-400">Dólar Blue</div>
+          <div className="text-2xl font-bold text-gray-900 dark:text-white">$ {publicRates.blue ? publicRates.blue.toLocaleString('es-AR', { minimumFractionDigits: 2 }) : '—'}</div>
         </Card>
         <Card className="p-4">
-          <div className="text-sm text-gray-500">Dólar Tarjeta</div>
-          <div className="text-2xl font-bold">$ {publicRates.tarjeta ? publicRates.tarjeta.toLocaleString('es-AR', { minimumFractionDigits: 2 }) : '—'}</div>
+          <div className="text-sm text-gray-500 dark:text-gray-400">Dólar Tarjeta</div>
+          <div className="text-2xl font-bold text-gray-900 dark:text-white">$ {publicRates.tarjeta ? publicRates.tarjeta.toLocaleString('es-AR', { minimumFractionDigits: 2 }) : '—'}</div>
         </Card>
         <Card className="p-4">
-          <div className="text-sm text-gray-500">Dólar Oficial</div>
-          <div className="text-2xl font-bold">$ {publicRates.oficial ? publicRates.oficial.toLocaleString('es-AR', { minimumFractionDigits: 2 }) : '—'}</div>
+          <div className="text-sm text-gray-500 dark:text-gray-400">Dólar Oficial</div>
+          <div className="text-2xl font-bold text-gray-900 dark:text-white">$ {publicRates.oficial ? publicRates.oficial.toLocaleString('es-AR', { minimumFractionDigits: 2 }) : '—'}</div>
         </Card>
         <Card className="p-4">
-          <div className="text-sm text-gray-500">Euro (ARS)</div>
-          <div className="text-2xl font-bold">$ {publicRates.eur ? publicRates.eur.toLocaleString('es-AR', { minimumFractionDigits: 2 }) : '—'}</div>
+          <div className="text-sm text-gray-500 dark:text-gray-400">Euro (ARS)</div>
+          <div className="text-2xl font-bold text-gray-900 dark:text-white">$ {publicRates.eur ? publicRates.eur.toLocaleString('es-AR', { minimumFractionDigits: 2 }) : '—'}</div>
         </Card>
       </div>
 
       {/* Cards resumen */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
         <Card className="p-4">
-          <div className="text-sm text-gray-500">Gastos en ARS (filtrado)</div>
-          <div className="text-2xl font-bold">$ {Number(totalesPorCodigo.ARS || 0).toLocaleString('es-AR', { minimumFractionDigits: 2 })}</div>
+          <div className="text-sm text-gray-500 dark:text-gray-400">Gastos en ARS (filtrado)</div>
+          <div className="text-2xl font-bold text-gray-900 dark:text-white">$ {Number(totalesPorCodigo.ARS || 0).toLocaleString('es-AR', { minimumFractionDigits: 2 })}</div>
         </Card>
         <Card className="p-4">
-          <div className="text-sm text-gray-500">Gastos en USD (filtrado)</div>
-          <div className="text-2xl font-bold">US$ {Number(totalesPorCodigo.USD || 0).toLocaleString('es-AR', { minimumFractionDigits: 2 })}</div>
-          <div className="text-xs text-gray-500 mt-1">≈ $ {(Number(totalesPorCodigo.USD || 0) * Number(rates.USD || 0)).toLocaleString('es-AR', { minimumFractionDigits: 2 })} ARS</div>
+          <div className="text-sm text-gray-500 dark:text-gray-400">Gastos en USD (filtrado)</div>
+          <div className="text-2xl font-bold text-gray-900 dark:text-white">US$ {Number(totalesPorCodigo.USD || 0).toLocaleString('es-AR', { minimumFractionDigits: 2 })}</div>
+          <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">≈ $ {(Number(totalesPorCodigo.USD || 0) * Number(rates.USD || 0)).toLocaleString('es-AR', { minimumFractionDigits: 2 })} ARS</div>
         </Card>
         <Card className="p-4">
-          <div className="text-sm text-gray-500">Gastos en EUR (filtrado)</div>
-          <div className="text-2xl font-bold">€ {Number(totalesPorCodigo.EUR || 0).toLocaleString('es-AR', { minimumFractionDigits: 2 })}</div>
-          <div className="text-xs text-gray-500 mt-1">≈ $ {(Number(totalesPorCodigo.EUR || 0) * Number(rates.EUR || 0)).toLocaleString('es-AR', { minimumFractionDigits: 2 })} ARS</div>
+          <div className="text-sm text-gray-500 dark:text-gray-400">Gastos en EUR (filtrado)</div>
+          <div className="text-2xl font-bold text-gray-900 dark:text-white">€ {Number(totalesPorCodigo.EUR || 0).toLocaleString('es-AR', { minimumFractionDigits: 2 })}</div>
+          <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">≈ $ {(Number(totalesPorCodigo.EUR || 0) * Number(rates.EUR || 0)).toLocaleString('es-AR', { minimumFractionDigits: 2 })} ARS</div>
         </Card>
         <Card className="p-4">
           <div className="flex items-center justify-between">
-            <div className="text-sm text-gray-500">Total equivalente ARS</div>
+            <div className="text-sm text-gray-500 dark:text-gray-400">Total equivalente ARS</div>
             <div className="w-36">
               <Select
                 options={[
@@ -412,8 +412,8 @@ const GastoList: React.FC<GastoListProps> = ({
               />
             </div>
           </div>
-          <div className="text-2xl font-bold mt-1">$ {totalEquivalenteARS.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</div>
-          <div className="text-xs text-gray-500">Cotización {cotizacion}</div>
+          <div className="text-2xl font-bold mt-1 text-gray-900 dark:text-white">$ {totalEquivalenteARS.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</div>
+          <div className="text-xs text-gray-500 dark:text-gray-400">Cotización {cotizacion}</div>
         </Card>
       </div>
 

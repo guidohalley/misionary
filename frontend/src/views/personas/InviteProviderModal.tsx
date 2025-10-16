@@ -174,7 +174,10 @@ const InviteProviderModal: React.FC<InviteProviderModalProps> = ({
                 variant="solid"
                 size="sm"
                 className="absolute right-0 top-0 bottom-0 rounded-l-none bg-blue-600 hover:bg-blue-700 w-[40px] flex items-center justify-center"
-                onClick={() => navigator.clipboard.writeText(generatedLink)}
+                onClick={() => {
+                  const message = `¡Hola! Te dejo el link de invitación para el sistema de Misionary.\n\n${generatedLink}\n\nRecordá que únicamente tenés 24hs para registrarte. Cuando lo hagas, no olvides registrar tus servicios y productos digitales que brindas en la agencia.`;
+                  navigator.clipboard.writeText(message);
+                }}
               >
                 <HiOutlineClipboard className="h-5 w-5 text-white" />
               </Button>

@@ -139,33 +139,29 @@ const PersonaList: React.FC<PersonaListProps> = ({
         <div className="flex items-center gap-2">
           {onView && (
             <Tooltip title="Ver detalles">
-              <Button
-                shape="circle"
-                variant="plain"
-                size="sm"
-                icon={<HiOutlineEye />}
+              <button
+                className="p-2 rounded-full transition-all duration-200 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 hover:shadow-md hover:shadow-blue-200 dark:hover:shadow-blue-900/30 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400"
                 onClick={() => onView(row.original)}
-              />
+              >
+                <HiOutlineEye className="w-4 h-4" />
+              </button>
             </Tooltip>
           )}
           <Tooltip title="Editar">
-            <Button
-              shape="circle"
-              variant="plain"
-              size="sm"
-              icon={<HiOutlinePencil />}
+            <button
+              className="p-2 rounded-full transition-all duration-200 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 hover:shadow-md hover:shadow-amber-200 dark:hover:shadow-amber-900/30 text-slate-600 dark:text-slate-300 hover:text-amber-600 dark:hover:text-amber-400"
               onClick={() => onEdit(row.original)}
-            />
+            >
+                <HiOutlinePencil className="w-4 h-4" />
+              </button>
           </Tooltip>
           <Tooltip title="Eliminar">
-            <Button
-              shape="circle"
-              variant="plain"
-              size="sm"
-              color="red-600"
-              icon={<HiOutlineTrash />}
+            <button
+              className="p-2 rounded-full transition-all duration-200 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 hover:shadow-md hover:shadow-red-200 dark:hover:shadow-red-900/30 text-slate-600 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-400"
               onClick={() => onDelete(row.original.id)}
-            />
+            >
+                <HiOutlineTrash className="w-4 h-4" />
+              </button>
           </Tooltip>
         </div>
       ),

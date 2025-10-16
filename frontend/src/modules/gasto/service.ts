@@ -15,6 +15,24 @@ import {
 import type { Presupuesto as PresupuestoFull } from '@/modules/presupuesto/types'
 
 // ================================
+// CATEGORÍAS DE GASTOS
+// ================================
+
+export interface CategoriaGasto {
+  value: string;
+  label: string;
+  descripcion?: string;
+}
+
+export async function fetchCategorias(): Promise<CategoriaGasto[]> {
+  const response = await ApiService.fetchData<{success: boolean, data: CategoriaGasto[], message: string}>({
+    url: '/gastos-operativos/categorias',
+    method: 'GET'
+  });
+  return response.data.data;
+}
+
+// ================================
 // GASTOS OPERATIVOS
 // ================================
 
