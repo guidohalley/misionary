@@ -245,7 +245,7 @@ function _Select<
                         },
                     }
                 },
-                menu: (provided) => ({ ...provided, zIndex: 50 }),
+                menu: (provided) => ({ ...provided, zIndex: 9999 }),
                 ...style,
             }}
             theme={(theme) => ({
