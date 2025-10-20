@@ -1,6 +1,7 @@
 import prisma from '../config/prisma';
 import { HttpError } from '../utils/http-error';
 import { CategoriaGasto } from '@prisma/client';
+import { combinarGastosRealesYProyectados, calcularTotalConProyecciones } from '../utils/gastoRecurrente';
 
 
 export interface CreateGastoOperativoData {
@@ -97,6 +98,133 @@ class GastoService {
       },
       orderBy: { fecha: 'desc' }
     });
+  }
+
+  /**
+   * Obtiene gastos operativos incluyendo proyecciones de gastos recurrentes
+   * Los gastos proyectados tienen una propiedad adicional: esProyeccion: true
+   */
+  async getGastosOperativosConProyecciones(filters?: GastoOperativoFilter & { incluirProyecciones?: boolean }) {
+    // Si no se solicitan proyecciones, usar método estándar
+    if (!filters?.incluirProyecciones) {
+      return this.getGastosOperativos(filters);
+    }
+
+    // Obtener todos los gastos recurrentes activos (sin filtro de fecha para proyectar correctamente)
+    const whereRecurrentes: any = {
+      esRecurrente: true,
+      activo: true
+    };
+
+    if (filters?.categoria) whereRecurrentes.categoria = filters.categoria;
+    if (filters?.proveedorId) whereRecurrentes.proveedorId = filters.proveedorId;
+    if (filters?.monedaId) whereRecurrentes.monedaId = filters.monedaId;
+
+    const gastosRecurrentes = await prisma.gastoOperativo.findMany({
+      where: whereRecurrentes,
+      include: {
+        moneda: true,
+        proveedor: {
+          select: {
+            id: true,
+            nombre: true,
+            email: true,
+            telefono: true
+          }
+        },
+        asignaciones: {
+          include: {
+            presupuesto: {
+              select: {
+                id: true,
+                cliente: {
+                  select: {
+                    id: true,
+                    nombre: true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // Obtener gastos normales (no recurrentes o recurrentes dentro del rango)
+    const whereNormales: any = {};
+    if (filters?.categoria) whereNormales.categoria = filters.categoria;
+    if (filters?.proveedorId) whereNormales.proveedorId = filters.proveedorId;
+    if (filters?.monedaId) whereNormales.monedaId = filters.monedaId;
+    if (filters?.activo !== undefined) whereNormales.activo = filters.activo;
+    
+    if (filters?.fechaDesde || filters?.fechaHasta) {
+      whereNormales.fecha = {};
+      if (filters.fechaDesde) whereNormales.fecha.gte = filters.fechaDesde;
+      if (filters.fechaHasta) whereNormales.fecha.lte = filters.fechaHasta;
+    }
+
+    if (filters?.search) {
+      whereNormales.OR = [
+        { concepto: { contains: filters.search, mode: 'insensitive' } },
+        { descripcion: { contains: filters.search, mode: 'insensitive' } },
+        { comprobante: { contains: filters.search, mode: 'insensitive' } }
+      ];
+    }
+
+    const gastosNormales = await prisma.gastoOperativo.findMany({
+      where: whereNormales,
+      include: {
+        moneda: true,
+        proveedor: {
+          select: {
+            id: true,
+            nombre: true,
+            email: true,
+            telefono: true
+          }
+        },
+        asignaciones: {
+          include: {
+            presupuesto: {
+              select: {
+                id: true,
+                cliente: {
+                  select: {
+                    id: true,
+                    nombre: true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // Definir rango de proyección
+    const fechaDesde = filters?.fechaDesde || new Date();
+    const fechaHasta = filters?.fechaHasta || (() => {
+      const fecha = new Date();
+      fecha.setMonth(fecha.getMonth() + 12); // Proyectar hasta 12 meses por defecto
+      return fecha;
+    })();
+
+    // Combinar gastos normales con proyecciones de recurrentes
+    const todosLosGastos = combinarGastosRealesYProyectados(
+      [...gastosNormales, ...gastosRecurrentes],
+      fechaDesde,
+      fechaHasta
+    );
+
+    // Filtrar por rango de fechas final
+    const gastosFiltrados = todosLosGastos.filter((g: any) => {
+      const fecha = new Date(g.fecha);
+      if (filters?.fechaDesde && fecha < filters.fechaDesde) return false;
+      if (filters?.fechaHasta && fecha > filters.fechaHasta) return false;
+      return true;
+    });
+
+    return gastosFiltrados;
   }
 
   async getGastoOperativoById(id: number) {
