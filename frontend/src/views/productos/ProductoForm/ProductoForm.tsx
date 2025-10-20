@@ -442,7 +442,7 @@ const ProductoForm: React.FC<ProductoFormProps> = ({
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5, duration: 0.3 }}
               >
-                <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
+                <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 relative z-10">
                   <div className="p-6">
                     <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                       💡 Información
