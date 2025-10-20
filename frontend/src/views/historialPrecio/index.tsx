@@ -47,22 +47,22 @@ const HistorialPrecioView = () => {
     >
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
             Gestión de Precios Dinámicos
           </h2>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <p className="text-gray-600 dark:text-gray-400 mt-2">
             Sistema multi-moneda con historial y actualizaciones masivas
           </p>
         </div>
       </div>
 
-      <Card className="p-0">
+      <Card className="p-0 shadow-lg">
         <Tabs 
           value={activeTab} 
           onChange={(val) => setActiveTab(val)}
           variant="pill"
         >
-          <div className="px-6 pt-6">
+          <div className="px-6 pt-6 border-b border-gray-200 dark:border-gray-700">
             <Tabs.TabList>
               {tabs.map((tab) => (
                 <Tabs.TabNav 
@@ -76,7 +76,7 @@ const HistorialPrecioView = () => {
             </Tabs.TabList>
           </div>
           
-          <div className="p-6">
+          <div className="p-4">
             {tabs.map((tab) => (
               <Tabs.TabContent key={tab.key} value={tab.key}>
                 <motion.div

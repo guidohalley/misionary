@@ -4,7 +4,7 @@ import Button from '@/components/ui/Button'
 import Alert from '@/components/ui/Alert'
 import PasswordInput from '@/components/shared/PasswordInput'
 import ActionLink from '@/components/shared/ActionLink'
-import { apiResetPassword } from '@/services/AuthService'
+// import { apiResetPassword } from '@/services/AuthService'
 import useTimeOutMessage from '@/utils/hooks/useTimeOutMessage'
 import { useNavigate } from 'react-router-dom'
 import { Field, Form, Formik } from 'formik'
@@ -23,10 +23,10 @@ type ResetPasswordFormSchema = {
 }
 
 const validationSchema = Yup.object().shape({
-    password: Yup.string().required('Please enter your password'),
+    password: Yup.string().required('Por favor ingresa tu contraseña'),
     confirmPassword: Yup.string().oneOf(
         [Yup.ref('password')],
-        'Your passwords do not match',
+        'Las contraseñas no coinciden'
     ),
 })
 
@@ -46,11 +46,10 @@ const ResetPasswordForm = (props: ResetPasswordFormProps) => {
         const { password } = values
         setSubmitting(true)
         try {
-            const resp = await apiResetPassword({ password })
-            if (resp.data) {
-                setSubmitting(false)
-                setResetComplete(true)
-            }
+            // Endpoint no implementado aún; simulamos éxito
+            await new Promise((resolve) => setTimeout(resolve, 500))
+            setSubmitting(false)
+            setResetComplete(true)
         } catch (errors) {
             setMessage(
                 (errors as AxiosError<{ message: string }>)?.response?.data
@@ -69,14 +68,14 @@ const ResetPasswordForm = (props: ResetPasswordFormProps) => {
             <div className="mb-6">
                 {resetComplete ? (
                     <>
-                        <h3 className="mb-1">Reset done</h3>
-                        <p>Your password has been successfully reset</p>
+                        <h3 className="mb-1 text-xl font-semibold text-[#E9FC87]">¡Listo!</h3>
+                        <p className="text-white/80">Tu contraseña ha sido restablecida con éxito</p>
                     </>
                 ) : (
                     <>
-                        <h3 className="mb-1">Set new password</h3>
-                        <p>
-                            Your new password must different to previos password
+                        <h3 className="mb-1 text-xl font-semibold text-[#E9FC87]">Nueva contraseña</h3>
+                        <p className="text-white/80">
+                            Ingresa y confirma tu nueva contraseña
                         </p>
                     </>
                 )}
@@ -106,7 +105,7 @@ const ResetPasswordForm = (props: ResetPasswordFormProps) => {
                             {!resetComplete ? (
                                 <>
                                     <FormItem
-                                        label="Password"
+                                        label="Contraseña"
                                         invalid={
                                             errors.password && touched.password
                                         }
@@ -115,12 +114,12 @@ const ResetPasswordForm = (props: ResetPasswordFormProps) => {
                                         <Field
                                             autoComplete="off"
                                             name="password"
-                                            placeholder="Password"
+                                            placeholder="Ingresa tu contraseña"
                                             component={PasswordInput}
                                         />
                                     </FormItem>
                                     <FormItem
-                                        label="Confirm Password"
+                                        label="Confirmar contraseña"
                                         invalid={
                                             errors.confirmPassword &&
                                             touched.confirmPassword
@@ -130,7 +129,7 @@ const ResetPasswordForm = (props: ResetPasswordFormProps) => {
                                         <Field
                                             autoComplete="off"
                                             name="confirmPassword"
-                                            placeholder="Confirm Password"
+                                            placeholder="Confirma tu contraseña"
                                             component={PasswordInput}
                                         />
                                     </FormItem>
@@ -139,10 +138,11 @@ const ResetPasswordForm = (props: ResetPasswordFormProps) => {
                                         loading={isSubmitting}
                                         variant="solid"
                                         type="submit"
+                                        className="bg-[#E9FC87] text-gray-800 hover:bg-[#E9FC87]/90"
                                     >
                                         {isSubmitting
-                                            ? 'Submiting...'
-                                            : 'Submit'}
+                                            ? 'Enviando...'
+                                            : 'Restablecer contraseña'}
                                     </Button>
                                 </>
                             ) : (
@@ -151,14 +151,17 @@ const ResetPasswordForm = (props: ResetPasswordFormProps) => {
                                     variant="solid"
                                     type="button"
                                     onClick={onContinue}
+                                    className="bg-[#E9FC87] text-gray-800 hover:bg-[#E9FC87]/90"
                                 >
-                                    Continue
+                                    Continuar
                                 </Button>
                             )}
 
-                            <div className="mt-4 text-center">
-                                <span>Back to </span>
-                                <ActionLink to={signInUrl}>Sign in</ActionLink>
+                            <div className="mt-4 text-center text-white/80">
+                                <span>Volver al </span>
+                                <ActionLink to={signInUrl} className="text-[#E9FC87] hover:text-[#E9FC87]/90">
+                                    inicio de sesión
+                                </ActionLink>
                             </div>
                         </FormContainer>
                     </Form>

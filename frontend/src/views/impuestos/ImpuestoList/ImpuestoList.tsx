@@ -112,8 +112,8 @@ const ImpuestoList: React.FC<ImpuestoListProps> = ({ className }) => {
     <div className={className}>
       <div className="mb-6 flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Impuestos</h2>
-          <p className="text-gray-600">Gestiona los impuestos del sistema</p>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Impuestos</h2>
+          <p className="text-gray-600 dark:text-gray-400">Gestiona los impuestos del sistema</p>
         </div>
         <Button 
           variant="solid" 
@@ -140,12 +140,12 @@ const ImpuestoList: React.FC<ImpuestoListProps> = ({ className }) => {
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-gray-200">
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">Nombre</th>
-                <th className="text-right py-3 px-4 font-semibold text-gray-700">Porcentaje</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">Descripción</th>
-                <th className="text-center py-3 px-4 font-semibold text-gray-700">Estado</th>
-                <th className="text-center py-3 px-4 font-semibold text-gray-700">Acciones</th>
+              <tr className="border-b border-gray-200 dark:border-gray-700">
+                <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Nombre</th>
+                <th className="text-right py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Porcentaje</th>
+                <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Descripción</th>
+                <th className="text-center py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Estado</th>
+                <th className="text-center py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -155,18 +155,18 @@ const ImpuestoList: React.FC<ImpuestoListProps> = ({ className }) => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
-                  className="border-b border-gray-100 hover:bg-gray-50"
+                  className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50"
                 >
                   <td className="py-3 px-4">
-                    <div className="font-medium text-gray-900">{impuesto.nombre}</div>
+                    <div className="font-medium text-gray-900 dark:text-gray-100">{impuesto.nombre}</div>
                   </td>
                   <td className="py-3 px-4 text-right">
-                    <div className="font-semibold text-blue-600">
+                    <div className="font-semibold text-blue-600 dark:text-blue-400">
                       {formatPorcentaje(impuesto.porcentaje)}
                     </div>
                   </td>
                   <td className="py-3 px-4">
-                    <div className="text-gray-600 truncate max-w-xs">
+                    <div className="text-gray-600 dark:text-gray-400 truncate max-w-xs">
                       {impuesto.descripcion || '-'}
                     </div>
                   </td>
@@ -178,31 +178,28 @@ const ImpuestoList: React.FC<ImpuestoListProps> = ({ className }) => {
                     />
                   </td>
                   <td className="py-3 px-4">
-                    <div className="flex justify-center space-x-2">
-                      <Button
-                        size="sm"
-                        variant="twoTone"
-                        icon={<HiOutlineEye />}
+                    <div className="flex justify-center items-center gap-2">
+                      <button
                         onClick={() => handleView(impuesto.id)}
-                        className="text-blue-600 hover:text-blue-700"
+                        className="p-2 rounded-full text-gray-700 dark:text-blue-300 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-600 dark:to-slate-700 hover:shadow-lg hover:shadow-blue-200 dark:hover:shadow-blue-900/50 active:shadow-inner transition-all duration-200"
                         title="Ver impuesto"
-                      />
-                      <Button
-                        size="sm"
-                        variant="twoTone"
-                        icon={<HiOutlinePencil />}
+                      >
+                        <HiOutlineEye className="w-5 h-5" />
+                      </button>
+                      <button
                         onClick={() => handleEdit(impuesto.id)}
-                        className="text-amber-600 hover:text-amber-700"
+                        className="p-2 rounded-full text-gray-700 dark:text-amber-300 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-600 dark:to-slate-700 hover:shadow-lg hover:shadow-amber-200 dark:hover:shadow-amber-900/50 active:shadow-inner transition-all duration-200"
                         title="Editar impuesto"
-                      />
-                      <Button
-                        size="sm"
-                        variant="twoTone"
-                        icon={<HiOutlineTrash />}
+                      >
+                        <HiOutlinePencil className="w-5 h-5" />
+                      </button>
+                      <button
                         onClick={() => handleDelete(impuesto.id)}
-                        className="text-red-600 hover:text-red-700"
+                        className="p-2 rounded-full text-gray-700 dark:text-red-300 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-600 dark:to-slate-700 hover:shadow-lg hover:shadow-red-200 dark:hover:shadow-red-900/50 active:shadow-inner transition-all duration-200"
                         title="Eliminar impuesto"
-                      />
+                      >
+                        <HiOutlineTrash className="w-5 h-5" />
+                      </button>
                     </div>
                   </td>
                 </motion.tr>
@@ -224,7 +221,7 @@ const ImpuestoList: React.FC<ImpuestoListProps> = ({ className }) => {
 
         {currentItems.length === 0 && (
           <div className="text-center py-8">
-            <p className="text-gray-600">No se encontraron impuestos</p>
+            <p className="text-gray-600 dark:text-gray-400">No se encontraron impuestos</p>
           </div>
         )}
       </Card>

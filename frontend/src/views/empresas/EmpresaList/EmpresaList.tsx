@@ -127,8 +127,8 @@ const EmpresaList: React.FC<EmpresaListProps> = ({ className }) => {
     <div className={className}>
       <div className="mb-6 flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Empresas</h2>
-          <p className="text-gray-600">Gestiona las empresas y sus datos comerciales</p>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Empresas</h2>
+          <p className="text-gray-600 dark:text-gray-400">Gestiona las empresas y sus datos comerciales</p>
         </div>
         <Button 
           variant="solid" 
@@ -168,7 +168,7 @@ const EmpresaList: React.FC<EmpresaListProps> = ({ className }) => {
               ]}
             />
           </div>
-          <div className="text-sm text-gray-600">
+          <div className="text-sm text-gray-600 dark:text-gray-400">
             Mostrando {startIndex + 1}-{Math.min(endIndex, totalItems)} de {totalItems} empresas
           </div>
         </div>
@@ -176,21 +176,21 @@ const EmpresaList: React.FC<EmpresaListProps> = ({ className }) => {
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-gray-200">
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">Empresa</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">Cliente</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">CUIT</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">Contacto</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">Estado</th>
-                <th className="text-center py-3 px-4 font-semibold text-gray-700">Acciones</th>
+              <tr className="border-b border-gray-200 dark:border-gray-700">
+                <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Empresa</th>
+                <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Cliente</th>
+                <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">CUIT</th>
+                <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Contacto</th>
+                <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Estado</th>
+                <th className="text-center py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Acciones</th>
               </tr>
             </thead>
             <tbody>
               {currentItems.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="text-center py-8">
-                    <div className="text-gray-500">
-                      <HiOutlineOfficeBuilding className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                    <div className="text-gray-500 dark:text-gray-400">
+                      <HiOutlineOfficeBuilding className="h-12 w-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" />
                       <p>No se encontraron empresas</p>
                       {searchTerm && (
                         <p className="text-sm mt-1">
@@ -207,7 +207,7 @@ const EmpresaList: React.FC<EmpresaListProps> = ({ className }) => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 }}
-                    className="border-b border-gray-100 hover:bg-gray-50"
+                    className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50"
                   >
                     {/* Empresa */}
                     <td className="py-3 px-4">
@@ -220,9 +220,9 @@ const EmpresaList: React.FC<EmpresaListProps> = ({ className }) => {
                           {empresa.nombre.charAt(0).toUpperCase()}
                         </Avatar>
                         <div>
-                          <div className="font-medium text-gray-900">{empresa.nombre}</div>
+                          <div className="font-medium text-gray-900 dark:text-gray-100">{empresa.nombre}</div>
                           {empresa.razonSocial && (
-                            <div className="text-sm text-gray-500">{empresa.razonSocial}</div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">{empresa.razonSocial}</div>
                           )}
                         </div>
                       </div>
@@ -231,16 +231,16 @@ const EmpresaList: React.FC<EmpresaListProps> = ({ className }) => {
                     {/* Cliente */}
                     <td className="py-3 px-4">
                       <div>
-                        <div className="font-medium text-gray-900">{empresa.cliente.nombre}</div>
-                        <div className="text-sm text-gray-500">{empresa.cliente.email}</div>
+                        <div className="font-medium text-gray-900 dark:text-gray-100">{empresa.cliente.nombre}</div>
+                        <div className="text-sm text-gray-500 dark:text-gray-400">{empresa.cliente.email}</div>
                       </div>
                     </td>
 
                     {/* CUIT */}
                     <td className="py-3 px-4">
                       <div className="flex items-center space-x-2">
-                        <HiOutlineIdentification className="h-4 w-4 text-gray-400" />
-                        <span className="font-mono text-sm">
+                        <HiOutlineIdentification className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                        <span className="font-mono text-sm text-gray-700 dark:text-gray-300">
                           {empresa.cuit || 'No registrado'}
                         </span>
                       </div>
@@ -251,14 +251,14 @@ const EmpresaList: React.FC<EmpresaListProps> = ({ className }) => {
                       <div className="space-y-1">
                         {empresa.email && (
                           <div className="flex items-center space-x-2 text-sm">
-                            <HiOutlineMail className="h-3 w-3 text-gray-400" />
-                            <span className="text-gray-600">{empresa.email}</span>
+                            <HiOutlineMail className="h-3 w-3 text-gray-400 dark:text-gray-500" />
+                            <span className="text-gray-600 dark:text-gray-400">{empresa.email}</span>
                           </div>
                         )}
                         {empresa.telefono && (
                           <div className="flex items-center space-x-2 text-sm">
-                            <HiOutlinePhone className="h-3 w-3 text-gray-400" />
-                            <span className="text-gray-600">{empresa.telefono}</span>
+                            <HiOutlinePhone className="h-3 w-3 text-gray-400 dark:text-gray-500" />
+                            <span className="text-gray-600 dark:text-gray-400">{empresa.telefono}</span>
                           </div>
                         )}
                       </div>
@@ -275,28 +275,28 @@ const EmpresaList: React.FC<EmpresaListProps> = ({ className }) => {
 
                     {/* Acciones */}
                     <td className="py-3 px-4">
-                      <div className="flex justify-center space-x-2">
-                        <Button
-                          size="sm"
-                          variant="twoTone"
-                          icon={<HiOutlineEye />}
+                      <div className="flex justify-center items-center gap-2">
+                        <button
                           onClick={() => handleView(empresa.id)}
-                          className="text-blue-600 hover:text-blue-700"
-                        />
-                        <Button
-                          size="sm"
-                          variant="twoTone"
-                          icon={<HiOutlinePencil />}
+                          className="p-2 rounded-full text-gray-700 dark:text-blue-300 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-600 dark:to-slate-700 hover:shadow-lg hover:shadow-blue-200 dark:hover:shadow-blue-900/50 active:shadow-inner transition-all duration-200"
+                          title="Ver"
+                        >
+                          <HiOutlineEye className="w-5 h-5" />
+                        </button>
+                        <button
                           onClick={() => handleEdit(empresa.id)}
-                          className="text-amber-600 hover:text-amber-700"
-                        />
-                        <Button
-                          size="sm"
-                          variant="twoTone"
-                          icon={<HiOutlineTrash />}
+                          className="p-2 rounded-full text-gray-700 dark:text-amber-300 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-600 dark:to-slate-700 hover:shadow-lg hover:shadow-amber-200 dark:hover:shadow-amber-900/50 active:shadow-inner transition-all duration-200"
+                          title="Editar"
+                        >
+                          <HiOutlinePencil className="w-5 h-5" />
+                        </button>
+                        <button
                           onClick={() => handleDeleteClick(empresa)}
-                          className="text-red-600 hover:text-red-700"
-                        />
+                          className="p-2 rounded-full text-gray-700 dark:text-red-300 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-600 dark:to-slate-700 hover:shadow-lg hover:shadow-red-200 dark:hover:shadow-red-900/50 active:shadow-inner transition-all duration-200"
+                          title="Eliminar"
+                        >
+                          <HiOutlineTrash className="w-5 h-5" />
+                        </button>
                       </div>
                     </td>
                   </motion.tr>

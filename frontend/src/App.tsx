@@ -8,6 +8,7 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import mockServer from './mock'
 import appConfig from '@/configs/app.config'
 import './locales'
+import { useZoom } from '@/hooks/useZoom'
 
 const environment = process.env.NODE_ENV
 
@@ -18,16 +19,24 @@ const environment = process.env.NODE_ENV
 if (environment !== 'production' && appConfig.enableMock) {
     mockServer({ environment })
 }
+
+function AppContent() {
+    useZoom()
+    return (
+        <Theme>
+            <AuthProvider>
+                <Layout />
+            </AuthProvider>
+        </Theme>
+    )
+}
+
 function App() {
     return (
         <Provider store={store}>
             <PersistGate loading={null} persistor={persistor}>
                 <BrowserRouter>
-                    <Theme>
-                        <AuthProvider>
-                            <Layout />
-                        </AuthProvider>
-                    </Theme>
+                    <AppContent />
                 </BrowserRouter>
             </PersistGate>
         </Provider>

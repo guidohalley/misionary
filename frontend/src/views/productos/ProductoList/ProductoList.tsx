@@ -103,8 +103,8 @@ const ProductoList: React.FC<ProductoListProps> = ({ className }) => {
     <div className={className}>
       <div className="mb-6 flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Productos</h2>
-          <p className="text-gray-600">Gestiona el catálogo de productos</p>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Productos</h2>
+          <p className="text-gray-600 dark:text-gray-400">Gestiona el catálogo de productos</p>
         </div>
         <Button 
           variant="solid" 
@@ -133,7 +133,7 @@ const ProductoList: React.FC<ProductoListProps> = ({ className }) => {
               isSearchable={false}
             />
           </div>
-          <div className="text-sm text-gray-600">
+          <div className="text-sm text-gray-600 dark:text-gray-400">
             Mostrando {startIndex + 1}-{Math.min(endIndex, totalItems)} de {totalItems} productos
           </div>
         </div>
@@ -141,12 +141,12 @@ const ProductoList: React.FC<ProductoListProps> = ({ className }) => {
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-gray-200">
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">Nombre</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">Precio</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">Proveedor</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">Fecha Creación</th>
-                <th className="text-center py-3 px-4 font-semibold text-gray-700">Acciones</th>
+              <tr className="border-b border-gray-200 dark:border-gray-700">
+                <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Nombre</th>
+                <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Precio</th>
+                <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Proveedor</th>
+                <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Fecha Creación</th>
+                <th className="text-center py-3 px-4 font-semibold text-gray-700 dark:text-gray-300 min-w-[120px]">Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -156,10 +156,10 @@ const ProductoList: React.FC<ProductoListProps> = ({ className }) => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
-                  className="border-b border-gray-100 hover:bg-gray-50"
+                  className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50"
                 >
                   <td className="py-3 px-4">
-                    <div className="font-medium text-gray-900">{producto.nombre}</div>
+                    <div className="font-medium text-gray-900 dark:text-gray-100">{producto.nombre}</div>
                   </td>
                   <td className="py-3 px-4">
                     <span className="inline-flex items-center rounded-full bg-misionary-100 text-misionary-800 px-2.5 py-0.5 text-xs font-medium ring-1 ring-misionary-200">
@@ -167,38 +167,38 @@ const ProductoList: React.FC<ProductoListProps> = ({ className }) => {
                     </span>
                   </td>
                   <td className="py-3 px-4">
-                    <span className="inline-flex items-center rounded-full bg-msgray-100 text-msgray-800 px-2 py-0.5 text-xs font-medium ring-1 ring-msgray-200">
+                    <span className="inline-flex items-center rounded-full bg-msgray-100 text-msgray-800 px-2 py-0.5 text-xs font-medium ring-1 ring-msgray-200 dark:bg-gray-700 dark:text-gray-200 dark:ring-gray-600">
                       {producto.proveedor?.nombre || 'Sin proveedor'}
                     </span>
                   </td>
                   <td className="py-3 px-4">
-                    <div className="text-gray-600">
+                    <div className="text-gray-600 dark:text-gray-400">
                       {new Date(producto.createdAt).toLocaleDateString('es-AR')}
                     </div>
                   </td>
                   <td className="py-3 px-4">
-                    <div className="flex justify-center space-x-2">
-                      <Button
-                        size="sm"
-                        variant="twoTone"
-                        icon={<HiOutlineEye />}
+                    <div className="flex justify-center items-center gap-2">
+                      <button
                         onClick={() => handleEdit(producto.id)}
-                        className="text-blue-600 hover:text-blue-700"
-                      />
-                      <Button
-                        size="sm"
-                        variant="twoTone"
-                        icon={<HiOutlinePencil />}
+                        className="p-2 rounded-full text-gray-700 dark:text-blue-300 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-600 dark:to-slate-700 hover:shadow-lg hover:shadow-blue-200 dark:hover:shadow-blue-900/50 active:shadow-inner transition-all duration-200"
+                        title="Ver/Editar"
+                      >
+                        <HiOutlineEye className="w-5 h-5" />
+                      </button>
+                      <button
                         onClick={() => handleEdit(producto.id)}
-                        className="text-amber-600 hover:text-amber-700"
-                      />
-                      <Button
-                        size="sm"
-                        variant="twoTone"
-                        icon={<HiOutlineTrash />}
+                        className="p-2 rounded-full text-gray-700 dark:text-amber-300 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-600 dark:to-slate-700 hover:shadow-lg hover:shadow-amber-200 dark:hover:shadow-amber-900/50 active:shadow-inner transition-all duration-200"
+                        title="Editar"
+                      >
+                        <HiOutlinePencil className="w-5 h-5" />
+                      </button>
+                      <button
                         onClick={() => handleDelete(producto.id)}
-                        className="text-red-600 hover:text-red-700"
-                      />
+                        className="p-2 rounded-full text-gray-700 dark:text-red-300 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-600 dark:to-slate-700 hover:shadow-lg hover:shadow-red-200 dark:hover:shadow-red-900/50 active:shadow-inner transition-all duration-200"
+                        title="Eliminar"
+                      >
+                        <HiOutlineTrash className="w-5 h-5" />
+                      </button>
                     </div>
                   </td>
                 </motion.tr>
@@ -220,7 +220,7 @@ const ProductoList: React.FC<ProductoListProps> = ({ className }) => {
 
         {currentItems.length === 0 && (
           <div className="text-center py-8">
-            <p className="text-gray-600">No se encontraron productos</p>
+            <p className="text-gray-600 dark:text-gray-400">No se encontraron productos</p>
           </div>
         )}
       </Card>

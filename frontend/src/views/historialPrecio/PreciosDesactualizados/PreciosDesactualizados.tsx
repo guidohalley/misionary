@@ -96,13 +96,12 @@ const PreciosDesactualizados = () => {
       accessorKey: 'actions',
       cell: ({ row }) => (
         <div className="flex space-x-2">
-          <Button
-            size="sm"
-            variant="solid"
+          <button
+            className="px-4 py-2 rounded-lg transition-all duration-200 bg-gradient-to-br from-blue-500 to-blue-600 hover:shadow-lg hover:shadow-blue-300 dark:hover:shadow-blue-900/50 text-white hover:from-blue-600 hover:to-blue-700"
             onClick={() => handleActualizar(row.original)}
           >
             Actualizar Precio
-          </Button>
+          </button>
         </div>
       ),
     },

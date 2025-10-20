@@ -7,6 +7,9 @@ import { asyncHandler } from '../utils/asyncHandler';
 
 const router = Router();
 
+// Crear cliente con empresa (autenticado)
+router.post('/cliente-con-empresa', [auth], asyncHandler(PersonaController.createClienteWithEmpresa));
+
 // Crear persona (solo ADMIN)
 router.post('/', [auth, checkRole([RolUsuario.ADMIN])], asyncHandler(PersonaController.create));
 
@@ -27,8 +30,5 @@ router.post('/:id/reset-password', [auth, checkRole([RolUsuario.ADMIN]), ...vali
 
 // Eliminar persona (solo ADMIN)
 router.delete('/:id', [auth, checkRole([RolUsuario.ADMIN])], asyncHandler(PersonaController.delete));
-
-// Crear cliente con empresa (solo ADMIN)
-router.post('/cliente-con-empresa', [auth, checkRole([RolUsuario.ADMIN])], asyncHandler(PersonaController.createClienteWithEmpresa));
 
 export default router;

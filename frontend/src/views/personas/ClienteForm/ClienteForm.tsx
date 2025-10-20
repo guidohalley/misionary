@@ -69,16 +69,16 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
       className="max-w-4xl mx-auto p-6"
     >
       <Card className="rounded-lg shadow-lg border-0">
-        <div className="mb-6 p-6 bg-gradient-to-r from-blue-50 to-sky-50 rounded-t-lg">
+        <div className="mb-6 p-6 bg-gradient-to-r from-blue-50 to-sky-50 dark:from-slate-700 dark:to-slate-800 rounded-t-lg">
           <div className="flex items-center space-x-3">
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-              <HiOutlineUser className="h-6 w-6 text-blue-600" />
+            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+              <HiOutlineUser className="h-6 w-6 text-blue-600 dark:text-blue-400" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                 {isEdit ? 'Editar Cliente' : 'Nuevo Cliente'}
               </h2>
-              <p className="text-gray-600 mt-1">
+              <p className="text-gray-600 dark:text-gray-400 mt-1">
                 {isEdit ? 'Modifica la información del cliente' : 'Registra un nuevo cliente en el sistema'}
               </p>
             </div>
@@ -149,14 +149,14 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
               </FormItem>
             </div>
 
-            <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
               <div className="flex items-start space-x-3">
-                <div className="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center mt-0.5">
-                  <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                <div className="w-5 h-5 bg-blue-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center mt-0.5">
+                  <div className="w-2 h-2 bg-blue-600 dark:bg-blue-400 rounded-full"></div>
                 </div>
                 <div>
-                  <h4 className="text-sm font-medium text-blue-900">Información sobre clientes</h4>
-                  <p className="text-sm text-blue-700 mt-1">
+                  <h4 className="text-sm font-medium text-blue-900 dark:text-blue-300">Información sobre clientes</h4>
+                  <p className="text-sm text-blue-700 dark:text-blue-400 mt-1">
                     Los clientes son registrados únicamente para datos comerciales y facturación. 
                     No tienen acceso al sistema interno de la empresa.
                   </p>
@@ -164,7 +164,7 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
               </div>
             </div>
 
-            <div className="flex justify-end space-x-4 mt-8 p-6 bg-gray-50 rounded-b-lg">
+            <div className="flex justify-end space-x-4 mt-8 p-6 bg-gray-50 dark:bg-gray-800 rounded-b-lg border-t border-gray-200 dark:border-gray-700">
               <Button
                 type="button"
                 variant="plain"

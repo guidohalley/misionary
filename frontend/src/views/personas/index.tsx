@@ -9,7 +9,7 @@ import { usePersona } from './hooks';
 import { Persona, UpdatePersonaDTO } from './types';
 import { TipoPersona } from './schemas';
 import useAuth from '@/utils/hooks/useAuth';
-import { HiOutlinePlus, HiOutlineMail } from 'react-icons/hi';
+import { HiOutlinePlus, HiOutlineMail, HiOutlineUserAdd } from 'react-icons/hi';
 
 interface PersonasViewProps {
   tipoFiltro?: TipoPersona;
@@ -103,7 +103,7 @@ const PersonasView: React.FC<PersonasViewProps> = ({ tipoFiltro }) => {
           <Button 
             variant="solid" 
             onClick={handleCreate}
-            className="bg-blue-600 hover:bg-blue-700"
+            className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600"
           >
             <HiOutlinePlus className="w-4 h-4 mr-2" />
             {getBotonTexto()}
@@ -114,10 +114,10 @@ const PersonasView: React.FC<PersonasViewProps> = ({ tipoFiltro }) => {
             <Button 
               variant="outline" 
               onClick={() => setShowInviteModal(true)}
-              className="border-green-500 text-green-600 hover:bg-green-50"
-            >
-              <HiOutlineMail className="w-4 h-4 mr-2" />
-              Invitar por Email
+              className="border-blue-500 dark:border-blue-400 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+            >     
+              <HiOutlineUserAdd className="w-4 h-4 mr-2" />
+              Invitar Proveedor
             </Button>
           )}
         </motion.div>

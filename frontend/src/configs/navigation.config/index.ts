@@ -185,39 +185,7 @@ const navigationConfig: NavigationTree[] = [
             },
         ],
     },
-    // === FACTURACIÓN ===
-    {
-        key: 'facturacion',
-        path: '',
-        title: 'Facturación',
-        translateKey: 'nav.facturacion.title',
-        icon: 'invoice',
-        type: NAV_ITEM_TYPE_COLLAPSE,
-        authority: [],
-        subMenu: [
-            {
-                key: 'facturacion.facturas',
-                path: '/facturas',
-                title: 'Facturas',
-                translateKey: 'nav.facturacion.facturas',
-                icon: 'receipt',
-                type: NAV_ITEM_TYPE_ITEM,
-                authority: [],
-                subMenu: [],
-            },
-            {
-                key: 'facturacion.recibos',
-                path: '/recibos',
-                title: 'Recibos',
-                translateKey: 'nav.facturacion.recibos',
-                icon: 'receiptTax',
-                type: NAV_ITEM_TYPE_ITEM,
-                authority: [],
-                subMenu: [],
-            },
-        ],
-    },
-
+    
     // === FINANZAS Y CONTROL ===
     {
         key: 'finanzas',

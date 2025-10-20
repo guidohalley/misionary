@@ -1,6 +1,7 @@
 import React from 'react';
 import { useForm, Controller } from 'react-hook-form';
-import { Card, Input, Button, FormItem, FormContainer, Alert } from '@/components/ui';
+import { Input, Button, FormItem, FormContainer, Alert } from '@/components/ui';
+import PasswordInput from '@/components/shared/PasswordInput';
 import useAuth from '@/utils/hooks/useAuth';
 import type { LoginCredentials } from '@/@types/auth';
 
@@ -44,80 +45,75 @@ const LoginView = () => {
   };
 
   return (
-    <div className="h-full flex flex-col justify-center items-center bg-gray-100">
-      <Card className="w-full max-w-md">
-        <div className="text-center mb-6">
-          <h3 className="mb-1 text-2xl font-bold">Iniciar Sesión</h3>
-          <p>Ingresa tus credenciales para continuar</p>
-        </div>
-        
-        {error && (
-          <Alert type="danger" showIcon className="mb-4">
-            {error}
-          </Alert>
-        )}
+    <div className="w-full max-w-md mx-auto">
+      <div className="text-center mb-6">
+        <h3 className="mb-1 text-2xl font-bold">Iniciar sesión</h3>
+        <p className="text-sm text-gray-600">Ingresá tus credenciales para continuar</p>
+      </div>
 
-        <FormContainer>
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <FormItem
-              label="Email"
-              invalid={Boolean(errors.email)}
-              errorMessage={errors.email?.message}
-            >
-              <Controller
-                name="email"
-                control={control}
-                rules={{
-                  required: 'El email es requerido',
-                  pattern: {
-                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                    message: 'Email inválido',
-                  },
-                }}
-                render={({ field }) => (
-                  <Input
-                    type="email"
-                    autoComplete="email"
-                    {...field}
-                    placeholder="usuario@ejemplo.com"
-                  />
-                )}
-              />
-            </FormItem>
-            
-            <FormItem
-              label="Contraseña"
-              invalid={Boolean(errors.password)}
-              errorMessage={errors.password?.message}
-            >
-              <Controller
-                name="password"
-                control={control}
-                rules={{
-                  required: 'La contraseña es requerida',
-                }}
-                render={({ field }) => (
-                  <Input
-                    type="password"
-                    autoComplete="current-password"
-                    {...field}
-                    placeholder="Tu contraseña"
-                  />
-                )}
-              />
-            </FormItem>
+      {error && (
+        <Alert type="danger" showIcon className="mb-4">
+          {error}
+        </Alert>
+      )}
 
-            <Button
-              block
-              variant="solid"
-              type="submit"
-              loading={isSubmitting}
-            >
-              {isSubmitting ? 'Iniciando sesión...' : 'Iniciar Sesión'}
-            </Button>
-          </form>
-        </FormContainer>
-      </Card>
+      <FormContainer>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          <FormItem
+            label="Email"
+            invalid={Boolean(errors.email)}
+            errorMessage={errors.email?.message}
+          >
+            <Controller
+              name="email"
+              control={control}
+              rules={{
+                required: 'El email es requerido',
+                pattern: {
+                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                  message: 'Email inválido',
+                },
+              }}
+              render={({ field }) => (
+                <Input
+                  type="email"
+                  autoComplete="email"
+                  {...field}
+                  placeholder="usuario@ejemplo.com"
+                />
+              )}
+            />
+          </FormItem>
+
+          <FormItem
+            label="Contraseña"
+            invalid={Boolean(errors.password)}
+            errorMessage={errors.password?.message}
+          >
+            <Controller
+              name="password"
+              control={control}
+              rules={{ required: 'La contraseña es requerida' }}
+              render={({ field }) => (
+                <PasswordInput
+                  {...field}
+                  placeholder="Tu contraseña"
+                  autoComplete="current-password"
+                />
+              )}
+            />
+          </FormItem>
+
+          <Button
+            block
+            variant="solid"
+            type="submit"
+            loading={isSubmitting}
+          >
+            {isSubmitting ? 'Iniciando sesión...' : 'Iniciar sesión'}
+          </Button>
+        </form>
+      </FormContainer>
     </div>
   );
 };

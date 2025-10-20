@@ -164,8 +164,8 @@ const PresupuestoList: React.FC<PresupuestoListProps> = ({ className }) => {
     <div className={className}>
       <div className="mb-6 flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Presupuestos</h2>
-          <p className="text-gray-600">Gestiona los presupuestos de clientes</p>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Presupuestos</h2>
+          <p className="text-gray-600 dark:text-gray-400">Gestiona los presupuestos de clientes</p>
         </div>
         <Button 
           variant="solid" 
@@ -206,7 +206,7 @@ const PresupuestoList: React.FC<PresupuestoListProps> = ({ className }) => {
               ]}
             />
           </div>
-          <div className="text-sm text-gray-600">
+          <div className="text-sm text-gray-600 dark:text-gray-400">
             Mostrando {startIndex + 1}-{Math.min(endIndex, totalItems)} de {totalItems} presupuestos
           </div>
         </div>
@@ -214,14 +214,14 @@ const PresupuestoList: React.FC<PresupuestoListProps> = ({ className }) => {
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-gray-200">
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">#</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">Cliente</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">Total</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">Estado</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">Fecha</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">Vigencia</th>
-                <th className="text-center py-3 px-4 font-semibold text-gray-700">Acciones</th>
+              <tr className="border-b border-gray-200 dark:border-gray-700">
+                <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">#</th>
+                <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Cliente</th>
+                <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Total</th>
+                <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Estado</th>
+                <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Fecha</th>
+                <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Vigencia</th>
+                <th className="text-center py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -233,17 +233,17 @@ const PresupuestoList: React.FC<PresupuestoListProps> = ({ className }) => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 }}
-                    className="border-b border-gray-100 hover:bg-gray-50"
+                    className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50"
                   >
                     <td className="py-3 px-4">
-                      <div className="font-medium text-gray-900">#{presupuesto.id}</div>
+                      <div className="font-medium text-gray-900 dark:text-gray-100">#{presupuesto.id}</div>
                     </td>
                     <td className="py-3 px-4">
-                      <div className="font-medium text-gray-900">{presupuesto.cliente.nombre}</div>
-                      <div className="text-sm text-gray-500">{presupuesto.cliente.email}</div>
+                      <div className="font-medium text-gray-900 dark:text-gray-100">{presupuesto.cliente.nombre}</div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">{presupuesto.cliente.email}</div>
                     </td>
                     <td className="py-3 px-4">
-                      <div className="font-semibold text-green-600">
+                      <div className="font-semibold text-green-600 dark:text-green-400">
                         {formatPrice(presupuesto.total)}
                       </div>
                     </td>
@@ -253,66 +253,61 @@ const PresupuestoList: React.FC<PresupuestoListProps> = ({ className }) => {
                       </Badge>
                     </td>
                     <td className="py-3 px-4">
-                      <div className="text-gray-600">
+                      <div className="text-gray-600 dark:text-gray-400">
                         {new Date(presupuesto.createdAt).toLocaleDateString('es-AR')}
                       </div>
                     </td>
                     <td className="py-3 px-4">
                       {presupuesto.periodoInicio ? (
-                        <div className="text-gray-600">
+                        <div className="text-gray-600 dark:text-gray-400">
                           {new Date(presupuesto.periodoInicio).toLocaleDateString('es-AR')} {presupuesto.periodoFin ? `→ ${new Date(presupuesto.periodoFin).toLocaleDateString('es-AR')}` : ''}
                         </div>
                       ) : (
-                        <div className="text-gray-400">-</div>
+                        <div className="text-gray-400 dark:text-gray-600">-</div>
                       )}
                     </td>
                     <td className="py-3 px-4">
                       <div className="flex justify-center space-x-2">
-                        <Button
-                          size="sm"
-                          variant="twoTone"
-                          icon={<HiOutlineEye />}
+                        <button
                           onClick={() => handleView(presupuesto.id)}
-                          className="text-blue-600 hover:text-blue-700"
+                          className="p-2 rounded-full text-blue-600 dark:text-blue-300 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-600 dark:to-slate-700 hover:shadow-lg hover:shadow-blue-200 dark:hover:shadow-blue-900/50 active:shadow-inner transition-all duration-200"
                           title="Ver presupuesto"
-                        />
-                        <Button
-                          size="sm"
-                          variant="twoTone"
-                          icon={<HiOutlinePrinter />}
+                        >
+                          <HiOutlineEye className="w-5 h-5" />
+                        </button>
+                        <button
                           onClick={() => handlePrint(presupuesto.id)}
-                          className="text-gray-600 hover:text-gray-700"
+                          className="p-2 rounded-full text-gray-600 dark:text-gray-300 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-600 dark:to-slate-700 hover:shadow-lg hover:shadow-gray-200 dark:hover:shadow-gray-900/50 active:shadow-inner transition-all duration-200"
                           title="Imprimir presupuesto"
-                        />
+                        >
+                          <HiOutlinePrinter className="w-5 h-5" />
+                        </button>
                         {canEditPresupuesto(presupuesto.estado) && (
-                          <Button
-                            size="sm"
-                            variant="twoTone"
-                            icon={<HiOutlinePencil />}
+                          <button
                             onClick={() => handleEdit(presupuesto.id)}
-                            className="text-amber-600 hover:text-amber-700"
+                            className="p-2 rounded-full text-amber-600 dark:text-amber-300 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-600 dark:to-slate-700 hover:shadow-lg hover:shadow-amber-200 dark:hover:shadow-amber-900/50 active:shadow-inner transition-all duration-200"
                             title="Editar presupuesto"
-                          />
+                          >
+                            <HiOutlinePencil className="w-5 h-5" />
+                          </button>
                         )}
                         {nextEstado && (
-                          <Button
-                            size="sm"
-                            variant="twoTone"
-                            icon={nextEstado === EstadoPresupuesto.ENVIADO ? <HiOutlineMail /> : <HiOutlineCheck />}
+                          <button
                             onClick={() => handleChangeEstado(presupuesto.id, nextEstado)}
-                            className="text-green-600 hover:text-green-700"
+                            className="p-2 rounded-full text-green-600 dark:text-green-300 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-600 dark:to-slate-700 hover:shadow-lg hover:shadow-green-200 dark:hover:shadow-green-900/50 active:shadow-inner transition-all duration-200"
                             title={`Cambiar a ${nextEstado}`}
-                          />
+                          >
+                            {nextEstado === EstadoPresupuesto.ENVIADO ? <HiOutlineMail className="w-5 h-5" /> : <HiOutlineCheck className="w-5 h-5" />}
+                          </button>
                         )}
                         {presupuesto.estado === EstadoPresupuesto.BORRADOR && (
-                          <Button
-                            size="sm"
-                            variant="twoTone"
-                            icon={<HiOutlineTrash />}
+                          <button
                             onClick={() => handleDelete(presupuesto.id)}
-                            className="text-red-600 hover:text-red-700"
+                            className="p-2 rounded-full text-red-600 dark:text-red-300 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-600 dark:to-slate-700 hover:shadow-lg hover:shadow-red-200 dark:hover:shadow-red-900/50 active:shadow-inner transition-all duration-200"
                             title="Eliminar presupuesto"
-                          />
+                          >
+                            <HiOutlineTrash className="w-5 h-5" />
+                          </button>
                         )}
                       </div>
                     </td>

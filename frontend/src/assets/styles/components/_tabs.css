@@ -206,7 +206,7 @@
   /* Tab content */
   .tab-content {
     position: relative;
-    min-height: 200px;
+    min-height: auto;
   }
 
   .tab-panel {

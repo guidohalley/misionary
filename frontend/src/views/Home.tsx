@@ -16,13 +16,13 @@ const Home = () => {
         <div className="container mx-auto px-4 py-6">
             <div className="mb-5 flex items-start justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-extrabold tracking-tight text-msgray-950">Dashboard</h1>
-                    <p className="text-sm text-msgray-500">Resumen operativo y atajos a tus acciones frecuentes</p>
+                    <h1 className="text-2xl font-extrabold tracking-tight text-gray-900 dark:text-white">Dashboard</h1>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Resumen operativo y atajos a tus acciones frecuentes</p>
                 </div>
                 {/* Selector de período para KPIs de Finanzas */}
                 {kpisAdminMes && (
                     <div className="flex flex-col items-end gap-1">
-                        <div className="flex items-center gap-1 text-xs text-msgray-600">
+                        <div className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400">
                             <FiCalendar className="opacity-80" />
                             <span>Período</span>
                         </div>
@@ -31,7 +31,7 @@ const Home = () => {
                                 <Button
                                     size="sm"
                                     variant="plain"
-                                    className={`!px-3 !py-1.5 rounded-full border ${periodoSeleccionado === '30D' ? '!bg-black !text-white border-black' : '!bg-white !text-gray-800 border-gray-200 hover:!bg-gray-50'}`}
+                                    className={`!px-3 !py-1.5 rounded-full border ${periodoSeleccionado === '30D' ? '!bg-black dark:!bg-white !text-white dark:!text-black border-black dark:border-white' : '!bg-white dark:!bg-gray-700 !text-gray-800 dark:!text-gray-200 border-gray-200 dark:border-gray-600 hover:!bg-gray-50 dark:hover:!bg-gray-600'}`}
                                     onClick={() => seleccionarPeriodo('30D')}
                                 >
                                     30 días
@@ -41,7 +41,7 @@ const Home = () => {
                                 <Button
                                     size="sm"
                                     variant="plain"
-                                    className={`!px-3 !py-1.5 rounded-full border ${periodoSeleccionado === 'MES' ? '!bg-black !text-white border-black' : '!bg-white !text-gray-800 border-gray-200 hover:!bg-gray-50'}`}
+                                    className={`!px-3 !py-1.5 rounded-full border ${periodoSeleccionado === 'MES' ? '!bg-black dark:!bg-white !text-white dark:!text-black border-black dark:border-white' : '!bg-white dark:!bg-gray-700 !text-gray-800 dark:!text-gray-200 border-gray-200 dark:border-gray-600 hover:!bg-gray-50 dark:hover:!bg-gray-600'}`}
                                     onClick={() => seleccionarPeriodo('MES')}
                                 >
                                     Este mes
@@ -51,7 +51,7 @@ const Home = () => {
                                 <Button
                                     size="sm"
                                     variant="plain"
-                                    className={`!px-3 !py-1.5 rounded-full border ${periodoSeleccionado === 'TRIMESTRE' ? '!bg-black !text-white border-black' : '!bg-white !text-gray-800 border-gray-200 hover:!bg-gray-50'}`}
+                                    className={`!px-3 !py-1.5 rounded-full border ${periodoSeleccionado === 'TRIMESTRE' ? '!bg-black dark:!bg-white !text-white dark:!text-black border-black dark:border-white' : '!bg-white dark:!bg-gray-700 !text-gray-800 dark:!text-gray-200 border-gray-200 dark:border-gray-600 hover:!bg-gray-50 dark:hover:!bg-gray-600'}`}
                                     onClick={() => seleccionarPeriodo('TRIMESTRE')}
                                 >
                                     Trimestre
@@ -59,7 +59,7 @@ const Home = () => {
                             </Tooltip>
                         </div>
                         {rangoFechas?.label && (
-                            <div className="text-[11px] text-msgray-500">{rangoFechas.label}</div>
+                            <div className="text-[11px] text-gray-600 dark:text-gray-400">{rangoFechas.label}</div>
                         )}
                     </div>
                 )}

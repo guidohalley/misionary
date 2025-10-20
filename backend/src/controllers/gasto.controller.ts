@@ -80,8 +80,9 @@ export class GastoController {
       }
 
       // Validar que la categoría sea válida
-      if (!Object.values(CategoriaGasto).includes(categoria)) {
-        throw new HttpError(400, 'Categoría inválida');
+      const categoriasValidas = ['OFICINA', 'PERSONAL', 'MARKETING', 'TECNOLOGIA', 'SERVICIOS', 'TRANSPORTE', 'COMUNICACION', 'OTROS'];
+      if (!categoriasValidas.includes(categoria)) {
+        throw new HttpError(400, `Categoría inválida. Válidas: ${categoriasValidas.join(', ')}`);
       }
 
       if (monto <= 0) {
@@ -302,6 +303,29 @@ export class GastoController {
   }
 
   // ─────────────────── UTILITARIOS ─────────────────── 
+
+  async getCategorias(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const categorias = [
+        { value: 'OFICINA', label: 'Oficina', descripcion: 'Gastos relacionados con la oficina' },
+        { value: 'PERSONAL', label: 'Personal', descripcion: 'Gastos de personal' },
+        { value: 'MARKETING', label: 'Marketing', descripcion: 'Gastos de marketing y publicidad' },
+        { value: 'TECNOLOGIA', label: 'Tecnología', descripcion: 'Gastos de tecnología e informática' },
+        { value: 'SERVICIOS', label: 'Servicios', descripcion: 'Gastos de servicios generales' },
+        { value: 'TRANSPORTE', label: 'Transporte', descripcion: 'Gastos de transporte' },
+        { value: 'COMUNICACION', label: 'Comunicación', descripcion: 'Gastos de comunicación' },
+        { value: 'OTROS', label: 'Otros', descripcion: 'Otros gastos no clasificados' }
+      ];
+
+      res.json({
+        success: true,
+        data: categorias,
+        message: 'Categorías de gasto obtenidas exitosamente'
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export const gastoController = new GastoController();

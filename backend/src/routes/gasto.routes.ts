@@ -16,7 +16,10 @@ router.get('/',
 );
 
 // GET /api/gastos/categorias - Obtener categorías disponibles
-// (movido a rutas /categorias)
+router.get('/categorias', 
+  [auth], 
+  asyncHandler(gastoController.getCategorias)
+);
 
 // GET /api/gastos/resumen - Resumen de gastos por categoría
 router.get('/resumen', 

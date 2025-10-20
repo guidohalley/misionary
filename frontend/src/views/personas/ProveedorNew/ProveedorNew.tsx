@@ -38,15 +38,15 @@ const ProveedorNew: React.FC = () => {
           variant="plain"
           size="sm"
           onClick={() => navigate('/personas')}
-          className="mb-4 text-gray-600 hover:text-gray-800"
+          className="mb-4 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
         >
           <HiOutlineArrowLeft className="mr-2 h-4 w-4" />
           Volver a Personas
         </Button>
         
-        <div className="border-b border-gray-200 pb-4">
-          <h1 className="text-3xl font-bold text-gray-900">Nuevo Proveedor</h1>
-          <p className="text-gray-600 mt-2">
+        <div className="border-b border-gray-200 dark:border-gray-700 pb-4">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Nuevo Proveedor</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-2">
             Registra un nuevo proveedor con acceso al sistema para gestionar sus productos/servicios
           </p>
         </div>

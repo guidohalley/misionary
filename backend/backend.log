@@ -1,0 +1,56 @@
+
+> backend@1.0.0 start:dev
+> npx ts-node-dev --respawn --transpile-only src/index.ts
+
+[INFO] 11:23:56 ts-node-dev ver. 2.0.0 (using ts-node ver. 10.9.2, typescript ver. 5.8.3)
+Error: /home/guido/workspace/misionary/backend/node_modules/bcrypt/lib/binding/napi-v3/bcrypt_lib.node: cannot open shared object file: No such file or directory
+    at Module._extensions..node (node:internal/modules/cjs/loader:1586:18)
+    at Object.nodeDevHook [as .node] (/home/guido/workspace/misionary/backend/node_modules/ts-node-dev/lib/hook.js:63:13)
+    at Module.load (node:internal/modules/cjs/loader:1288:32)
+    at Function.Module._load (node:internal/modules/cjs/loader:1104:12)
+    at Module.require (node:internal/modules/cjs/loader:1311:19)
+    at require (node:internal/modules/helpers:179:18)
+    at Object.<anonymous> (/home/guido/workspace/misionary/backend/node_modules/bcrypt/bcrypt.js:6:16)
+    at Module._compile (node:internal/modules/cjs/loader:1469:14)
+    at Module._compile (/home/guido/workspace/misionary/backend/node_modules/source-map-support/source-map-support.js:568:25)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+[ERROR] 11:23:57 Error: /home/guido/workspace/misionary/backend/node_modules/bcrypt/lib/binding/napi-v3/bcrypt_lib.node: cannot open shared object file: No such file or directory
+[INFO] 11:47:05 Restarting: /home/guido/workspace/misionary/backend/src/index.ts has been modified
+Error: /home/guido/workspace/misionary/backend/node_modules/bcrypt/lib/binding/napi-v3/bcrypt_lib.node: cannot open shared object file: No such file or directory
+    at Module._extensions..node (node:internal/modules/cjs/loader:1586:18)
+    at Object.nodeDevHook [as .node] (/home/guido/workspace/misionary/backend/node_modules/ts-node-dev/lib/hook.js:63:13)
+    at Module.load (node:internal/modules/cjs/loader:1288:32)
+    at Function.Module._load (node:internal/modules/cjs/loader:1104:12)
+    at Module.require (node:internal/modules/cjs/loader:1311:19)
+    at require (node:internal/modules/helpers:179:18)
+    at Object.<anonymous> (/home/guido/workspace/misionary/backend/node_modules/bcrypt/bcrypt.js:6:16)
+    at Module._compile (node:internal/modules/cjs/loader:1469:14)
+    at Module._compile (/home/guido/workspace/misionary/backend/node_modules/source-map-support/source-map-support.js:568:25)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+[ERROR] 11:47:05 Error: /home/guido/workspace/misionary/backend/node_modules/bcrypt/lib/binding/napi-v3/bcrypt_lib.node: cannot open shared object file: No such file or directory
+[INFO] 11:47:12 Restarting: /home/guido/workspace/misionary/backend/src/index.ts has been modified
+Error: /home/guido/workspace/misionary/backend/node_modules/bcrypt/lib/binding/napi-v3/bcrypt_lib.node: cannot open shared object file: No such file or directory
+    at Module._extensions..node (node:internal/modules/cjs/loader:1586:18)
+    at Object.nodeDevHook [as .node] (/home/guido/workspace/misionary/backend/node_modules/ts-node-dev/lib/hook.js:63:13)
+    at Module.load (node:internal/modules/cjs/loader:1288:32)
+    at Function.Module._load (node:internal/modules/cjs/loader:1104:12)
+    at Module.require (node:internal/modules/cjs/loader:1311:19)
+    at require (node:internal/modules/helpers:179:18)
+    at Object.<anonymous> (/home/guido/workspace/misionary/backend/node_modules/bcrypt/bcrypt.js:6:16)
+    at Module._compile (node:internal/modules/cjs/loader:1469:14)
+    at Module._compile (/home/guido/workspace/misionary/backend/node_modules/source-map-support/source-map-support.js:568:25)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+[ERROR] 11:47:13 Error: /home/guido/workspace/misionary/backend/node_modules/bcrypt/lib/binding/napi-v3/bcrypt_lib.node: cannot open shared object file: No such file or directory
+[INFO] 11:55:42 Restarting: /home/guido/workspace/misionary/backend/src/index.ts has been modified
+Error: /home/guido/workspace/misionary/backend/node_modules/bcrypt/lib/binding/napi-v3/bcrypt_lib.node: cannot open shared object file: No such file or directory
+    at Module._extensions..node (node:internal/modules/cjs/loader:1586:18)
+    at Object.nodeDevHook [as .node] (/home/guido/workspace/misionary/backend/node_modules/ts-node-dev/lib/hook.js:63:13)
+    at Module.load (node:internal/modules/cjs/loader:1288:32)
+    at Function.Module._load (node:internal/modules/cjs/loader:1104:12)
+    at Module.require (node:internal/modules/cjs/loader:1311:19)
+    at require (node:internal/modules/helpers:179:18)
+    at Object.<anonymous> (/home/guido/workspace/misionary/backend/node_modules/bcrypt/bcrypt.js:6:16)
+    at Module._compile (node:internal/modules/cjs/loader:1469:14)
+    at Module._compile (/home/guido/workspace/misionary/backend/node_modules/source-map-support/source-map-support.js:568:25)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+[ERROR] 11:55:42 Error: /home/guido/workspace/misionary/backend/node_modules/bcrypt/lib/binding/napi-v3/bcrypt_lib.node: cannot open shared object file: No such file or directory

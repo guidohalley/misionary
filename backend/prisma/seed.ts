@@ -1,12 +1,12 @@
-import { PrismaClient, CodigoMoneda, RolUsuario, TipoPersona } from '@prisma/client';
+import { PrismaClient, CodigoMoneda, RolUsuario, TipoPersona, TipoCotizacion } from '@prisma/client';
 import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('Iniciando el proceso de seed...');
-  
-  // 1) Monedas básicas
+  console.log('Iniciando seed básico del sistema...');
+
+  // 1. Configuración inicial de monedas
   const monedas = [
     { codigo: CodigoMoneda.ARS, nombre: 'Peso Argentino', simbolo: '$' },
     { codigo: CodigoMoneda.USD, nombre: 'Dólar Estadounidense', simbolo: 'US$' },
@@ -17,23 +17,57 @@ async function main() {
     await prisma.moneda.upsert({
       where: { codigo: monedaData.codigo },
       update: {},
-      create: monedaData
+      create: {
+        ...monedaData,
+        activo: true
+      }
     });
   }
 
-  console.log('Monedas básicas creadas');
-  
-  
-  // 2) Usuario administrador único
+  // Configurar tipos de cambio iniciales
+  const [arsMoneda, usdMoneda] = await Promise.all([
+    prisma.moneda.findUnique({ where: { codigo: CodigoMoneda.ARS } }),
+    prisma.moneda.findUnique({ where: { codigo: CodigoMoneda.USD } })
+  ]);
+
+  if (!arsMoneda || !usdMoneda) {
+    throw new Error('No se pudieron crear las monedas base');
+  }
+
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+
+  // Tipo de cambio USD -> ARS (necesario para el funcionamiento básico)
+  await prisma.tipoCambio.upsert({
+    where: {
+      monedaDesdeId_monedaHaciaId_tipo_fecha: {
+        monedaDesdeId: usdMoneda.id,
+        monedaHaciaId: arsMoneda.id,
+        tipo: TipoCotizacion.OFICIAL,
+        fecha: hoy
+      }
+    },
+    update: { valor: 1200.0000 },
+    create: {
+      monedaDesdeId: usdMoneda.id,
+      monedaHaciaId: arsMoneda.id,
+      valor: 1200.0000,
+      fecha: hoy,
+      tipo: TipoCotizacion.OFICIAL
+    }
+  });
+
+  console.log('Sistema de monedas configurado');
+
+  // 2. Usuario administrador principal (requerido para acceder al sistema)
   const emailAdmin = 'guido@misionary.com';
-  const nombreAdmin = 'Guido';
-  const passwordPlano = '4C0@Cs4^6WuK@jci';
-  const hashedPassword = await bcrypt.hash(passwordPlano, 10);
+  const passwordAdmin = '4C0@Cs4^6WuK@jci'; // Cambiar en producción
+  const hashedPassword = await bcrypt.hash(passwordAdmin, 10);
 
   const admin = await prisma.persona.upsert({
     where: { email: emailAdmin },
     update: {
-      nombre: nombreAdmin,
+      nombre: 'Guido',
       tipo: TipoPersona.INTERNO,
       roles: [RolUsuario.ADMIN],
       esUsuario: true,
@@ -42,7 +76,7 @@ async function main() {
     },
     create: {
       email: emailAdmin,
-      nombre: nombreAdmin,
+      nombre: 'Guido',
       tipo: TipoPersona.INTERNO,
       roles: [RolUsuario.ADMIN],
       esUsuario: true,
@@ -51,14 +85,36 @@ async function main() {
     }
   });
 
-  console.log('Usuario administrador listo:', { id: admin.id, email: admin.email });
-  
-  console.log('Seed completado exitosamente');
+  console.log('Usuario administrador creado:', { email: admin.email });
+
+  // 3. Impuestos básicos necesarios
+  const impuestos = [
+    { nombre: 'IVA 21%', porcentaje: 21.00, descripcion: 'Impuesto al Valor Agregado' }
+  ];
+
+  for (const imp of impuestos) {
+    await prisma.impuesto.upsert({
+      where: { nombre: imp.nombre },
+      update: {
+        porcentaje: imp.porcentaje,
+        descripcion: imp.descripcion,
+        activo: true
+      },
+      create: {
+        nombre: imp.nombre,
+        porcentaje: imp.porcentaje,
+        descripcion: imp.descripcion,
+        activo: true
+      }
+    });
+  }
+
+  console.log('Seed básico completado exitosamente');
 }
 
 main()
   .catch((e) => {
-    console.error(e);
+    console.error('Error durante el seed:', e);
     process.exit(1);
   })
   .finally(async () => {

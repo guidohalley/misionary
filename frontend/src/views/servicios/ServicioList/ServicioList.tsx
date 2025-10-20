@@ -96,8 +96,8 @@ const ServicioList: React.FC<ServicioListProps> = ({ className }) => {
     <div className={className}>
       <div className="mb-6 flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Servicios</h2>
-          <p className="text-gray-600">Gestiona el catálogo de servicios</p>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Servicios</h2>
+          <p className="text-gray-600 dark:text-gray-400">Gestiona el catálogo de servicios</p>
         </div>
         <Button 
           variant="solid" 
@@ -127,7 +127,7 @@ const ServicioList: React.FC<ServicioListProps> = ({ className }) => {
               ]}
             />
           </div>
-          <div className="text-sm text-gray-600">
+          <div className="text-sm text-gray-600 dark:text-gray-400">
             Mostrando {startIndex + 1}-{Math.min(endIndex, totalItems)} de {totalItems} servicios
           </div>
         </div>
@@ -135,13 +135,13 @@ const ServicioList: React.FC<ServicioListProps> = ({ className }) => {
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-gray-200">
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">Nombre</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">Descripción</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">Precio</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">Proveedor</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">Fecha Creación</th>
-                <th className="text-center py-3 px-4 font-semibold text-gray-700">Acciones</th>
+              <tr className="border-b border-gray-200 dark:border-gray-700">
+                <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Nombre</th>
+                <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Descripción</th>
+                <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Precio</th>
+                <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Proveedor</th>
+                <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Fecha Creación</th>
+                <th className="text-center py-3 px-4 font-semibold text-gray-700 dark:text-gray-300 min-w-[120px]">Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -151,52 +151,52 @@ const ServicioList: React.FC<ServicioListProps> = ({ className }) => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
-                  className="border-b border-gray-100 hover:bg-gray-50"
+                  className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50"
                 >
                   <td className="py-3 px-4">
-                    <div className="font-medium text-gray-900">{servicio.nombre}</div>
+                    <div className="font-medium text-gray-900 dark:text-gray-100">{servicio.nombre}</div>
                   </td>
                   <td className="py-3 px-4">
-                    <div className="text-gray-600 max-w-xs truncate" title={servicio.descripcion}>
+                    <div className="text-gray-600 dark:text-gray-400 max-w-xs truncate" title={servicio.descripcion}>
                       {servicio.descripcion}
                     </div>
                   </td>
                   <td className="py-3 px-4">
-                    <Badge className="bg-green-100 text-green-800">
+                    <Badge className="bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300">
                       {formatPrice(servicio.precio)}
                     </Badge>
                   </td>
                   <td className="py-3 px-4">
-                    <div className="text-gray-900">{servicio.proveedor?.nombre || 'Sin proveedor'}</div>
+                    <div className="text-gray-900 dark:text-gray-100">{servicio.proveedor?.nombre || 'Sin proveedor'}</div>
                   </td>
                   <td className="py-3 px-4">
-                    <div className="text-gray-600">
+                    <div className="text-gray-600 dark:text-gray-400">
                       {new Date(servicio.createdAt).toLocaleDateString('es-AR')}
                     </div>
                   </td>
                   <td className="py-3 px-4">
-                    <div className="flex justify-center space-x-2">
-                      <Button
-                        size="sm"
-                        variant="twoTone"
-                        icon={<HiOutlineEye />}
+                    <div className="flex justify-center items-center gap-2">
+                      <button
                         onClick={() => handleEdit(servicio.id)}
-                        className="text-blue-600 hover:text-blue-700"
-                      />
-                      <Button
-                        size="sm"
-                        variant="twoTone"
-                        icon={<HiOutlinePencil />}
+                        className="p-2 rounded-full text-gray-700 dark:text-blue-300 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-600 dark:to-slate-700 hover:shadow-lg hover:shadow-blue-200 dark:hover:shadow-blue-900/50 active:shadow-inner transition-all duration-200"
+                        title="Ver/Editar"
+                      >
+                        <HiOutlineEye className="w-5 h-5" />
+                      </button>
+                      <button
                         onClick={() => handleEdit(servicio.id)}
-                        className="text-amber-600 hover:text-amber-700"
-                      />
-                      <Button
-                        size="sm"
-                        variant="twoTone"
-                        icon={<HiOutlineTrash />}
+                        className="p-2 rounded-full text-gray-700 dark:text-amber-300 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-600 dark:to-slate-700 hover:shadow-lg hover:shadow-amber-200 dark:hover:shadow-amber-900/50 active:shadow-inner transition-all duration-200"
+                        title="Editar"
+                      >
+                        <HiOutlinePencil className="w-5 h-5" />
+                      </button>
+                      <button
                         onClick={() => handleDelete(servicio.id)}
-                        className="text-red-600 hover:text-red-700"
-                      />
+                        className="p-2 rounded-full text-gray-700 dark:text-red-300 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-600 dark:to-slate-700 hover:shadow-lg hover:shadow-red-200 dark:hover:shadow-red-900/50 active:shadow-inner transition-all duration-200"
+                        title="Eliminar"
+                      >
+                        <HiOutlineTrash className="w-5 h-5" />
+                      </button>
                     </div>
                   </td>
                 </motion.tr>
@@ -218,7 +218,7 @@ const ServicioList: React.FC<ServicioListProps> = ({ className }) => {
 
         {currentItems.length === 0 && (
           <div className="text-center py-8">
-            <p className="text-gray-600">No se encontraron servicios</p>
+            <p className="text-gray-600 dark:text-gray-400">No se encontraron servicios</p>
           </div>
         )}
       </Card>
