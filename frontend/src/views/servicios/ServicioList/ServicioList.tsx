@@ -1,10 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Button, Badge, Pagination, Select, Input, Notification, toast } from '@/components/ui';
-import { HiOutlinePencil, HiOutlineTrash, HiOutlineEye } from 'react-icons/hi';
+import { Card, Button, Badge, Pagination, Select, Input, Notification, toast, Tooltip } from '@/components/ui';
+import { HiOutlinePencil, HiOutlineTrash, HiOutlineEye, HiOutlineLock } from 'react-icons/hi';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useServicio } from '@/modules/servicio/hooks/useServicio';
 import type { Servicio } from '@/modules/servicio/types';
+import { useAppSelector } from '@/store';
+import { 
+  canEditProductoServicio, 
+  canDeleteProductoServicio, 
+  canViewPrecios,
+  getNoEditTooltip,
+  getNoDeleteTooltip,
+  getErrorMessage
+} from '@/utils/permissions';
 
 interface ServicioListProps {
   className?: string;
@@ -13,6 +22,7 @@ interface ServicioListProps {
 const ServicioList: React.FC<ServicioListProps> = ({ className }) => {
   const navigate = useNavigate();
   const { servicios, loading, error, refreshServicios, deleteServicio } = useServicio();
+  const currentUser = useAppSelector(state => state.auth.user);
   
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -33,23 +43,43 @@ const ServicioList: React.FC<ServicioListProps> = ({ className }) => {
     setCurrentPage(1);
   }, [servicios, searchTerm]);
 
-  const handleEdit = (id: number) => {
-    navigate(`/servicios/edit/${id}`);
+  const handleEdit = (servicio: Servicio) => {
+    // Validar permisos antes de navegar
+    if (!canEditProductoServicio(currentUser, servicio.proveedorId)) {
+      toast.push(
+        <Notification title="Sin permisos" type="danger">
+          {getNoEditTooltip(currentUser)}
+        </Notification>
+      );
+      return;
+    }
+    navigate(`/servicios/edit/${servicio.id}`);
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (servicio: Servicio) => {
+    // Validar permisos antes de eliminar
+    if (!canDeleteProductoServicio(currentUser, servicio.proveedorId)) {
+      toast.push(
+        <Notification title="Sin permisos" type="danger">
+          {getNoDeleteTooltip(currentUser)}
+        </Notification>
+      );
+      return;
+    }
+
     if (window.confirm('¿Está seguro de que desea eliminar este servicio?')) {
       try {
-        await deleteServicio(id);
+        await deleteServicio(servicio.id);
         toast.push(
           <Notification title="Éxito" type="success">
             Servicio eliminado correctamente
           </Notification>
         );
-      } catch (error) {
+      } catch (error: any) {
+        const errorMessage = getErrorMessage(error);
         toast.push(
           <Notification title="Error" type="danger">
-            Error al eliminar el servicio
+            {errorMessage}
           </Notification>
         );
       }
@@ -162,9 +192,15 @@ const ServicioList: React.FC<ServicioListProps> = ({ className }) => {
                     </div>
                   </td>
                   <td className="py-3 px-4">
-                    <Badge className="bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300">
-                      {formatPrice(servicio.precio)}
-                    </Badge>
+                    {canViewPrecios(currentUser, servicio.proveedorId) && servicio.precio !== null ? (
+                      <Badge className="bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300">
+                        {formatPrice(servicio.precio)}
+                      </Badge>
+                    ) : (
+                      <Badge className="bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400">
+                        —
+                      </Badge>
+                    )}
                   </td>
                   <td className="py-3 px-4">
                     <div className="text-gray-900 dark:text-gray-100">{servicio.proveedor?.nombre || 'Sin proveedor'}</div>
@@ -176,27 +212,70 @@ const ServicioList: React.FC<ServicioListProps> = ({ className }) => {
                   </td>
                   <td className="py-3 px-4">
                     <div className="flex justify-center items-center gap-2">
-                      <button
-                        onClick={() => handleEdit(servicio.id)}
-                        className="p-2 rounded-full text-gray-700 dark:text-blue-300 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-600 dark:to-slate-700 hover:shadow-lg hover:shadow-blue-200 dark:hover:shadow-blue-900/50 active:shadow-inner transition-all duration-200"
-                        title="Ver/Editar"
-                      >
-                        <HiOutlineEye className="w-5 h-5" />
-                      </button>
-                      <button
-                        onClick={() => handleEdit(servicio.id)}
-                        className="p-2 rounded-full text-gray-700 dark:text-amber-300 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-600 dark:to-slate-700 hover:shadow-lg hover:shadow-amber-200 dark:hover:shadow-amber-900/50 active:shadow-inner transition-all duration-200"
-                        title="Editar"
-                      >
-                        <HiOutlinePencil className="w-5 h-5" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(servicio.id)}
-                        className="p-2 rounded-full text-gray-700 dark:text-red-300 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-600 dark:to-slate-700 hover:shadow-lg hover:shadow-red-200 dark:hover:shadow-red-900/50 active:shadow-inner transition-all duration-200"
-                        title="Eliminar"
-                      >
-                        <HiOutlineTrash className="w-5 h-5" />
-                      </button>
+                      {(() => {
+                        const puedeEditar = canEditProductoServicio(currentUser, servicio.proveedorId);
+                        const puedeEliminar = canDeleteProductoServicio(currentUser, servicio.proveedorId);
+                        
+                        return (
+                          <>
+                            <Tooltip title={puedeEditar ? "Ver/Editar" : getNoEditTooltip(currentUser)}>
+                              <span>
+                                <button
+                                  onClick={() => handleEdit(servicio)}
+                                  disabled={!puedeEditar}
+                                  className={`p-2 rounded-full transition-all duration-200 ${
+                                    puedeEditar
+                                      ? 'text-gray-700 dark:text-blue-300 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-600 dark:to-slate-700 hover:shadow-lg hover:shadow-blue-200 dark:hover:shadow-blue-900/50 active:shadow-inner cursor-pointer'
+                                      : 'text-gray-400 dark:text-gray-600 bg-gray-100 dark:bg-gray-800 cursor-not-allowed opacity-50'
+                                  }`}
+                                >
+                                  <HiOutlineEye className="w-5 h-5" />
+                                </button>
+                              </span>
+                            </Tooltip>
+                            
+                            <Tooltip title={puedeEditar ? "Editar" : getNoEditTooltip(currentUser)}>
+                              <span>
+                                <button
+                                  onClick={() => handleEdit(servicio)}
+                                  disabled={!puedeEditar}
+                                  className={`p-2 rounded-full transition-all duration-200 ${
+                                    puedeEditar
+                                      ? 'text-gray-700 dark:text-amber-300 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-600 dark:to-slate-700 hover:shadow-lg hover:shadow-amber-200 dark:hover:shadow-amber-900/50 active:shadow-inner cursor-pointer'
+                                      : 'text-gray-400 dark:text-gray-600 bg-gray-100 dark:bg-gray-800 cursor-not-allowed opacity-50'
+                                  }`}
+                                >
+                                  <HiOutlinePencil className="w-5 h-5" />
+                                </button>
+                              </span>
+                            </Tooltip>
+                            
+                            <Tooltip title={puedeEliminar ? "Eliminar" : getNoDeleteTooltip(currentUser)}>
+                              <span>
+                                <button
+                                  onClick={() => handleDelete(servicio)}
+                                  disabled={!puedeEliminar}
+                                  className={`p-2 rounded-full transition-all duration-200 ${
+                                    puedeEliminar
+                                      ? 'text-gray-700 dark:text-red-300 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-600 dark:to-slate-700 hover:shadow-lg hover:shadow-red-200 dark:hover:shadow-red-900/50 active:shadow-inner cursor-pointer'
+                                      : 'text-gray-400 dark:text-gray-600 bg-gray-100 dark:bg-gray-800 cursor-not-allowed opacity-50'
+                                  }`}
+                                >
+                                  <HiOutlineTrash className="w-5 h-5" />
+                                </button>
+                              </span>
+                            </Tooltip>
+                            
+                            {!puedeEditar && (
+                              <Tooltip title="Servicio de otro proveedor">
+                                <span>
+                                  <HiOutlineLock className="w-4 h-4 text-gray-400" />
+                                </span>
+                              </Tooltip>
+                            )}
+                          </>
+                        );
+                      })()}
                     </div>
                   </td>
                 </motion.tr>

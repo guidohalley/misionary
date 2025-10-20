@@ -3,13 +3,16 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import ServicioForm from '../ServicioForm/ServicioForm';
 import { useServicio } from '@/modules/servicio/hooks/useServicio';
-import { Button } from '@/components/ui';
+import { Button, Notification, toast } from '@/components/ui';
 import type { ServicioFormData } from '../types';
+import { useAppSelector } from '@/store';
+import { canEditProductoServicio, getErrorMessage } from '@/utils/permissions';
 
 const ServicioEdit: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const { servicios, updateServicio, refreshServicios } = useServicio();
+  const currentUser = useAppSelector(state => state.auth.user);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -25,23 +28,52 @@ const ServicioEdit: React.FC = () => {
           await refreshServicios();
         }
         
+        // Verificar permisos después de cargar el servicio
+        const servicioEncontrado = servicios.find(s => s.id === parseInt(id || '0'));
+        if (servicioEncontrado && !canEditProductoServicio(currentUser, servicioEncontrado.proveedorId)) {
+          toast.push(
+            <Notification title="Sin permisos" type="danger">
+              No tienes permisos para editar este servicio
+            </Notification>
+          );
+          navigate('/servicios');
+          return;
+        }
+        
         setLoading(false);
-      } catch (err) {
-        setError('Error al cargar el servicio');
+      } catch (err: any) {
+        const errorMessage = getErrorMessage(err);
+        setError(errorMessage);
         setLoading(false);
       }
     };
 
     loadServicio();
-  }, [id, servicios.length, refreshServicios]);
+  }, [id, servicios.length, refreshServicios, currentUser, navigate]);
 
   const handleSubmit = async (data: ServicioFormData) => {
     try {
       if (!id) throw new Error('ID de servicio no encontrado');
+      
+      // Validar permisos antes de enviar
+      if (!canEditProductoServicio(currentUser, data.proveedorId)) {
+        toast.push(
+          <Notification title="Sin permisos" type="danger">
+            No tienes permisos para editar este servicio
+          </Notification>
+        );
+        return;
+      }
+      
       await updateServicio(parseInt(id), data);
       navigate('/servicios');
-    } catch (error) {
-      console.error('Error updating servicio:', error);
+    } catch (error: any) {
+      const errorMessage = getErrorMessage(error);
+      toast.push(
+        <Notification title="Error" type="danger">
+          {errorMessage}
+        </Notification>
+      );
       throw error;
     }
   };

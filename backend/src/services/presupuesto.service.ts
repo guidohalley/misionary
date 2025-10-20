@@ -1,5 +1,6 @@
 import prisma from '../config/prisma';
 import PresupuestoHistorialService from './presupuesto-historial.service';
+import { calcularMontoSugerido, validarGananciaGlobal } from '../utils/presupuestoGanancia';
 
 export class PresupuestoService {
   static async create(data: {
@@ -15,8 +16,11 @@ export class PresupuestoService {
     total: number;
     impuestosSeleccionados?: number[];
     monedaId?: number;
-  periodoInicio?: string | Date;
-  periodoFin?: string | Date;
+    periodoInicio?: string | Date;
+    periodoFin?: string | Date;
+    usarGananciaGlobal?: boolean;
+    margenAgenciaGlobal?: number;
+    montoGananciaAgencia?: number;
   }) {
     try {
       console.log('PresupuestoService.create - Input data:', JSON.stringify(data, null, 2));
@@ -63,6 +67,24 @@ export class PresupuestoService {
       
       console.log('Validaciones pasadas, creando presupuesto...');
       
+      // Validar ganancia global si se proporciona
+      if (data.usarGananciaGlobal) {
+        const validacion = validarGananciaGlobal(
+          data.margenAgenciaGlobal,
+          data.montoGananciaAgencia,
+          data.subtotal
+        );
+        
+        if (!validacion.valido) {
+          throw new Error(validacion.error);
+        }
+        
+        // Si tiene porcentaje pero no monto, calcular monto sugerido
+        if (data.margenAgenciaGlobal && !data.montoGananciaAgencia) {
+          data.montoGananciaAgencia = calcularMontoSugerido(data.subtotal, data.margenAgenciaGlobal);
+        }
+      }
+      
       const presupuesto = await prisma.presupuesto.create({
         data: {
           clienteId: data.clienteId,
@@ -74,6 +96,10 @@ export class PresupuestoService {
           // Vigencia del presupuesto (opcional)
           periodoInicio: data.periodoInicio ? new Date(data.periodoInicio) : undefined,
           periodoFin: data.periodoFin ? new Date(data.periodoFin) : undefined,
+          // Ganancia global (opcional)
+          usarGananciaGlobal: data.usarGananciaGlobal || false,
+          margenAgenciaGlobal: data.margenAgenciaGlobal,
+          montoGananciaAgencia: data.montoGananciaAgencia,
           items: {
             create: data.items
           },
@@ -253,6 +279,39 @@ export class PresupuestoService {
         }))
       };
       delete updateData.impuestosSeleccionados;
+    }
+
+    // Validar y procesar ganancia global si se proporciona
+    if (data.usarGananciaGlobal !== undefined) {
+      updateData.usarGananciaGlobal = data.usarGananciaGlobal;
+      
+      if (data.usarGananciaGlobal) {
+        const validacion = validarGananciaGlobal(
+          data.margenAgenciaGlobal,
+          data.montoGananciaAgencia,
+          data.subtotal || Number(presupuestoExistente.subtotal)
+        );
+        
+        if (!validacion.valido) {
+          throw new Error(validacion.error);
+        }
+        
+        // Si tiene porcentaje pero no monto, calcular monto sugerido
+        if (data.margenAgenciaGlobal !== undefined && data.montoGananciaAgencia === undefined) {
+          updateData.montoGananciaAgencia = calcularMontoSugerido(
+            data.subtotal || Number(presupuestoExistente.subtotal),
+            data.margenAgenciaGlobal
+          );
+        }
+      }
+    }
+    
+    // Actualizar campos de ganancia si se proporcionan
+    if (data.margenAgenciaGlobal !== undefined) {
+      updateData.margenAgenciaGlobal = data.margenAgenciaGlobal;
+    }
+    if (data.montoGananciaAgencia !== undefined) {
+      updateData.montoGananciaAgencia = data.montoGananciaAgencia;
     }
 
     // Crear snapshot del estado anterior

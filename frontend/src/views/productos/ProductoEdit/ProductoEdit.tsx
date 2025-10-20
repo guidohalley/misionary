@@ -3,13 +3,16 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import ProductoForm from '../ProductoForm/ProductoForm';
 import { useProducto } from '@/modules/producto/hooks/useProducto';
-import { Button } from '@/components/ui';
+import { Button, Notification, toast } from '@/components/ui';
 import type { ProductoFormData } from '../types';
+import { useAppSelector } from '@/store';
+import { canEditProductoServicio, getErrorMessage } from '@/utils/permissions';
 
 const ProductoEdit: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const { productos, updateProducto, refreshProductos } = useProducto();
+  const currentUser = useAppSelector(state => state.auth.user);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -25,19 +28,43 @@ const ProductoEdit: React.FC = () => {
           await refreshProductos();
         }
         
+        // Verificar permisos después de cargar el producto
+        const productoEncontrado = productos.find(p => p.id === parseInt(id || '0'));
+        if (productoEncontrado && !canEditProductoServicio(currentUser, productoEncontrado.proveedorId)) {
+          toast.push(
+            <Notification title="Sin permisos" type="danger">
+              No tienes permisos para editar este producto
+            </Notification>
+          );
+          navigate('/productos');
+          return;
+        }
+        
         setLoading(false);
-      } catch (err) {
-        setError('Error al cargar el producto');
+      } catch (err: any) {
+        const errorMessage = getErrorMessage(err);
+        setError(errorMessage);
         setLoading(false);
       }
     };
 
     loadProducto();
-  }, [id, productos.length, refreshProductos]);
+  }, [id, productos.length, refreshProductos, currentUser, navigate]);
 
   const handleSubmit = async (data: ProductoFormData) => {
     try {
       if (!id) throw new Error('ID de producto no encontrado');
+      
+      // Validar permisos antes de enviar
+      if (!canEditProductoServicio(currentUser, data.proveedorId)) {
+        toast.push(
+          <Notification title="Sin permisos" type="danger">
+            No tienes permisos para editar este producto
+          </Notification>
+        );
+        return;
+      }
+      
       // Normalizar payload: solo enviar campos relevantes del update
       const payload = {
         nombre: data.nombre,
@@ -50,8 +77,13 @@ const ProductoEdit: React.FC = () => {
       };
       await updateProducto(parseInt(id), payload);
       navigate('/productos');
-    } catch (error) {
-      console.error('Error updating producto:', error);
+    } catch (error: any) {
+      const errorMessage = getErrorMessage(error);
+      toast.push(
+        <Notification title="Error" type="danger">
+          {errorMessage}
+        </Notification>
+      );
       throw error;
     }
   };
