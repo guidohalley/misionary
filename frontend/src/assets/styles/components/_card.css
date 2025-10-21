@@ -118,11 +118,11 @@
 
   .card-header,
   .card-footer {
-    @apply py-4 px-6;
+    @apply py-3 px-4;
   }
 
   .card-body {
-    @apply p-6;
+    @apply p-4;
   }
 
   .card-gutterless {

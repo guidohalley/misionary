@@ -14,8 +14,8 @@
   }
 
   .header-wrapper {
-    @apply flex relative items-center justify-between p-0 px-6 w-full;
-    min-height: 64px;
+    @apply flex relative items-center justify-between p-0 px-4 w-full;
+    min-height: 56px;
   }
 
   .header-action {
