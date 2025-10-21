@@ -175,7 +175,8 @@ const ServicioList: React.FC<ServicioListProps> = ({ className }) => {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        {/* Vista Desktop - Tabla */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-200 dark:border-gray-700">
@@ -360,6 +361,181 @@ const ServicioList: React.FC<ServicioListProps> = ({ className }) => {
               ))}
             </tbody>
           </table>
+        </div>
+
+        {/* Vista Mobile - Cards */}
+        <div className="md:hidden space-y-4">
+          {currentItems.map((servicio, index) => {
+            const puedeVerPrecios = canViewPrecios(currentUser, servicio.proveedorId);
+            const esAdmin = currentUser?.roles?.includes('ADMIN');
+            const esContador = currentUser?.roles?.includes('CONTADOR');
+            const isExpanded = expandedCostos.has(servicio.id);
+            const puedeEditar = canEditProductoServicio(currentUser, servicio.proveedorId);
+            const puedeEliminar = canDeleteProductoServicio(currentUser, servicio.proveedorId);
+
+            return (
+              <motion.div
+                key={servicio.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 shadow-sm hover:shadow-md transition-shadow"
+              >
+                {/* Header con Nombre */}
+                <div className="mb-3">
+                  <div className="text-lg font-bold text-gray-900 dark:text-white">{servicio.nombre}</div>
+                </div>
+
+                {/* Descripción */}
+                <div className="mb-3">
+                  <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Descripción</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">{servicio.descripcion}</div>
+                </div>
+
+                {/* Precio */}
+                <div className="mb-3">
+                  <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                    {(currentUser?.roles?.includes('ADMIN') || currentUser?.roles?.includes('CONTADOR'))
+                      ? 'Precio Final' 
+                      : 'Precio'}
+                  </div>
+                  <div className="text-lg font-bold text-green-600 dark:text-green-400">
+                    {(() => {
+                      if (!puedeVerPrecios) {
+                        return (
+                          <Badge className="bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400">
+                            —
+                          </Badge>
+                        );
+                      }
+
+                      if (esAdmin) {
+                        return (
+                          <div className="flex flex-col gap-2">
+                            <div className="flex items-center gap-2">
+                              <Badge className="bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300">
+                                {formatPrice(servicio.precio)}
+                              </Badge>
+                              <button
+                                onClick={() => toggleCosto(servicio.id)}
+                                className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                              >
+                                {isExpanded ? (
+                                  <HiChevronUp className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                                ) : (
+                                  <HiChevronDown className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                                )}
+                              </button>
+                            </div>
+                            {isExpanded && (
+                              <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                              >
+                                <Badge className="bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300">
+                                  Costo: {formatPrice(servicio.costoProveedor)}
+                                </Badge>
+                              </motion.div>
+                            )}
+                          </div>
+                        );
+                      }
+
+                      if (esContador) {
+                        return (
+                          <Badge className="bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300">
+                            {formatPrice(servicio.precio)}
+                          </Badge>
+                        );
+                      }
+
+                      return (
+                        <Badge className="bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300">
+                          {formatPrice(servicio.costoProveedor)}
+                        </Badge>
+                      );
+                    })()}
+                  </div>
+                </div>
+
+                {/* Proveedor y Fecha */}
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Proveedor</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                      {servicio.proveedor?.nombre || 'Sin proveedor'}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Fecha Creación</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                      {new Date(servicio.createdAt).toLocaleDateString('es-AR')}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Acciones */}
+                <div className="flex justify-center space-x-2 pt-3 border-t border-gray-200 dark:border-gray-700">
+                  <Tooltip title={puedeEditar ? "Ver/Editar" : getNoEditTooltip(currentUser)}>
+                    <span>
+                      <button
+                        onClick={() => handleEdit(servicio)}
+                        disabled={!puedeEditar}
+                        className={`p-2 rounded-full transition-all duration-200 ${
+                          puedeEditar
+                            ? 'text-gray-700 dark:text-blue-300 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-600 dark:to-slate-700 hover:shadow-lg hover:shadow-blue-200 dark:hover:shadow-blue-900/50 active:shadow-inner cursor-pointer'
+                            : 'text-gray-400 dark:text-gray-600 bg-gray-100 dark:bg-gray-800 cursor-not-allowed opacity-50'
+                        }`}
+                      >
+                        <HiOutlineEye className="w-5 h-5" />
+                      </button>
+                    </span>
+                  </Tooltip>
+                  
+                  <Tooltip title={puedeEditar ? "Editar" : getNoEditTooltip(currentUser)}>
+                    <span>
+                      <button
+                        onClick={() => handleEdit(servicio)}
+                        disabled={!puedeEditar}
+                        className={`p-2 rounded-full transition-all duration-200 ${
+                          puedeEditar
+                            ? 'text-amber-600 dark:text-amber-300 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-600 dark:to-slate-700 hover:shadow-lg hover:shadow-amber-200 dark:hover:shadow-amber-900/50 active:shadow-inner cursor-pointer'
+                            : 'text-gray-400 dark:text-gray-600 bg-gray-100 dark:bg-gray-800 cursor-not-allowed opacity-50'
+                        }`}
+                      >
+                        <HiOutlinePencil className="w-5 h-5" />
+                      </button>
+                    </span>
+                  </Tooltip>
+                  
+                  <Tooltip title={puedeEliminar ? "Eliminar" : getNoDeleteTooltip(currentUser)}>
+                    <span>
+                      <button
+                        onClick={() => handleDelete(servicio)}
+                        disabled={!puedeEliminar}
+                        className={`p-2 rounded-full transition-all duration-200 ${
+                          puedeEliminar
+                            ? 'text-red-600 dark:text-red-300 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-600 dark:to-slate-700 hover:shadow-lg hover:shadow-red-200 dark:hover:shadow-red-900/50 active:shadow-inner cursor-pointer'
+                            : 'text-gray-400 dark:text-gray-600 bg-gray-100 dark:bg-gray-800 cursor-not-allowed opacity-50'
+                        }`}
+                      >
+                        <HiOutlineTrash className="w-5 h-5" />
+                      </button>
+                    </span>
+                  </Tooltip>
+                  
+                  {!puedeEditar && (
+                    <Tooltip title="Servicio de otro proveedor">
+                      <span>
+                        <HiLockClosed className="w-4 h-4 text-gray-400" />
+                      </span>
+                    </Tooltip>
+                  )}
+                </div>
+              </motion.div>
+            );
+          })}
         </div>
 
         {totalPages > 1 && (
