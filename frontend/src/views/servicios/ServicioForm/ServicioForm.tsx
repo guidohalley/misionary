@@ -60,7 +60,7 @@ const ServicioForm: React.FC<ServicioFormProps> = ({
       nombre: '',
       descripcion: '',
       costoProveedor: 0,
-      margenAgencia: 0,
+      margenAgencia: isProveedor ? 35 : 0, // 35% por defecto para proveedores
       precio: 0,
       proveedorId: mustUseOwnId ? user?.id : undefined, // Precargar ID si es proveedor puro
       monedaId: 1, // ARS por defecto
@@ -144,7 +144,7 @@ const ServicioForm: React.FC<ServicioFormProps> = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="container mx-auto p-4 max-w-7xl"
+      className="w-full max-w-[98%] sm:max-w-[95%] md:max-w-[90%] xl:max-w-7xl mx-auto p-3 sm:p-4"
     >
       {/* Header con breadcrumbs */}
       <motion.div
@@ -288,13 +288,16 @@ const ServicioForm: React.FC<ServicioFormProps> = ({
                         Pricing y Moneda
                       </h3>
                       <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                        Configure el costo del proveedor y margen de agencia. El precio se calculará automáticamente.
+                        {isProveedor 
+                          ? 'Configure el costo de su servicio. El precio final se calculará automáticamente.'
+                          : 'Configure el costo del proveedor y margen de agencia. El precio se calculará automáticamente.'
+                        }
                       </p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <FormItem
-                        label="Costo del Proveedor"
+                        label={isProveedor ? "Costo del Servicio" : "Costo del Proveedor"}
                         invalid={!!errors.costoProveedor}
                         errorMessage={errors.costoProveedor?.message}
                         asterisk
@@ -319,62 +322,91 @@ const ServicioForm: React.FC<ServicioFormProps> = ({
                         />
                       </FormItem>
 
+                      {/* Solo mostrar margen de agencia si NO es proveedor */}
+                      {!isProveedor && (
+                        <FormItem
+                          label="Margen de Agencia (%)"
+                          invalid={!!errors.margenAgencia}
+                          errorMessage={errors.margenAgencia?.message}
+                          asterisk
+                        >
+                          <Controller
+                            name="margenAgencia"
+                            control={control}
+                            rules={{ 
+                              required: 'El margen de agencia es requerido',
+                              min: { value: 0, message: 'El margen debe ser mayor o igual a 0' },
+                              max: { value: 1000, message: 'El margen no puede exceder 1000%' }
+                            }}
+                            render={({ field }) => (
+                              <Input
+                                {...field}
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                max="1000"
+                                value={field.value || ''}
+                                onChange={(e) => field.onChange(Number(e.target.value))}
+                                placeholder="Ej: 25 (para 25%)"
+                                disabled={isSubmitting}
+                                className="rounded-lg"
+                                suffix="%"
+                              />
+                            )}
+                          />
+                        </FormItem>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                       <FormItem
-                        label="Margen de Agencia (%)"
-                        invalid={!!errors.margenAgencia}
-                        errorMessage={errors.margenAgencia?.message}
+                        label="Moneda"
+                        invalid={!!errors.monedaId}
+                        errorMessage={errors.monedaId?.message}
                         asterisk
                       >
                         <Controller
-                          name="margenAgencia"
+                          name="monedaId"
                           control={control}
-                          rules={{ 
-                            required: 'El margen de agencia es requerido',
-                            min: { value: 0, message: 'El margen debe ser mayor o igual a 0' },
-                            max: { value: 1000, message: 'El margen no puede exceder 1000%' }
-                          }}
+                          rules={{ required: 'La moneda es requerida' }}
                           render={({ field }) => (
-                            <Input
-                              {...field}
-                              type="number"
-                              step="0.01"
-                              min="0"
-                              max="1000"
-                              value={field.value || ''}
-                              onChange={(e) => field.onChange(Number(e.target.value))}
-                              placeholder="Ej: 25 (para 25%)"
-                              disabled={isSubmitting}
+                            <Select
+                              options={monedasOptions}
+                              value={monedasOptions.find(option => option.value === field.value)}
+                              onChange={option => field.onChange(option?.value)}
+                              isLoading={loadingMonedas}
+                              isDisabled={loadingMonedas || isSubmitting}
+                              placeholder="Seleccionar moneda..."
                               className="rounded-lg"
-                              suffix="%"
                             />
                           )}
                         />
                       </FormItem>
-                    </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4"># ... existing code ...
-
-                      <FormItem
-                        label="Precio Final (Calculado automáticamente)"
-                        invalid={!!errors.precio}
-                        errorMessage={errors.precio?.message}
-                      >
-                        <Controller
-                          name="precio"
-                          control={control}
-                          render={({ field }) => (
-                            <MoneyInput
-                              value={field.value || 0}
-                              onChange={field.onChange}
-                              currency={monedaSeleccionada?.codigo || 'ARS'}
-                              currencySymbol={monedaSeleccionada?.simbolo || '$'}
-                              placeholder="0,00"
-                              disabled={true} // Siempre readonly porque se calcula automáticamente
-                              className="bg-gray-50 dark:bg-gray-700"
-                            />
-                          )}
-                        />
-                      </FormItem>
+                      {/* Solo mostrar precio final si NO es proveedor */}
+                      {!isProveedor && (
+                        <FormItem
+                          label="Precio Final (Calculado automáticamente)"
+                          invalid={!!errors.precio}
+                          errorMessage={errors.precio?.message}
+                        >
+                          <Controller
+                            name="precio"
+                            control={control}
+                            render={({ field }) => (
+                              <MoneyInput
+                                value={field.value || 0}
+                                onChange={field.onChange}
+                                currency={monedaSeleccionada?.codigo || 'ARS'}
+                                currencySymbol={monedaSeleccionada?.simbolo || '$'}
+                                placeholder="0,00"
+                                disabled={true} // Siempre readonly porque se calcula automáticamente
+                                className="bg-gray-50 dark:bg-gray-700"
+                              />
+                            )}
+                          />
+                        </FormItem>
+                      )}
                     </div>
                   </div>
                 </Card>
@@ -384,11 +416,33 @@ const ServicioForm: React.FC<ServicioFormProps> = ({
             {/* Columna Lateral - Proveedor y Configuración */}
             <div className="space-y-6">
               
-              {/* Proveedor */}
+              {/* Información del Sistema */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4, duration: 0.3 }}
+              >
+                <Card className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20">
+                  <div className="p-6">
+                    <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                      💡 Información
+                    </h4>
+                    <ul className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
+                      <li>• Los precios se almacenan en la moneda seleccionada</li>
+                      <li>• ARS (Peso Argentino) es la moneda por defecto</li>
+                      <li>• El servicio será visible en presupuestos</li>
+                      <li>• El proveedor debe estar registrado previamente</li>
+                      <li>• Una descripción detallada mejora la comunicación</li>
+                    </ul>
+                  </div>
+                </Card>
+              </motion.div>
+
+              {/* Proveedor */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5, duration: 0.3 }}
               >
                 <Card>
                   <div className="p-6">
@@ -426,28 +480,6 @@ const ServicioForm: React.FC<ServicioFormProps> = ({
                         )}
                       />
                     </FormItem>
-                  </div>
-                </Card>
-              </motion.div>
-              
-              {/* Información del Sistema */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5, duration: 0.3 }}
-              >
-                <Card className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20">
-                  <div className="p-6">
-                    <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                      💡 Información
-                    </h4>
-                    <ul className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
-                      <li>• Los precios se almacenan en la moneda seleccionada</li>
-                      <li>• ARS (Peso Argentino) es la moneda por defecto</li>
-                      <li>• El servicio será visible en presupuestos</li>
-                      <li>• El proveedor debe estar registrado previamente</li>
-                      <li>• Una descripción detallada mejora la comunicación</li>
-                    </ul>
                   </div>
                 </Card>
               </motion.div>

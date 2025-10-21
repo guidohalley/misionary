@@ -38,7 +38,7 @@ const SimpleLayout = () => {
                         headerMiddle={<HorizontalNav />}
                         headerEnd={<HeaderActionsEnd />}
                     />
-                    <View pageContainerType="contained" />
+                    <View pageContainerType="default" />
                 </div>
             </div>
         </div>

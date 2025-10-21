@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { usePresupuesto } from '@/modules/presupuesto/hooks/usePresupuesto';
 import PresupuestoForm from '../PresupuestoForm/PresupuestoForm';
+import PermissionGuard from '@/components/shared/PermissionGuard';
 import type { PresupuestoFormData } from '../types';
 
 const PresupuestoEdit: React.FC = () => {
@@ -18,14 +19,27 @@ const PresupuestoEdit: React.FC = () => {
 
   useEffect(() => {
     if (selectedPresupuesto) {
+      console.log('🔍 DEBUG PresupuestoEdit - selectedPresupuesto:', selectedPresupuesto);
+      console.log('🔍 DEBUG presupuestoImpuestos:', selectedPresupuesto.presupuestoImpuestos);
+      
+      const impuestosSeleccionados = selectedPresupuesto.presupuestoImpuestos?.map(pi => pi.impuestoId) || [];
+      console.log('🔍 DEBUG impuestosSeleccionados mapeados:', impuestosSeleccionados);
+      
       setInitialData({
         clienteId: selectedPresupuesto.clienteId,
         items: selectedPresupuesto.items.map(item => ({
           productoId: item.productoId || undefined,
           servicioId: item.servicioId || undefined,
-          cantidad: item.cantidad,
-          precioUnitario: item.precioUnitario
-        }))
+          cantidad: Number(item.cantidad) || 0,
+          precioUnitario: Number(item.precioUnitario) || 0
+        })),
+        monedaId: selectedPresupuesto.monedaId,
+        periodoInicio: selectedPresupuesto.periodoInicio,
+        periodoFin: selectedPresupuesto.periodoFin,
+        margenAgenciaGlobal: selectedPresupuesto.margenAgenciaGlobal ? Number(selectedPresupuesto.margenAgenciaGlobal) : undefined,
+        // IMPORTANTE: El backend devuelve montoGananciaAgencia, mapearlo a montoGanancia para el form
+        montoGanancia: (selectedPresupuesto as any).montoGananciaAgencia ? Number((selectedPresupuesto as any).montoGananciaAgencia) : undefined,
+        impuestosSeleccionados,
       });
     }
   }, [selectedPresupuesto]);
@@ -46,16 +60,16 @@ const PresupuestoEdit: React.FC = () => {
     navigate('/presupuestos');
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
+  return (
+    <PermissionGuard allowedRoles={['ADMIN', 'CONTADOR']} showBlur={true}>
+      {loading && (
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+        </div>
+      )}
 
-  if (error) {
-    return (        <div className="text-center py-8">
+      {error && (
+        <div className="text-center py-8">
           <p className="text-red-600 mb-4">Error: {error}</p>
           <button 
             onClick={() => navigate('/presupuestos')}
@@ -64,11 +78,10 @@ const PresupuestoEdit: React.FC = () => {
             Volver a Presupuestos
           </button>
         </div>
-    );
-  }
+      )}
 
-  if (!selectedPresupuesto) {
-    return (        <div className="text-center py-8">
+      {!loading && !error && !selectedPresupuesto && (
+        <div className="text-center py-8">
           <p className="text-gray-600 mb-4">Presupuesto no encontrado</p>
           <button 
             onClick={() => navigate('/presupuestos')}
@@ -77,18 +90,19 @@ const PresupuestoEdit: React.FC = () => {
             Volver a Presupuestos
           </button>
         </div>
-    );
-  }
+      )}
 
-  return (
-    <div className="max-w-full">
-      <PresupuestoForm
-        initialData={initialData}
-        onSubmit={handleSubmit}
-        onCancel={handleCancel}
-        isEdit={true}
-      />
-    </div>
+      {!loading && !error && selectedPresupuesto && (
+        <div className="max-w-full">
+          <PresupuestoForm
+            initialData={initialData}
+            onSubmit={handleSubmit}
+            onCancel={handleCancel}
+            isEdit={true}
+          />
+        </div>
+      )}
+    </PermissionGuard>
   );
 };
 

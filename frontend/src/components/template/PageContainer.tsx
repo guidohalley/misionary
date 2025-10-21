@@ -43,15 +43,15 @@ const PageContainer = (props: PageContainerProps) => {
                         'page-container relative h-full flex flex-auto flex-col',
                         pageContainerType !== 'gutterless' &&
                             `${PAGE_CONTAINER_GUTTER_X} ${PAGE_CONTAINER_GUTTER_Y}`,
-                        pageContainerType === 'contained' &&
-                            'container mx-auto',
+                        pageContainerType === 'contained' 
+                            ? 'w-full max-w-[95%] md:max-w-[90%] xl:max-w-[85%] 2xl:max-w-[80%] mx-auto'
+                            : 'w-full',
                     )}
                 >
                     {(header || extraHeader) && (
                         <div
                             className={classNames(
-                                contained && 'container mx-auto',
-                                'flex items-center justify-between mb-4',
+                                'flex items-center justify-between mb-4 w-full',
                             )}
                         >
                             <div>

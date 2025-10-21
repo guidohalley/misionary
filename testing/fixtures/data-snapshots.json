@@ -1,0 +1,114 @@
+{
+  "testData": {
+    "users": {
+      "admin": {
+        "email": "admin@misionary.com",
+        "password": "AdminPassword123!",
+        "roles": ["ADMIN"]
+      },
+      "contador": {
+        "email": "contador@misionary.com", 
+        "password": "ContadorPassword123!",
+        "roles": ["CONTADOR"]
+      },
+      "proveedor": {
+        "email": "proveedor@misionary.com",
+        "password": "ProveedorPassword123!",
+        "roles": ["PROVEEDOR"]
+      },
+      "cliente": {
+        "email": "cliente@misionary.com",
+        "password": "ClientePassword123!",
+        "roles": ["CLIENTE"]
+      }
+    },
+    "clientes": {
+      "persona_fisica": {
+        "nombre": "Juan Pérez",
+        "email": "juan.perez@email.com",
+        "telefono": "+54 9 11 1234-5678",
+        "direccion": "Av. Corrientes 1234, CABA",
+        "tipo": "PERSONA"
+      },
+      "empresa": {
+        "nombre": "Empresa Test S.A.",
+        "email": "contacto@empresatest.com",
+        "telefono": "+54 11 4567-8901",
+        "direccion": "Av. Santa Fe 5678, CABA",
+        "tipo": "EMPRESA"
+      }
+    },
+    "presupuestos": {
+      "basico": {
+        "cliente": "Juan Pérez",
+        "total": 10000,
+        "impuestos": 245,
+        "fecha": "2024-01-15",
+        "estado": "BORRADOR"
+      },
+      "alto_valor": {
+        "cliente": "Empresa Test S.A.",
+        "total": 100000,
+        "impuestos": 2450,
+        "fecha": "2024-01-20",
+        "estado": "ENVIADO"
+      }
+    },
+    "productos": {
+      "software": {
+        "nombre": "Software CRM",
+        "descripcion": "Sistema de gestión de relaciones con clientes",
+        "precio": 50000,
+        "stock": 10,
+        "categoria": "SOFTWARE"
+      },
+      "hardware": {
+        "nombre": "Servidor Dell",
+        "descripcion": "Servidor para infraestructura",
+        "precio": 150000,
+        "stock": 5,
+        "categoria": "HARDWARE"
+      }
+    },
+    "servicios": {
+      "desarrollo": {
+        "nombre": "Desarrollo Web",
+        "descripcion": "Desarrollo de aplicaciones web personalizadas",
+        "precio": 120000,
+        "duracion": 30,
+        "categoria": "DESARROLLO"
+      },
+      "mantenimiento": {
+        "nombre": "Mantenimiento Mensual",
+        "descripcion": "Mantenimiento y soporte técnico mensual",
+        "precio": 25000,
+        "duracion": 30,
+        "categoria": "MANTENIMIENTO"
+      }
+    }
+  },
+  "config": {
+    "baseURL": "http://localhost:5173",
+    "timeout": 30000,
+    "retries": 2,
+    "impuestos": {
+      "porcentaje": 2.45,
+      "descripcion": "Impuesto a las ventas"
+    }
+  },
+  "selectors": {
+    "auth": {
+      "loginForm": "form[data-testid='login-form']",
+      "emailInput": "input[name='email']",
+      "passwordInput": "input[name='password']",
+      "loginButton": "button[type='submit']"
+    },
+    "navigation": {
+      "sidebar": "[data-testid='sidebar']",
+      "dashboardMenu": "[data-testid='menu-dashboard']",
+      "clientesMenu": "[data-testid='menu-clientes']",
+      "presupuestosMenu": "[data-testid='menu-presupuestos']"
+    }
+  }
+}
+

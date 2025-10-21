@@ -8,7 +8,7 @@ import { HiOutlineMinusSmall, HiOutlinePlusSmall } from 'react-icons/hi2'
  */
 export const ZoomControl = () => {
   const { currentZoom, increaseZoom, decreaseZoom, resetZoom } = useZoom()
-  const zoomPercentage = Math.round(currentZoom * 100)
+  const zoomPercentage = Math.round(currentZoom)
 
   return (
     <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">

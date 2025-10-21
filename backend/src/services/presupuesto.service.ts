@@ -1,7 +1,34 @@
 import prisma from '../config/prisma';
 import PresupuestoHistorialService from './presupuesto-historial.service';
+import { calcularMontoSugerido, validarGananciaGlobal } from '../utils/presupuestoGanancia';
 
 export class PresupuestoService {
+  /**
+   * Convierte campos Decimal a Number para serialización JSON correcta
+   */
+  private static transformPresupuesto(presupuesto: any): any {
+    if (!presupuesto) return null;
+    
+    return {
+      ...presupuesto,
+      subtotal: presupuesto.subtotal ? Number(presupuesto.subtotal) : presupuesto.subtotal,
+      impuestos: presupuesto.impuestos ? Number(presupuesto.impuestos) : presupuesto.impuestos,
+      total: presupuesto.total ? Number(presupuesto.total) : presupuesto.total,
+      margenAgenciaGlobal: presupuesto.margenAgenciaGlobal ? Number(presupuesto.margenAgenciaGlobal) : presupuesto.margenAgenciaGlobal,
+      // IMPORTANTE: El campo en DB es montoGananciaAgencia, pero frontend espera montoGanancia
+      montoGanancia: presupuesto.montoGananciaAgencia ? Number(presupuesto.montoGananciaAgencia) : presupuesto.montoGananciaAgencia,
+      items: presupuesto.items?.map((item: any) => ({
+        ...item,
+        cantidad: item.cantidad ? Number(item.cantidad) : item.cantidad,
+        precioUnitario: item.precioUnitario ? Number(item.precioUnitario) : item.precioUnitario,
+      })) || [],
+      presupuestoImpuestos: presupuesto.presupuestoImpuestos?.map((pi: any) => ({
+        ...pi,
+        monto: pi.monto ? Number(pi.monto) : pi.monto,
+      })) || [],
+    };
+  }
+
   static async create(data: {
     clienteId: number;
     items: {
@@ -15,8 +42,11 @@ export class PresupuestoService {
     total: number;
     impuestosSeleccionados?: number[];
     monedaId?: number;
-  periodoInicio?: string | Date;
-  periodoFin?: string | Date;
+    periodoInicio?: string | Date;
+    periodoFin?: string | Date;
+    usarGananciaGlobal?: boolean;
+    margenAgenciaGlobal?: number;
+    montoGananciaAgencia?: number;
   }) {
     try {
       console.log('PresupuestoService.create - Input data:', JSON.stringify(data, null, 2));
@@ -63,6 +93,24 @@ export class PresupuestoService {
       
       console.log('Validaciones pasadas, creando presupuesto...');
       
+      // Validar ganancia global si se proporciona
+      if (data.usarGananciaGlobal) {
+        const validacion = validarGananciaGlobal(
+          data.margenAgenciaGlobal,
+          data.montoGananciaAgencia,
+          data.subtotal
+        );
+        
+        if (!validacion.valido) {
+          throw new Error(validacion.error);
+        }
+        
+        // Si tiene porcentaje pero no monto, calcular monto sugerido
+        if (data.margenAgenciaGlobal && !data.montoGananciaAgencia) {
+          data.montoGananciaAgencia = calcularMontoSugerido(data.subtotal, data.margenAgenciaGlobal);
+        }
+      }
+      
       const presupuesto = await prisma.presupuesto.create({
         data: {
           clienteId: data.clienteId,
@@ -74,6 +122,10 @@ export class PresupuestoService {
           // Vigencia del presupuesto (opcional)
           periodoInicio: data.periodoInicio ? new Date(data.periodoInicio) : undefined,
           periodoFin: data.periodoFin ? new Date(data.periodoFin) : undefined,
+          // Ganancia global (opcional)
+          usarGananciaGlobal: data.usarGananciaGlobal || false,
+          margenAgenciaGlobal: data.margenAgenciaGlobal,
+          montoGananciaAgencia: data.montoGananciaAgencia,
           items: {
             create: data.items
           },
@@ -167,11 +219,11 @@ export class PresupuestoService {
   }
 
   static async findById(id: number) {
-    return prisma.presupuesto.findUnique({
+    const presupuesto = await prisma.presupuesto.findUnique({
       where: { id },
       include: {
         cliente: true,
-  empresa: true,
+        empresa: true,
         moneda: true,
         items: {
           include: {
@@ -184,9 +236,11 @@ export class PresupuestoService {
             impuesto: true
           }
         },
-          facturas: true
+        facturas: true
       }
     });
+    
+    return this.transformPresupuesto(presupuesto);
   }
 
   static async update(id: number, data: any, userId?: number, userRoles?: string[]) {
@@ -227,6 +281,11 @@ export class PresupuestoService {
     // Procesar los datos antes de la actualización
     const updateData: any = { ...data };
     
+    // Excluir campos que no se pueden actualizar directamente (relaciones)
+    delete updateData.clienteId; // El cliente no se puede cambiar en un presupuesto existente
+    delete updateData.monedaId; // La moneda no se cambia en update (se puede agregar lógica después si es necesario)
+    delete updateData.empresaId; // La empresa no se cambia en update
+    
     // Si hay items, necesitamos manejarlos correctamente
     if (data.items && Array.isArray(data.items)) {
       // Primero eliminar los items existentes y luego crear los nuevos
@@ -255,10 +314,43 @@ export class PresupuestoService {
       delete updateData.impuestosSeleccionados;
     }
 
+    // Validar y procesar ganancia global si se proporciona
+    if (data.usarGananciaGlobal !== undefined) {
+      updateData.usarGananciaGlobal = data.usarGananciaGlobal;
+      
+      if (data.usarGananciaGlobal) {
+        const validacion = validarGananciaGlobal(
+          data.margenAgenciaGlobal,
+          data.montoGananciaAgencia,
+          data.subtotal || Number(presupuestoExistente.subtotal)
+        );
+        
+        if (!validacion.valido) {
+          throw new Error(validacion.error);
+        }
+        
+        // Si tiene porcentaje pero no monto, calcular monto sugerido
+        if (data.margenAgenciaGlobal !== undefined && data.montoGananciaAgencia === undefined) {
+          updateData.montoGananciaAgencia = calcularMontoSugerido(
+            data.subtotal || Number(presupuestoExistente.subtotal),
+            data.margenAgenciaGlobal
+          );
+        }
+      }
+    }
+    
+    // Actualizar campos de ganancia si se proporcionan
+    if (data.margenAgenciaGlobal !== undefined) {
+      updateData.margenAgenciaGlobal = data.margenAgenciaGlobal;
+    }
+    if (data.montoGananciaAgencia !== undefined) {
+      updateData.montoGananciaAgencia = data.montoGananciaAgencia;
+    }
+
     // Crear snapshot del estado anterior
     const snapshotAnterior = await PresupuestoHistorialService.crearSnapshot(id);
 
-    return prisma.presupuesto.update({
+    const presupuestoActualizado = await prisma.presupuesto.update({
       where: { id },
       data: updateData,
       include: {
@@ -277,22 +369,24 @@ export class PresupuestoService {
           }
         }
       }
-    }).then(async (presupuestoActualizado) => {
-      // Registrar el cambio en el historial
-      const snapshotNuevo = await PresupuestoHistorialService.crearSnapshot(id);
-      if (snapshotAnterior && snapshotNuevo) {
-        await PresupuestoHistorialService.registrarCambio({
-          tipo: 'UPDATE',
-          presupuestoId: id,
-          usuarioId: userId,
-          datosAnteriores: snapshotAnterior,
-          datosNuevos: snapshotNuevo
-        });
-      }
-      
-      return presupuestoActualizado;
     });
-  }  static async updateEstado(id: number, estado: string, usuarioId?: number) {
+    
+    // Registrar el cambio en el historial
+    const snapshotNuevo = await PresupuestoHistorialService.crearSnapshot(id);
+    if (snapshotAnterior && snapshotNuevo) {
+      await PresupuestoHistorialService.registrarCambio({
+        tipo: 'UPDATE',
+        presupuestoId: id,
+        usuarioId: userId,
+        datosAnteriores: snapshotAnterior,
+        datosNuevos: snapshotNuevo
+      });
+    }
+    
+    return this.transformPresupuesto(presupuestoActualizado);
+  }
+  
+  static async updateEstado(id: number, estado: string, usuarioId?: number) {
     // Crear snapshot del estado anterior
     const snapshotAnterior = await PresupuestoHistorialService.crearSnapshot(id);
 
@@ -326,13 +420,13 @@ export class PresupuestoService {
   static async findAll(clienteId?: number, estado?: string) {
     const where: any = {};
     if (clienteId) where.clienteId = clienteId;
-  if (estado) where.estado = estado as any;
+    if (estado) where.estado = estado as any;
 
-    return prisma.presupuesto.findMany({
+    const presupuestos = await prisma.presupuesto.findMany({
       where,
       include: {
         cliente: true,
-  empresa: true,
+        empresa: true,
         moneda: true,
         items: {
           include: {
@@ -344,8 +438,10 @@ export class PresupuestoService {
           include: {
             impuesto: true
           }
-  }
+        }
       }
     });
+    
+    return presupuestos.map(p => this.transformPresupuesto(p));
   }
 }

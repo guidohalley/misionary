@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePresupuesto } from '@/modules/presupuesto/hooks/usePresupuesto';
 import PresupuestoForm from '../PresupuestoForm/PresupuestoForm';
+import PermissionGuard from '@/components/shared/PermissionGuard';
 import type { PresupuestoFormData } from '../types';
 
 const PresupuestoNew: React.FC = () => {
@@ -23,13 +24,15 @@ const PresupuestoNew: React.FC = () => {
   };
 
   return (
-    <div className="max-w-full">
-      <PresupuestoForm
-        onSubmit={handleSubmit}
-        onCancel={handleCancel}
-        isEdit={false}
-      />
-    </div>
+    <PermissionGuard allowedRoles={['ADMIN', 'CONTADOR']} showBlur={true}>
+      <div className="max-w-full">
+        <PresupuestoForm
+          onSubmit={handleSubmit}
+          onCancel={handleCancel}
+          isEdit={false}
+        />
+      </div>
+    </PermissionGuard>
   );
 };
 

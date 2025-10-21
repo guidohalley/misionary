@@ -44,6 +44,10 @@ export interface Presupuesto {
   tipoCambioFecha?: string;
   periodoInicio?: string;
   periodoFin?: string;
+  // Campos de ganancia global
+  usarGananciaGlobal?: boolean;
+  margenAgenciaGlobal?: number;
+  montoGanancia?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -65,6 +69,10 @@ export interface CreatePresupuestoDTO {
   monedaId?: number;
   periodoInicio?: string; // ISO o YYYY-MM-DD
   periodoFin?: string;    // ISO o YYYY-MM-DD
+  // Campos de ganancia global
+  usarGananciaGlobal?: boolean;
+  margenAgenciaGlobal?: number;
+  montoGanancia?: number;
 }
 
 export interface UpdatePresupuestoDTO {
@@ -78,6 +86,10 @@ export interface UpdatePresupuestoDTO {
   monedaId?: number;
   periodoInicio?: string;
   periodoFin?: string;
+  // Campos de ganancia global
+  usarGananciaGlobal?: boolean;
+  margenAgenciaGlobal?: number;
+  montoGanancia?: number;
 }
 
 export const estadoPresupuestoOptions = [

@@ -63,15 +63,14 @@ export class ProductoController {
         return res.status(404).json({ error: 'Producto no encontrado' });
       }
       
-      // Lógica de permisos para actualización
+      // Control de permisos: solo ADMIN o el propietario pueden modificar
       if (user.roles.includes(RolUsuario.ADMIN)) {
-        // ADMIN puede actualizar cualquier producto
-        // No aplicamos restricciones
-      } else if (user.roles.includes(RolUsuario.PROVEEDOR)) {
-        // PROVEEDOR solo puede actualizar sus propios productos
+        // ADMIN puede actualizar cualquier producto sin restricciones
+      } else if (user.roles.includes(RolUsuario.PROVEEDOR) || user.roles.includes(RolUsuario.CONTADOR)) {
+        // PROVEEDOR y CONTADOR solo pueden actualizar sus propios productos
         if (producto.proveedorId !== user.id) {
           return res.status(403).json({ 
-            error: 'No tienes permiso para actualizar este producto' 
+            error: 'Solo puedes modificar tus propios productos. Este producto pertenece a otro proveedor.' 
           });
         }
         // Verificar que no intente cambiar el proveedor a otro
@@ -105,15 +104,14 @@ export class ProductoController {
         return res.status(404).json({ error: 'Producto no encontrado' });
       }
       
-      // Lógica de permisos para eliminación
+      // Control de permisos: solo ADMIN o el propietario pueden eliminar
       if (user.roles.includes(RolUsuario.ADMIN)) {
-        // ADMIN puede eliminar cualquier producto
-        // No aplicamos restricciones
-      } else if (user.roles.includes(RolUsuario.PROVEEDOR)) {
-        // PROVEEDOR solo puede eliminar sus propios productos
+        // ADMIN puede eliminar cualquier producto sin restricciones
+      } else if (user.roles.includes(RolUsuario.PROVEEDOR) || user.roles.includes(RolUsuario.CONTADOR)) {
+        // PROVEEDOR y CONTADOR solo pueden eliminar sus propios productos
         if (producto.proveedorId !== user.id) {
           return res.status(403).json({ 
-            error: 'No tienes permiso para eliminar este producto' 
+            error: 'Solo puedes eliminar tus propios productos. Este producto pertenece a otro proveedor.' 
           });
         }
       } else {

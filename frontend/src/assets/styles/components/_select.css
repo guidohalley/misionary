@@ -71,8 +71,8 @@
       0 2px 4px -1px rgba(0, 0, 0, 0.06),
       0 0 0 1px rgba(255, 255, 255, 0.1) !important;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    min-height: 48px !important;
-    padding: 0 8px !important;
+    min-height: 38px !important;
+    padding: 0 6px !important;
 
     &:hover {
       border-color: rgba(233, 252, 135, 0.4) !important;
@@ -181,6 +181,7 @@
     0 0 0 1px rgba(255, 255, 255, 0.1) !important;
   overflow: hidden !important;
   margin-top: 4px !important;
+  z-index: 9999 !important;
   animation: selectMenuSlideIn 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -286,7 +287,7 @@
 }
 
 .select__value-container {
-  padding: 8px 12px !important;
+  padding: 4px 8px !important;
 }
 
 /* Group styling */

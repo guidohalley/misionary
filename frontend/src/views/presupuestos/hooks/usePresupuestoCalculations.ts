@@ -37,17 +37,6 @@ export const usePresupuestoCalculations = (
     const totalImpuestos = detalleImpuestos.reduce((sum, detalle) => sum + detalle.monto, 0);
     const total = subtotal + totalImpuestos;
 
-    // Log para debugging - solo para cambios significativos
-    const hasSignificantChange = items?.length > 0 && subtotal > 0;
-    if (hasSignificantChange) {
-      console.log('🧮 Recalculando totales:', { 
-        items: items?.length || 0, 
-        subtotal, 
-        totalImpuestos, 
-        total,
-        itemsData: items?.map(i => ({ cantidad: i?.cantidad, precio: i?.precioUnitario }))
-      });
-    }
 
     return {
       subtotal,

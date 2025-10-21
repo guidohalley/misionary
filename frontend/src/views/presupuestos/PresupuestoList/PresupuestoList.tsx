@@ -42,10 +42,14 @@ const PresupuestoList: React.FC<PresupuestoListProps> = ({ className }) => {
   }, [refreshPresupuestos]);
 
   useEffect(() => {
-    let filtered = presupuestos.filter(presupuesto =>
-      presupuesto.cliente.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      presupuesto.id.toString().includes(searchTerm)
-    );
+    let filtered = presupuestos.filter(presupuesto => {
+      // Validación defensiva: verificar que cliente existe
+      const clienteNombre = presupuesto.cliente?.nombre || '';
+      return (
+        clienteNombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        presupuesto.id.toString().includes(searchTerm)
+      );
+    });
 
     if (estadoFilter) {
       filtered = filtered.filter(presupuesto => presupuesto.estado === estadoFilter);
@@ -162,19 +166,22 @@ const PresupuestoList: React.FC<PresupuestoListProps> = ({ className }) => {
 
   return (
     <div className={className}>
-      <div className="mb-6 flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Presupuestos</h2>
-          <p className="text-gray-600 dark:text-gray-400">Gestiona los presupuestos de clientes</p>
+      {/* Header Card */}
+      <Card className="mb-6 p-4">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Presupuestos</h2>
+            <p className="text-gray-600 dark:text-gray-400 text-sm">Gestiona los presupuestos de clientes</p>
+          </div>
+          <Button 
+            variant="solid" 
+            onClick={handleNewPresupuesto}
+            className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
+          >
+            Nuevo Presupuesto
+          </Button>
         </div>
-        <Button 
-          variant="solid" 
-          onClick={handleNewPresupuesto}
-          className="bg-blue-600 hover:bg-blue-700"
-        >
-          Nuevo Presupuesto
-        </Button>
-      </div>
+      </Card>
 
       <Card className="mb-6">
         <div className="flex justify-between items-center mb-4">
@@ -211,7 +218,8 @@ const PresupuestoList: React.FC<PresupuestoListProps> = ({ className }) => {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        {/* Vista Desktop - Tabla */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-200 dark:border-gray-700">
@@ -316,6 +324,118 @@ const PresupuestoList: React.FC<PresupuestoListProps> = ({ className }) => {
               })}
             </tbody>
           </table>
+        </div>
+
+        {/* Vista Mobile - Cards */}
+        <div className="md:hidden space-y-4">
+          {currentItems.map((presupuesto, index) => {
+            const nextEstado = getNextEstado(presupuesto.estado);
+            return (
+              <motion.div
+                key={presupuesto.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 shadow-sm hover:shadow-md transition-shadow"
+              >
+                {/* Header con ID y Estado */}
+                <div className="flex justify-between items-start mb-3">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm font-medium text-gray-500 dark:text-gray-400">#</span>
+                    <span className="text-lg font-bold text-gray-900 dark:text-white">#{presupuesto.id}</span>
+                  </div>
+                  <Badge className={getEstadoBadge(presupuesto.estado)}>
+                    {presupuesto.estado}
+                  </Badge>
+                </div>
+
+                {/* Cliente */}
+                <div className="mb-3">
+                  <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Cliente</div>
+                  <div className="font-semibold text-gray-900 dark:text-white">{presupuesto.cliente.nombre}</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">{presupuesto.cliente.email}</div>
+                </div>
+
+                {/* Total */}
+                <div className="mb-3">
+                  <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Total</div>
+                  <div className="text-xl font-bold text-green-600 dark:text-green-400">
+                    {formatPrice(presupuesto.total)}
+                  </div>
+                </div>
+
+                {/* Fecha y Vigencia */}
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Fecha</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                      {new Date(presupuesto.createdAt).toLocaleDateString('es-AR')}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Vigencia</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                      {presupuesto.periodoInicio ? (
+                        <>
+                          {new Date(presupuesto.periodoInicio).toLocaleDateString('es-AR')}
+                          {presupuesto.periodoFin && (
+                            <><br />→ {new Date(presupuesto.periodoFin).toLocaleDateString('es-AR')}</>
+                          )}
+                        </>
+                      ) : (
+                        '-'
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Acciones */}
+                <div className="flex justify-center space-x-2 pt-3 border-t border-gray-200 dark:border-gray-700">
+                  <button
+                    onClick={() => handleView(presupuesto.id)}
+                    className="p-2 rounded-full text-blue-600 dark:text-blue-300 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-600 dark:to-slate-700 hover:shadow-lg hover:shadow-blue-200 dark:hover:shadow-blue-900/50 active:shadow-inner transition-all duration-200"
+                    title="Ver presupuesto"
+                  >
+                    <HiOutlineEye className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => handlePrint(presupuesto.id)}
+                    className="p-2 rounded-full text-gray-600 dark:text-gray-300 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-600 dark:to-slate-700 hover:shadow-lg hover:shadow-gray-200 dark:hover:shadow-gray-900/50 active:shadow-inner transition-all duration-200"
+                    title="Imprimir presupuesto"
+                  >
+                    <HiOutlinePrinter className="w-5 h-5" />
+                  </button>
+                  {canEditPresupuesto(presupuesto.estado) && (
+                    <button
+                      onClick={() => handleEdit(presupuesto.id)}
+                      className="p-2 rounded-full text-amber-600 dark:text-amber-300 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-600 dark:to-slate-700 hover:shadow-lg hover:shadow-amber-200 dark:hover:shadow-amber-900/50 active:shadow-inner transition-all duration-200"
+                      title="Editar presupuesto"
+                    >
+                      <HiOutlinePencil className="w-5 h-5" />
+                    </button>
+                  )}
+                  {nextEstado && (
+                    <button
+                      onClick={() => handleChangeEstado(presupuesto.id, nextEstado)}
+                      className="p-2 rounded-full text-green-600 dark:text-green-300 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-600 dark:to-slate-700 hover:shadow-lg hover:shadow-green-200 dark:hover:shadow-green-900/50 active:shadow-inner transition-all duration-200"
+                      title={`Cambiar a ${nextEstado}`}
+                    >
+                      {nextEstado === EstadoPresupuesto.ENVIADO ? <HiOutlineMail className="w-5 h-5" /> : <HiOutlineCheck className="w-5 h-5" />}
+                    </button>
+                  )}
+                  {presupuesto.estado === EstadoPresupuesto.BORRADOR && (
+                    <button
+                      onClick={() => handleDelete(presupuesto.id)}
+                      className="p-2 rounded-full text-red-600 dark:text-red-300 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-600 dark:to-slate-700 hover:shadow-lg hover:shadow-red-200 dark:hover:shadow-red-900/50 active:shadow-inner transition-all duration-200"
+                      title="Eliminar presupuesto"
+                    >
+                      <HiOutlineTrash className="w-5 h-5" />
+                    </button>
+                  )}
+                </div>
+              </motion.div>
+            );
+          })}
         </div>
 
         {totalPages > 1 && (
