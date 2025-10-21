@@ -173,7 +173,8 @@ const EmpresaList: React.FC<EmpresaListProps> = ({ className }) => {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        {/* Vista Desktop - Tabla */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-200 dark:border-gray-700">
@@ -304,6 +305,97 @@ const EmpresaList: React.FC<EmpresaListProps> = ({ className }) => {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Vista Mobile - Cards */}
+        <div className="md:hidden space-y-4">
+          {currentItems.map((empresa, index) => (
+            <motion.div
+              key={empresa.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+              className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 shadow-sm hover:shadow-md transition-shadow"
+            >
+              {/* Header con Nombre */}
+              <div className="mb-3">
+                <div className="text-lg font-bold text-gray-900 dark:text-white">{empresa.nombre}</div>
+                {empresa.razonSocial && (
+                  <div className="text-sm text-gray-600 dark:text-gray-400">{empresa.razonSocial}</div>
+                )}
+              </div>
+
+              {/* Cliente */}
+              <div className="mb-3">
+                <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Cliente</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  {empresa.cliente?.nombre || 'Sin cliente'}
+                </div>
+              </div>
+
+              {/* CUIT */}
+              <div className="mb-3">
+                <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">CUIT</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  {empresa.cuit || 'Sin CUIT'}
+                </div>
+              </div>
+
+              {/* Contacto */}
+              <div className="mb-3">
+                <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Contacto</div>
+                <div className="space-y-1">
+                  {empresa.email && (
+                    <div className="flex items-center space-x-2 text-sm">
+                      <HiOutlineMail className="h-3 w-3 text-gray-400 dark:text-gray-500" />
+                      <span className="text-gray-600 dark:text-gray-400">{empresa.email}</span>
+                    </div>
+                  )}
+                  {empresa.telefono && (
+                    <div className="flex items-center space-x-2 text-sm">
+                      <HiOutlinePhone className="h-3 w-3 text-gray-400 dark:text-gray-500" />
+                      <span className="text-gray-600 dark:text-gray-400">{empresa.telefono}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Estado */}
+              <div className="mb-4">
+                <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Estado</div>
+                <Badge 
+                  className={empresa.activo ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}
+                >
+                  {empresa.activo ? 'Activa' : 'Inactiva'}
+                </Badge>
+              </div>
+
+              {/* Acciones */}
+              <div className="flex justify-center space-x-2 pt-3 border-t border-gray-200 dark:border-gray-700">
+                <button
+                  onClick={() => handleView(empresa.id)}
+                  className="p-2 rounded-full text-gray-700 dark:text-blue-300 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-600 dark:to-slate-700 hover:shadow-lg hover:shadow-blue-200 dark:hover:shadow-blue-900/50 active:shadow-inner transition-all duration-200"
+                  title="Ver"
+                >
+                  <HiOutlineEye className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={() => handleEdit(empresa.id)}
+                  className="p-2 rounded-full text-gray-700 dark:text-amber-300 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-600 dark:to-slate-700 hover:shadow-lg hover:shadow-amber-200 dark:hover:shadow-amber-900/50 active:shadow-inner transition-all duration-200"
+                  title="Editar"
+                >
+                  <HiOutlinePencil className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={() => handleDeleteClick(empresa)}
+                  className="p-2 rounded-full text-gray-700 dark:text-red-300 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-600 dark:to-slate-700 hover:shadow-lg hover:shadow-red-200 dark:hover:shadow-red-900/50 active:shadow-inner transition-all duration-200"
+                  title="Eliminar"
+                >
+                  <HiOutlineTrash className="w-5 h-5" />
+                </button>
+              </div>
+            </motion.div>
+          ))}
         </div>
       </Card>
 
