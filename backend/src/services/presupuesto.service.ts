@@ -281,6 +281,11 @@ export class PresupuestoService {
     // Procesar los datos antes de la actualización
     const updateData: any = { ...data };
     
+    // Excluir campos que no se pueden actualizar directamente (relaciones)
+    delete updateData.clienteId; // El cliente no se puede cambiar en un presupuesto existente
+    delete updateData.monedaId; // La moneda no se cambia en update (se puede agregar lógica después si es necesario)
+    delete updateData.empresaId; // La empresa no se cambia en update
+    
     // Si hay items, necesitamos manejarlos correctamente
     if (data.items && Array.isArray(data.items)) {
       // Primero eliminar los items existentes y luego crear los nuevos
