@@ -229,8 +229,8 @@ const EmpresaEdit: React.FC = () => {
                             options={clienteOptions}
                             isLoading={clientesLoading}
                             className="w-full"
-                            value={field.value}
-                            onChange={(option: any) => field.onChange(option?.value)}
+                            value={clienteOptions.find(opt => opt.value === field.value) || null}
+                            onChange={(option: any) => field.onChange(option?.value ?? undefined)}
                           />
                         );
                       }}

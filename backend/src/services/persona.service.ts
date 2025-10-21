@@ -24,7 +24,8 @@ export class PersonaService {
         productos: true,
         servicios: true,
         presupuestos: true,
-        recibos: true
+        recibos: true,
+        empresas: true
       }
     });
   }
