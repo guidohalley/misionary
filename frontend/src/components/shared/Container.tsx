@@ -12,7 +12,7 @@ const Container = forwardRef((props: ContainerProps, ref) => {
     return (
         <Component
             ref={ref}
-            className={classNames('container mx-auto', className)}
+            className={classNames('w-full max-w-[90%] xl:max-w-[85%] 2xl:max-w-[80%] mx-auto', className)}
             {...rest}
         >
             {children}
