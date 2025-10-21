@@ -137,7 +137,8 @@ const ImpuestoList: React.FC<ImpuestoListProps> = ({ className }) => {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        {/* Vista Desktop - Tabla */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-200 dark:border-gray-700">
@@ -206,6 +207,68 @@ const ImpuestoList: React.FC<ImpuestoListProps> = ({ className }) => {
               ))}
             </tbody>
           </table>
+        </div>
+
+        {/* Vista Mobile - Cards */}
+        <div className="md:hidden space-y-4">
+          {currentItems.map((impuesto, index) => (
+            <motion.div
+              key={impuesto.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+              className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 shadow-sm hover:shadow-md transition-shadow"
+            >
+              {/* Header con Nombre */}
+              <div className="mb-3">
+                <div className="text-lg font-bold text-gray-900 dark:text-white">{impuesto.nombre}</div>
+              </div>
+
+              {/* Porcentaje */}
+              <div className="mb-3">
+                <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Porcentaje</div>
+                <div className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                  {impuesto.porcentaje}%
+                </div>
+              </div>
+
+              {/* Descripción */}
+              <div className="mb-3">
+                <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Descripción</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  {impuesto.descripcion || 'Sin descripción'}
+                </div>
+              </div>
+
+              {/* Estado */}
+              <div className="mb-4">
+                <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Estado</div>
+                <Badge 
+                  className={impuesto.activo ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}
+                >
+                  {impuesto.activo ? 'Activo' : 'Inactivo'}
+                </Badge>
+              </div>
+
+              {/* Acciones */}
+              <div className="flex justify-center space-x-2 pt-3 border-t border-gray-200 dark:border-gray-700">
+                <button
+                  onClick={() => handleEdit(impuesto.id)}
+                  className="p-2 rounded-full text-gray-700 dark:text-amber-300 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-600 dark:to-slate-700 hover:shadow-lg hover:shadow-amber-200 dark:hover:shadow-amber-900/50 active:shadow-inner transition-all duration-200"
+                  title="Editar"
+                >
+                  <HiOutlinePencil className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={() => handleDelete(impuesto.id)}
+                  className="p-2 rounded-full text-gray-700 dark:text-red-300 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-600 dark:to-slate-700 hover:shadow-lg hover:shadow-red-200 dark:hover:shadow-red-900/50 active:shadow-inner transition-all duration-200"
+                  title="Eliminar"
+                >
+                  <HiOutlineTrash className="w-5 h-5" />
+                </button>
+              </div>
+            </motion.div>
+          ))}
         </div>
 
         {totalPages > 1 && (
