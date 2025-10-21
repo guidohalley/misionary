@@ -37,7 +37,7 @@ const DeckedLayout = () => {
                         headerEnd={<HeaderActionsEnd />}
                     />
                     <SecondaryHeader contained />
-                    <View pageContainerType="contained" />
+                    <View pageContainerType="default" />
                 </div>
             </div>
         </div>
