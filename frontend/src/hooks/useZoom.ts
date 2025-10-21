@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 
 const ZOOM_STORAGE_KEY = 'misionary_app_zoom'
-const DEFAULT_ZOOM = 80 // 80%
+const DEFAULT_ZOOM = 100 // 100%
 
 /**
  * Hook personalizado para manejar el zoom de la aplicación
@@ -51,7 +51,7 @@ export const useZoom = () => {
     updateZoom(currentZoom - 10)
   }
 
-  // Resetear al zoom por defecto (80%)
+  // Resetear al zoom por defecto (100%)
   const resetZoom = () => {
     updateZoom(DEFAULT_ZOOM)
   }
