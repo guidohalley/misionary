@@ -261,7 +261,10 @@ const PresupuestoView: React.FC = () => {
                 <th className="text-left py-3 px-4 font-semibold text-gray-700">Tipo</th>
                 <th className="text-left py-3 px-4 font-semibold text-gray-700">Descripción</th>
                 <th className="text-right py-3 px-4 font-semibold text-gray-700">Cantidad</th>
+                <th className="text-right py-3 px-4 font-semibold text-gray-700">Costo</th>
+                <th className="text-right py-3 px-4 font-semibold text-gray-700">Margen %</th>
                 <th className="text-right py-3 px-4 font-semibold text-gray-700">Precio Unit.</th>
+                <th className="text-right py-3 px-4 font-semibold text-gray-700">Ganancia</th>
                 <th className="text-right py-3 px-4 font-semibold text-gray-700">Subtotal</th>
               </tr>
             </thead>
@@ -294,7 +297,26 @@ const PresupuestoView: React.FC = () => {
                     {item.cantidad}
                   </td>
                   <td className="py-3 px-4 text-right">
+                    {(() => {
+                      const costo = item.producto?.costoProveedor || item.servicio?.costoProveedor || 0;
+                      return formatPrice(Number(costo));
+                    })()}
+                  </td>
+                  <td className="py-3 px-4 text-right">
+                    {(() => {
+                      const margen = item.producto?.margenAgencia || item.servicio?.margenAgencia || 0;
+                      return `${Number(margen).toFixed(2)}%`;
+                    })()}
+                  </td>
+                  <td className="py-3 px-4 text-right">
                     {formatPrice(item.precioUnitario)}
+                  </td>
+                  <td className="py-3 px-4 text-right text-yellow-700 dark:text-yellow-400 font-medium">
+                    {(() => {
+                      const costo = item.producto?.costoProveedor || item.servicio?.costoProveedor || 0;
+                      const ganancia = (item.precioUnitario - Number(costo)) * item.cantidad;
+                      return formatPrice(ganancia);
+                    })()}
                   </td>
                   <td className="py-3 px-4 text-right font-semibold">
                     {formatPrice(item.cantidad * item.precioUnitario)}
@@ -303,6 +325,25 @@ const PresupuestoView: React.FC = () => {
               ))}
             </tbody>
           </table>
+        </div>
+        
+        {/* Resumen de Ganancia por Items */}
+        <div className="mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-500 rounded">
+          <div className="flex justify-between items-center">
+            <span className="text-sm font-medium text-yellow-800 dark:text-yellow-400">
+              Ganancia Total por Items:
+            </span>
+            <span className="text-lg font-bold text-yellow-700 dark:text-yellow-400">
+              {(() => {
+                const gananciaTotal = selectedPresupuesto.items.reduce((sum, item) => {
+                  const costo = item.producto?.costoProveedor || item.servicio?.costoProveedor || 0;
+                  const ganancia = (item.precioUnitario - Number(costo)) * item.cantidad;
+                  return sum + ganancia;
+                }, 0);
+                return formatPrice(gananciaTotal);
+              })()}
+            </span>
+          </div>
         </div>
       </Card>
 
@@ -314,6 +355,26 @@ const PresupuestoView: React.FC = () => {
             <span className="text-gray-600">Subtotal:</span>
             <span className="font-medium">{formatPrice(selectedPresupuesto.subtotal)}</span>
           </div>
+          
+          {/* Ganancia de Agencia Global */}
+          {(() => {
+            // El backend devuelve montoGananciaAgencia
+            const montoGanancia = (selectedPresupuesto as any).montoGananciaAgencia || selectedPresupuesto.montoGanancia;
+            const montoGananciaNum = Number(montoGanancia);
+            
+            if (montoGananciaNum > 0) {
+              return (
+                <div className="flex justify-between border-l-4 border-yellow-500 pl-2 bg-yellow-50 dark:bg-yellow-900/20 py-2 my-2 rounded">
+                  <span className="text-sm font-medium text-yellow-800 dark:text-yellow-400">
+                    Ganancia Agencia Global {selectedPresupuesto.margenAgenciaGlobal ? `(${Number(selectedPresupuesto.margenAgenciaGlobal).toFixed(2)}%)` : ''}:
+                  </span>
+                  <span className="font-bold text-yellow-700 dark:text-yellow-400">{formatPrice(montoGananciaNum)}</span>
+                </div>
+              );
+            }
+            return null;
+          })()}
+          
           <div className="flex justify-between">
             <span className="text-gray-600">IVA (21%):</span>
             <span className="font-medium">{formatPrice(selectedPresupuesto.impuestos)}</span>

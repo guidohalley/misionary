@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Button, Pagination, Select, Input, Notification, toast, Tooltip } from '@/components/ui';
-import { HiOutlinePencil, HiOutlineTrash, HiOutlineEye, HiOutlineLock } from 'react-icons/hi';
+import { HiOutlinePencil, HiOutlineTrash, HiOutlineEye, HiLockClosed, HiChevronDown, HiChevronUp } from 'react-icons/hi';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useProducto } from '@/modules/producto/hooks/useProducto';
 import type { Producto } from '@/modules/producto/types';
-import { useAppSelector } from '@/store';
+import { useAuth } from '@/contexts/AuthContext';
 import { 
   canEditProductoServicio, 
   canDeleteProductoServicio, 
@@ -22,12 +22,25 @@ interface ProductoListProps {
 const ProductoList: React.FC<ProductoListProps> = ({ className }) => {
   const navigate = useNavigate();
   const { productos, loading, error, refreshProductos, deleteProducto } = useProducto();
-  const currentUser = useAppSelector(state => state.auth.user);
+  const { user: currentUser } = useAuth();
   
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredProductos, setFilteredProductos] = useState<Producto[]>([]);
+  const [expandedCostos, setExpandedCostos] = useState<Set<number>>(new Set());
+
+  const toggleCosto = (productoId: number) => {
+    setExpandedCostos(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(productoId)) {
+        newSet.delete(productoId);
+      } else {
+        newSet.add(productoId);
+      }
+      return newSet;
+    });
+  };
 
   useEffect(() => {
     refreshProductos();
@@ -173,7 +186,11 @@ const ProductoList: React.FC<ProductoListProps> = ({ className }) => {
             <thead>
               <tr className="border-b border-gray-200 dark:border-gray-700">
                 <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Nombre</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Precio</th>
+                <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">
+                  {(currentUser?.roles?.includes('ADMIN') || currentUser?.roles?.includes('CONTADOR'))
+                    ? 'Precio Final' 
+                    : 'Precio'}
+                </th>
                 <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Proveedor</th>
                 <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Fecha Creación</th>
                 <th className="text-center py-3 px-4 font-semibold text-gray-700 dark:text-gray-300 min-w-[120px]">Acciones</th>
@@ -192,15 +209,75 @@ const ProductoList: React.FC<ProductoListProps> = ({ className }) => {
                     <div className="font-medium text-gray-900 dark:text-gray-100">{producto.nombre}</div>
                   </td>
                   <td className="py-3 px-4">
-                    {canViewPrecios(currentUser, producto.proveedorId) && producto.precio !== null ? (
-                      <span className="inline-flex items-center rounded-full bg-misionary-100 text-misionary-800 px-2.5 py-0.5 text-xs font-medium ring-1 ring-misionary-200">
-                        {formatPrice(producto.precio)}
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center rounded-full bg-gray-100 text-gray-500 px-2.5 py-0.5 text-xs font-medium ring-1 ring-gray-200">
-                        —
-                      </span>
-                    )}
+                    {(() => {
+                      const puedeVerPrecios = canViewPrecios(currentUser, producto.proveedorId);
+                      const esPropio = currentUser?.id === producto.proveedorId;
+                      const esAdmin = currentUser?.roles?.includes('ADMIN');
+                      const esContador = currentUser?.roles?.includes('CONTADOR');
+                      const isExpanded = expandedCostos.has(producto.id);
+                      
+                      if (!puedeVerPrecios) {
+                        return (
+                          <span className="inline-flex items-center rounded-full bg-gray-100 text-gray-500 px-2.5 py-0.5 text-xs font-medium ring-1 ring-gray-200">
+                            —
+                          </span>
+                        );
+                      }
+
+                      // ADMIN ve precio final con botón para expandir costo
+                      if (esAdmin) {
+                        return (
+                          <div className="flex flex-col gap-1">
+                            <div className="flex items-center gap-1">
+                              <span className="inline-flex items-center rounded-full bg-misionary-100 text-misionary-800 px-2.5 py-0.5 text-xs font-medium ring-1 ring-misionary-200">
+                                {formatPrice(producto.precio)}
+                              </span>
+                              <Tooltip title={isExpanded ? "Ocultar costo" : "Ver costo del proveedor"}>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    toggleCosto(producto.id);
+                                  }}
+                                  className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                >
+                                  {isExpanded ? (
+                                    <HiChevronUp className="w-3 h-3 text-gray-600 dark:text-gray-400" />
+                                  ) : (
+                                    <HiChevronDown className="w-3 h-3 text-gray-600 dark:text-gray-400" />
+                                  )}
+                                </button>
+                              </Tooltip>
+                            </div>
+                            {isExpanded && (
+                              <motion.span
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                                className="inline-flex items-center rounded-full bg-gray-100 text-gray-600 px-2.5 py-0.5 text-xs font-medium ring-1 ring-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:ring-gray-600"
+                              >
+                                Costo: {formatPrice(producto.costoProveedor)}
+                              </motion.span>
+                            )}
+                          </div>
+                        );
+                      }
+
+                      // CONTADOR ve precio final
+                      if (esContador) {
+                        return (
+                          <span className="inline-flex items-center rounded-full bg-misionary-100 text-misionary-800 px-2.5 py-0.5 text-xs font-medium ring-1 ring-misionary-200">
+                            {formatPrice(producto.precio)}
+                          </span>
+                        );
+                      }
+
+                      // PROVEEDOR ve su costo
+                      return (
+                        <span className="inline-flex items-center rounded-full bg-misionary-100 text-misionary-800 px-2.5 py-0.5 text-xs font-medium ring-1 ring-misionary-200">
+                          {formatPrice(producto.costoProveedor)}
+                        </span>
+                      );
+                    })()}
                   </td>
                   <td className="py-3 px-4">
                     <span className="inline-flex items-center rounded-full bg-msgray-100 text-msgray-800 px-2 py-0.5 text-xs font-medium ring-1 ring-msgray-200 dark:bg-gray-700 dark:text-gray-200 dark:ring-gray-600">
@@ -271,7 +348,7 @@ const ProductoList: React.FC<ProductoListProps> = ({ className }) => {
                             {!puedeEditar && (
                               <Tooltip title="Producto de otro proveedor">
                                 <span>
-                                  <HiOutlineLock className="w-4 h-4 text-gray-400" />
+                                  <HiLockClosed className="w-4 h-4 text-gray-400" />
                                 </span>
                               </Tooltip>
                             )}

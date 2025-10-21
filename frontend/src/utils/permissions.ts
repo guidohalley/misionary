@@ -10,7 +10,7 @@ export function canEditProductoServicio(
   if (!user) return false
   
   // ADMIN puede editar cualquier producto/servicio
-  if (user.authority?.includes('ADMIN')) {
+  if (user.authority?.includes('ADMIN') || user.roles?.includes('ADMIN')) {
     return true
   }
   
@@ -41,7 +41,9 @@ export function canViewPrecios(
   // ADMIN y CONTADOR pueden ver todos los precios
   if (
     user.authority?.includes('ADMIN') ||
-    user.authority?.includes('CONTADOR')
+    user.authority?.includes('CONTADOR') ||
+    user.roles?.includes('ADMIN') ||
+    user.roles?.includes('CONTADOR')
   ) {
     return true
   }
@@ -56,7 +58,7 @@ export function canViewPrecios(
 export function getNoEditTooltip(user: User | null | undefined): string {
   if (!user) return 'Debes iniciar sesión'
   
-  if (user.authority?.includes('ADMIN')) {
+  if (user.authority?.includes('ADMIN') || user.roles?.includes('ADMIN')) {
     return 'Puedes editar'
   }
   
@@ -69,7 +71,7 @@ export function getNoEditTooltip(user: User | null | undefined): string {
 export function getNoDeleteTooltip(user: User | null | undefined): string {
   if (!user) return 'Debes iniciar sesión'
   
-  if (user.authority?.includes('ADMIN')) {
+  if (user.authority?.includes('ADMIN') || user.roles?.includes('ADMIN')) {
     return 'Puedes eliminar'
   }
   
@@ -81,7 +83,7 @@ export function getNoDeleteTooltip(user: User | null | undefined): string {
  */
 export function isAdmin(user: User | null | undefined): boolean {
   if (!user) return false
-  return user.authority?.includes('ADMIN') || false
+  return user.authority?.includes('ADMIN') || user.roles?.includes('ADMIN') || false
 }
 
 /**
@@ -89,7 +91,7 @@ export function isAdmin(user: User | null | undefined): boolean {
  */
 export function isContador(user: User | null | undefined): boolean {
   if (!user) return false
-  return user.authority?.includes('CONTADOR') || false
+  return user.authority?.includes('CONTADOR') || user.roles?.includes('CONTADOR') || false
 }
 
 /**
@@ -97,7 +99,7 @@ export function isContador(user: User | null | undefined): boolean {
  */
 export function isProveedor(user: User | null | undefined): boolean {
   if (!user) return false
-  return user.authority?.includes('PROVEEDOR') || false
+  return user.authority?.includes('PROVEEDOR') || user.roles?.includes('PROVEEDOR') || false
 }
 
 /**

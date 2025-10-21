@@ -1,11 +1,30 @@
+/**
+ * CONFIGURACIÓN DE NAVEGACIÓN CON PERMISOS
+ * Sistema Misionary ERP/CRM
+ * 
+ * Actualización del menú de navegación lateral con roles asignados correctamente.
+ */
+
 import {
     NAV_ITEM_TYPE_TITLE,
     NAV_ITEM_TYPE_ITEM,
     NAV_ITEM_TYPE_COLLAPSE,
-} from '@/constants/navigation.constant'
-import type { NavigationTree } from '@/@types/navigation'
+} from '@/constants/navigation.constant';
+import type { NavigationTree } from '@/@types/navigation';
 
-const navigationConfig: NavigationTree[] = [
+/**
+ * CONFIGURACIÓN DE NAVEGACIÓN CON ROLES CORRECTOS
+ * 
+ * Authority (roles permitidos):
+ * - [] = visible para todos los usuarios autenticados
+ * - ['ADMIN'] = solo administradores
+ * - ['ADMIN', 'CONTADOR'] = administradores y contadores
+ * - ['ADMIN', 'CONTADOR', 'PROVEEDOR'] = todos los roles
+ */
+const navigationConfigWithPermissions: NavigationTree[] = [
+    // ========================================
+    // DASHBOARD
+    // ========================================
     {
         key: 'home',
         path: '/home',
@@ -13,7 +32,7 @@ const navigationConfig: NavigationTree[] = [
         translateKey: 'nav.home',
         icon: 'home',
         type: NAV_ITEM_TYPE_ITEM,
-        authority: [],
+        authority: ['ADMIN', 'CONTADOR', 'PROVEEDOR'], // Todos los usuarios
         subMenu: [],
     },
     {
@@ -23,11 +42,13 @@ const navigationConfig: NavigationTree[] = [
         translateKey: 'nav.analytics',
         icon: 'chartLine',
         type: NAV_ITEM_TYPE_ITEM,
-        authority: ['ADMIN', 'CONTADOR'],
+        authority: ['ADMIN', 'CONTADOR'], // Solo gestores
         subMenu: [],
     },
     
-    // === GESTIÓN DE CATÁLOGOS ===
+    // ========================================
+    // GESTIÓN DE CATÁLOGOS
+    // ========================================
     {
         key: 'catalogos',
         path: '',
@@ -35,7 +56,7 @@ const navigationConfig: NavigationTree[] = [
         translateKey: 'nav.catalogos.title',
         icon: 'database',
         type: NAV_ITEM_TYPE_COLLAPSE,
-        authority: ['ADMIN', 'CONTADOR', 'PROVEEDOR'],
+        authority: ['ADMIN', 'CONTADOR', 'PROVEEDOR'], // Todos ven la sección
         subMenu: [
             {
                 key: 'catalogos.productos',
@@ -44,7 +65,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.catalogos.productos',
                 icon: 'package',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: ['ADMIN', 'CONTADOR', 'PROVEEDOR'],
+                authority: ['ADMIN', 'CONTADOR', 'PROVEEDOR'], // Todos (filtrado en backend)
                 subMenu: [],
             },
             {
@@ -54,7 +75,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.catalogos.servicios',
                 icon: 'briefcase',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: ['ADMIN', 'CONTADOR', 'PROVEEDOR'],
+                authority: ['ADMIN', 'CONTADOR', 'PROVEEDOR'], // Todos (filtrado en backend)
                 subMenu: [],
             },
             {
@@ -64,13 +85,15 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.catalogos.precios',
                 icon: 'chartBar',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: ['ADMIN', 'CONTADOR'],
+                authority: ['ADMIN', 'CONTADOR'], // Solo gestores
                 subMenu: [],
             },
         ],
     },
 
-    // === GESTIÓN COMERCIAL ===
+    // ========================================
+    // GESTIÓN COMERCIAL
+    // ========================================
     {
         key: 'comercial',
         path: '',
@@ -78,7 +101,7 @@ const navigationConfig: NavigationTree[] = [
         translateKey: 'nav.comercial.title',
         icon: 'briefcase',
         type: NAV_ITEM_TYPE_COLLAPSE,
-        authority: ['ADMIN', 'CONTADOR'],
+        authority: ['ADMIN', 'CONTADOR'], // Solo gestores ven esta sección
         subMenu: [
             {
                 key: 'comercial.clientes',
@@ -123,7 +146,9 @@ const navigationConfig: NavigationTree[] = [
         ],
     },
 
-    // === PRESUPUESTOS PARA PROVEEDORES ===
+    // ========================================
+    // SECCIÓN ESPECIAL PARA PROVEEDORES
+    // ========================================
     {
         key: 'mis-presupuestos',
         path: '/presupuestos',
@@ -131,11 +156,13 @@ const navigationConfig: NavigationTree[] = [
         translateKey: 'nav.presupuestos.mis',
         icon: 'calculator',
         type: NAV_ITEM_TYPE_ITEM,
-        authority: ['PROVEEDOR'],
+        authority: ['PROVEEDOR'], // Solo proveedores ven esto
         subMenu: [],
     },
 
-    // === OPERACIONES RÁPIDAS ===
+    // ========================================
+    // OPERACIONES RÁPIDAS
+    // ========================================
     {
         key: 'operaciones',
         path: '',
@@ -143,7 +170,7 @@ const navigationConfig: NavigationTree[] = [
         translateKey: 'nav.operaciones.title',
         icon: 'lightning',
         type: NAV_ITEM_TYPE_COLLAPSE,
-        authority: ['ADMIN', 'CONTADOR'],
+        authority: ['ADMIN', 'CONTADOR'], // Solo gestores
         subMenu: [
             {
                 key: 'operaciones.nuevo-cliente',
@@ -192,38 +219,40 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.operaciones.nuevoUsuario',
                 icon: 'userPlus',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: ['ADMIN'],
+                authority: ['ADMIN'], // Solo admins
                 subMenu: [],
             },
         ],
     },
 
-    // === OPERACIONES PARA PROVEEDORES ===
+    // ========================================
+    // OPERACIONES RÁPIDAS PARA PROVEEDORES
+    // ========================================
     {
-        key: 'mis-operaciones',
+        key: 'operaciones-proveedor',
         path: '',
         title: 'Mis Operaciones',
-        translateKey: 'nav.operaciones.proveedor',
+        translateKey: 'nav.operaciones.proveedor.title',
         icon: 'lightning',
         type: NAV_ITEM_TYPE_COLLAPSE,
-        authority: ['PROVEEDOR'],
+        authority: ['PROVEEDOR'], // Solo proveedores
         subMenu: [
             {
-                key: 'mis-operaciones.nuevo-producto',
+                key: 'operaciones-proveedor.nuevo-producto',
                 path: '/productos/new',
                 title: 'Nuevo Producto',
                 translateKey: 'nav.operaciones.proveedor.nuevoProducto',
-                icon: 'package',
+                icon: 'packageAdd',
                 type: NAV_ITEM_TYPE_ITEM,
                 authority: ['PROVEEDOR'],
                 subMenu: [],
             },
             {
-                key: 'mis-operaciones.nuevo-servicio',
+                key: 'operaciones-proveedor.nuevo-servicio',
                 path: '/servicios/new',
                 title: 'Nuevo Servicio',
                 translateKey: 'nav.operaciones.proveedor.nuevoServicio',
-                icon: 'briefcase',
+                icon: 'briefcaseAdd',
                 type: NAV_ITEM_TYPE_ITEM,
                 authority: ['PROVEEDOR'],
                 subMenu: [],
@@ -231,7 +260,9 @@ const navigationConfig: NavigationTree[] = [
         ],
     },
     
-    // === FINANZAS Y CONTROL ===
+    // ========================================
+    // FINANZAS Y CONTROL
+    // ========================================
     {
         key: 'finanzas',
         path: '',
@@ -239,7 +270,7 @@ const navigationConfig: NavigationTree[] = [
         translateKey: 'nav.finanzas.title',
         icon: 'chartLine',
         type: NAV_ITEM_TYPE_COLLAPSE,
-        authority: ['ADMIN', 'CONTADOR'],
+        authority: ['ADMIN', 'CONTADOR'], // Solo gestores ven la sección
         subMenu: [
             {
                 key: 'finanzas.resumen',
@@ -248,7 +279,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.finanzas.resumen',
                 icon: 'chartLine',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: ['ADMIN'],
+                authority: ['ADMIN'], // Solo admin ve finanzas completas
                 subMenu: [],
             },
             {
@@ -258,7 +289,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.finanzas.gastos',
                 icon: 'cash',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: ['ADMIN', 'CONTADOR'],
+                authority: ['ADMIN', 'CONTADOR'], // Gestores
                 subMenu: [],
             },
             {
@@ -268,7 +299,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.finanzas.rentabilidad',
                 icon: 'trendingUp',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: ['ADMIN'],
+                authority: ['ADMIN'], // Solo admin
                 subMenu: [],
             },
             {
@@ -278,13 +309,15 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.finanzas.recibos',
                 icon: 'receipt',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: ['ADMIN', 'CONTADOR'],
+                authority: ['ADMIN', 'CONTADOR'], // Gestores
                 subMenu: [],
             },
         ],
     },
 
-    // === CONFIGURACIÓN ===
+    // ========================================
+    // CONFIGURACIÓN
+    // ========================================
     {
         key: 'configuracion',
         path: '',
@@ -292,7 +325,7 @@ const navigationConfig: NavigationTree[] = [
         translateKey: 'nav.configuracion.title',
         icon: 'cog',
         type: NAV_ITEM_TYPE_COLLAPSE,
-        authority: ['ADMIN'],
+        authority: ['ADMIN'], // Solo admin ve configuración
         subMenu: [
             {
                 key: 'configuracion.monedas',
@@ -316,6 +349,48 @@ const navigationConfig: NavigationTree[] = [
             },
         ],
     },
-]
+];
 
-export default navigationConfig
+/**
+ * RESUMEN DE NAVEGACIÓN POR ROL
+ */
+export const NAVIGATION_SUMMARY = {
+    ADMIN: {
+        sections: [
+            'Dashboard',
+            'Proyecciones',
+            'Catálogos (Productos, Servicios, Precios)',
+            'Gestión Comercial (Clientes, Empresas, Proveedores, Presupuestos)',
+            'Operaciones Rápidas (todos)',
+            'Finanzas y Control (completo)',
+            'Configuración',
+        ],
+        total_items: 23,
+    },
+    
+    CONTADOR: {
+        sections: [
+            'Dashboard',
+            'Proyecciones',
+            'Catálogos (Productos, Servicios, Precios)',
+            'Gestión Comercial (Clientes, Empresas, Proveedores, Presupuestos)',
+            'Operaciones Rápidas (sin crear usuarios internos)',
+            'Finanzas y Control (sin resumen financiero ni rentabilidad)',
+        ],
+        total_items: 17,
+    },
+    
+    PROVEEDOR: {
+        sections: [
+            'Dashboard',
+            'Catálogos (solo Productos y Servicios propios)',
+            'Mis Presupuestos (filtrados)',
+            'Mis Operaciones (Nuevo Producto, Nuevo Servicio)',
+        ],
+        total_items: 5,
+    },
+};
+
+export default navigationConfigWithPermissions;
+
+

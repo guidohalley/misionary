@@ -45,6 +45,16 @@ const createBase = z.object({
   periodoFin: z.string().optional(),
   
   estado: z.nativeEnum(EstadoPresupuesto).optional(),
+  
+  // Campos de ganancia global
+  usarGananciaGlobal: z.boolean().optional(),
+  margenAgenciaGlobal: z.number()
+    .min(0, 'El margen debe ser mayor o igual a 0')
+    .max(100, 'El margen no puede exceder 100%')
+    .optional(),
+  montoGanancia: z.number()
+    .min(0, 'El monto de ganancia debe ser mayor o igual a 0')
+    .optional(),
 });
 
 // Efectos/refinements para create

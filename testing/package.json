@@ -38,7 +38,7 @@
     "logs:list": "ls -lh logs/"
   },
   "devDependencies": {
-    "@playwright/test": "^1.56.1"
+    "@playwright/test": "^1.56.1",
+    "dotenv": "^17.2.3"
   }
 }
-

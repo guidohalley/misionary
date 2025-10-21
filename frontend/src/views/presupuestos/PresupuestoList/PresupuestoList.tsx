@@ -42,10 +42,14 @@ const PresupuestoList: React.FC<PresupuestoListProps> = ({ className }) => {
   }, [refreshPresupuestos]);
 
   useEffect(() => {
-    let filtered = presupuestos.filter(presupuesto =>
-      presupuesto.cliente.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      presupuesto.id.toString().includes(searchTerm)
-    );
+    let filtered = presupuestos.filter(presupuesto => {
+      // Validación defensiva: verificar que cliente existe
+      const clienteNombre = presupuesto.cliente?.nombre || '';
+      return (
+        clienteNombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        presupuesto.id.toString().includes(searchTerm)
+      );
+    });
 
     if (estadoFilter) {
       filtered = filtered.filter(presupuesto => presupuesto.estado === estadoFilter);

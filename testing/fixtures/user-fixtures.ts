@@ -13,7 +13,7 @@ import { MisionaryUser } from '../utils/helpers';
 export const TEST_USERS: Record<string, MisionaryUser> = {
   ADMIN: {
     id: 1,
-    email: 'admin@misionary.com',
+    email: process.env.ADMIN_EMAIL || 'guido@misionary',
     nombre: 'Administrador Sistema',
     tipo: 'INTERNO',
     roles: ['ADMIN']
@@ -67,14 +67,14 @@ export const TEST_USERS: Record<string, MisionaryUser> = {
  */
 export const TEST_PASSWORDS = {
   DEFAULT: 'TestPassword123!',
-  ADMIN: 'AdminPassword123!',
-  CONTADOR: 'ContadorPassword123!',
-  PROVEEDOR: 'ProveedorPassword123!',
-  CLIENTE: 'ClientePassword123!'
+  ADMIN: process.env.ADMIN_PASSWORD || '4C0@Cs4^6WuK@jci',
+  CONTADOR: process.env.CONTADOR_PASSWORD || 'TestPassword123!',
+  PROVEEDOR: process.env.PROVEEDOR_PASSWORD || 'TestPassword123!',
+  CLIENTE: process.env.CLIENTE_PASSWORD || 'TestPassword123!'
 };
 
 /**
- * Datos de prueba para clientes
+ * Datos de prueba para clientes (Agencia Digital)
  */
 export const TEST_CLIENTES = {
   PERSONA_FISICA: {
@@ -85,107 +85,131 @@ export const TEST_CLIENTES = {
     tipo: 'PERSONA' as const
   },
   
-  EMPRESA: {
-    nombre: 'Empresa Test S.A.',
-    email: 'contacto@empresatest.com',
+  PYME: {
+    nombre: 'RestaurantePyme S.R.L.',
+    email: 'info@restaurantepyme.com',
     telefono: '+54 11 4567-8901',
     direccion: 'Av. Santa Fe 5678, CABA',
     tipo: 'EMPRESA' as const
   },
   
-  CLIENTE_INTERNACIONAL: {
-    nombre: 'International Corp',
-    email: 'info@international.com',
-    telefono: '+1 555-0123',
-    direccion: '123 Business St, New York, NY',
+  STARTUP: {
+    nombre: 'TechStartup Argentina',
+    email: 'contacto@techstartup.com.ar',
+    telefono: '+54 9 11 5555-6666',
+    direccion: 'Distrito Tecnológico, Parque Patricios, CABA',
     tipo: 'EMPRESA' as const
+  },
+  
+  EMPRENDEDOR: {
+    nombre: 'María García - Consultora',
+    email: 'maria@consultora.com',
+    telefono: '+54 9 11 7777-8888',
+    direccion: 'Palermo Soho, CABA',
+    tipo: 'PERSONA' as const
   }
 };
 
 /**
- * Datos de prueba para presupuestos
+ * Datos de prueba para presupuestos (Agencia Digital)
  */
 export const TEST_PRESUPUESTOS = {
-  BASICO: {
-    cliente: 'Juan Pérez',
-    total: 10000,
-    impuestos: 245, // 2.45%
+  PAGINA_WEB: {
+    cliente: 'RestaurantePyme S.R.L.',
+    total: 150000,
+    impuestos: 3675, // 2.45%
     fecha: '2024-01-15',
     estado: 'BORRADOR' as const
   },
   
-  ALTO_VALOR: {
-    cliente: 'Empresa Test S.A.',
-    total: 100000,
-    impuestos: 2450, // 2.45%
+  ECOMMERCE_COMPLETO: {
+    cliente: 'TechStartup Argentina',
+    total: 500000,
+    impuestos: 12250, // 2.45%
     fecha: '2024-01-20',
     estado: 'ENVIADO' as const
   },
   
-  CON_DESCUENTO: {
-    cliente: 'Cliente Frecuente',
-    total: 5000,
-    impuestos: 122.5, // 2.45%
+  MANTENIMIENTO_ANUAL: {
+    cliente: 'María García - Consultora',
+    total: 420000, // 35000 x 12 meses
+    impuestos: 10290, // 2.45%
     fecha: '2024-01-25',
     estado: 'APROBADO' as const
+  },
+  
+  MARKETING_MENSUAL: {
+    cliente: 'RestaurantePyme S.R.L.',
+    total: 80000,
+    impuestos: 1960, // 2.45%
+    fecha: '2024-01-30',
+    estado: 'BORRADOR' as const
   }
 };
 
 /**
- * Datos de prueba para productos
+ * Datos de prueba para productos (Agencia Digital)
  */
 export const TEST_PRODUCTOS = {
-  SOFTWARE: {
-    nombre: 'Software CRM',
-    descripcion: 'Sistema de gestión de relaciones con clientes',
-    precio: 50000,
-    stock: 10,
-    categoria: 'SOFTWARE'
-  },
-  
-  HARDWARE: {
-    nombre: 'Servidor Dell',
-    descripcion: 'Servidor para infraestructura',
+  PAGINA_WEB_BASICA: {
+    nombre: 'Página Web Básica',
+    descripcion: 'Sitio web institucional con diseño responsive',
     precio: 150000,
-    stock: 5,
-    categoria: 'HARDWARE'
+    stock: 999,
+    categoria: 'WEB'
   },
   
-  CONSULTORIA: {
-    nombre: 'Consultoría IT',
-    descripcion: 'Servicios de consultoría en tecnología',
+  ECOMMERCE: {
+    nombre: 'Tienda Online E-commerce',
+    descripcion: 'Plataforma de comercio electrónico completa',
+    precio: 500000,
+    stock: 999,
+    categoria: 'WEB'
+  },
+  
+  LANDING_PAGE: {
+    nombre: 'Landing Page Conversión',
+    descripcion: 'Página de aterrizaje optimizada para conversión',
     precio: 80000,
-    stock: 999, // Servicio ilimitado
-    categoria: 'SERVICIOS'
+    stock: 999,
+    categoria: 'WEB'
   }
 };
 
 /**
- * Datos de prueba para servicios
+ * Datos de prueba para servicios (Agencia Digital)
  */
 export const TEST_SERVICIOS = {
-  DESARROLLO: {
-    nombre: 'Desarrollo Web',
-    descripcion: 'Desarrollo de aplicaciones web personalizadas',
-    precio: 120000,
+  MANTENIMIENTO_WEB: {
+    nombre: 'Mantenimiento Web Mensual',
+    descripcion: 'Mantenimiento y actualización de sitio web',
+    precio: 35000,
     duracion: 30, // días
-    categoria: 'DESARROLLO'
-  },
-  
-  MANTENIMIENTO: {
-    nombre: 'Mantenimiento Mensual',
-    descripcion: 'Mantenimiento y soporte técnico mensual',
-    precio: 25000,
-    duracion: 30,
     categoria: 'MANTENIMIENTO'
   },
   
-  CONSULTORIA: {
-    nombre: 'Consultoría Estratégica',
-    descripcion: 'Consultoría en estrategia de negocio',
+  MARKETING_DIGITAL: {
+    nombre: 'Gestión Marketing Digital',
+    descripcion: 'Gestión de redes sociales y campañas publicitarias',
+    precio: 80000,
+    duracion: 30,
+    categoria: 'MARKETING'
+  },
+  
+  PRODUCCION_AUDIOVISUAL: {
+    nombre: 'Producción Audiovisual',
+    descripcion: 'Video corporativo profesional con edición',
     precio: 150000,
-    duracion: 60,
-    categoria: 'CONSULTORIA'
+    duracion: 15,
+    categoria: 'AUDIOVISUAL'
+  },
+  
+  SEO: {
+    nombre: 'Optimización SEO',
+    descripcion: 'Posicionamiento en buscadores - Plan mensual',
+    precio: 60000,
+    duracion: 30,
+    categoria: 'MARKETING'
   }
 };
 

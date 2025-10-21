@@ -1,4 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
+import dotenv from 'dotenv';
+
+// Cargar variables de entorno
+dotenv.config();
 
 /**
  * Configuración de Playwright para Misionary CRM/ERP

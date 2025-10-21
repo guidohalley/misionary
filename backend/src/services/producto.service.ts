@@ -1,6 +1,20 @@
 import prisma from '../config/prisma';
 
 export class ProductoService {
+  /**
+   * Convierte campos Decimal a Number para serialización JSON correcta
+   */
+  private static transformProducto(producto: any): any {
+    if (!producto) return null;
+    
+    return {
+      ...producto,
+      precio: producto.precio ? Number(producto.precio) : producto.precio,
+      costoProveedor: producto.costoProveedor ? Number(producto.costoProveedor) : producto.costoProveedor,
+      margenAgencia: producto.margenAgencia ? Number(producto.margenAgencia) : producto.margenAgencia,
+    };
+  }
+
   static async create(data: {
     nombre: string;
     costoProveedor: number;
@@ -12,7 +26,7 @@ export class ProductoService {
     // Calcular precio automáticamente si no se proporciona
     const precioFinal = data.precio ?? data.costoProveedor * (1 + data.margenAgencia / 100);
     
-    return prisma.producto.create({
+    const producto = await prisma.producto.create({
       data: {
         nombre: data.nombre,
         costoProveedor: data.costoProveedor,
@@ -26,10 +40,11 @@ export class ProductoService {
         moneda: true
       }
     });
+    return this.transformProducto(producto);
   }
 
   static async findById(id: number) {
-    return prisma.producto.findUnique({
+    const producto = await prisma.producto.findUnique({
       where: { id },
       include: {
         proveedor: true,
@@ -41,6 +56,7 @@ export class ProductoService {
         }
       }
     });
+    return this.transformProducto(producto);
   }
 
   static async update(id: number, data: {
@@ -68,7 +84,7 @@ export class ProductoService {
       }
     }
     
-    return prisma.producto.update({
+    const producto = await prisma.producto.update({
       where: { id },
       data: updateData,
       include: {
@@ -76,6 +92,7 @@ export class ProductoService {
         moneda: true
       }
     });
+    return this.transformProducto(producto);
   }
 
   static async delete(id: number) {
@@ -86,12 +103,13 @@ export class ProductoService {
 
   static async findAll(proveedorId?: number) {
     const where = proveedorId ? { proveedorId } : {};
-    return prisma.producto.findMany({
+    const productos = await prisma.producto.findMany({
       where,
       include: {
         proveedor: true,
         moneda: true
       }
     });
+    return productos.map(p => this.transformProducto(p));
   }
 }

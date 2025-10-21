@@ -3,6 +3,32 @@ import PresupuestoHistorialService from './presupuesto-historial.service';
 import { calcularMontoSugerido, validarGananciaGlobal } from '../utils/presupuestoGanancia';
 
 export class PresupuestoService {
+  /**
+   * Convierte campos Decimal a Number para serialización JSON correcta
+   */
+  private static transformPresupuesto(presupuesto: any): any {
+    if (!presupuesto) return null;
+    
+    return {
+      ...presupuesto,
+      subtotal: presupuesto.subtotal ? Number(presupuesto.subtotal) : presupuesto.subtotal,
+      impuestos: presupuesto.impuestos ? Number(presupuesto.impuestos) : presupuesto.impuestos,
+      total: presupuesto.total ? Number(presupuesto.total) : presupuesto.total,
+      margenAgenciaGlobal: presupuesto.margenAgenciaGlobal ? Number(presupuesto.margenAgenciaGlobal) : presupuesto.margenAgenciaGlobal,
+      // IMPORTANTE: El campo en DB es montoGananciaAgencia, pero frontend espera montoGanancia
+      montoGanancia: presupuesto.montoGananciaAgencia ? Number(presupuesto.montoGananciaAgencia) : presupuesto.montoGananciaAgencia,
+      items: presupuesto.items?.map((item: any) => ({
+        ...item,
+        cantidad: item.cantidad ? Number(item.cantidad) : item.cantidad,
+        precioUnitario: item.precioUnitario ? Number(item.precioUnitario) : item.precioUnitario,
+      })) || [],
+      presupuestoImpuestos: presupuesto.presupuestoImpuestos?.map((pi: any) => ({
+        ...pi,
+        monto: pi.monto ? Number(pi.monto) : pi.monto,
+      })) || [],
+    };
+  }
+
   static async create(data: {
     clienteId: number;
     items: {
@@ -193,11 +219,11 @@ export class PresupuestoService {
   }
 
   static async findById(id: number) {
-    return prisma.presupuesto.findUnique({
+    const presupuesto = await prisma.presupuesto.findUnique({
       where: { id },
       include: {
         cliente: true,
-  empresa: true,
+        empresa: true,
         moneda: true,
         items: {
           include: {
@@ -210,9 +236,11 @@ export class PresupuestoService {
             impuesto: true
           }
         },
-          facturas: true
+        facturas: true
       }
     });
+    
+    return this.transformPresupuesto(presupuesto);
   }
 
   static async update(id: number, data: any, userId?: number, userRoles?: string[]) {
@@ -317,7 +345,7 @@ export class PresupuestoService {
     // Crear snapshot del estado anterior
     const snapshotAnterior = await PresupuestoHistorialService.crearSnapshot(id);
 
-    return prisma.presupuesto.update({
+    const presupuestoActualizado = await prisma.presupuesto.update({
       where: { id },
       data: updateData,
       include: {
@@ -336,22 +364,24 @@ export class PresupuestoService {
           }
         }
       }
-    }).then(async (presupuestoActualizado) => {
-      // Registrar el cambio en el historial
-      const snapshotNuevo = await PresupuestoHistorialService.crearSnapshot(id);
-      if (snapshotAnterior && snapshotNuevo) {
-        await PresupuestoHistorialService.registrarCambio({
-          tipo: 'UPDATE',
-          presupuestoId: id,
-          usuarioId: userId,
-          datosAnteriores: snapshotAnterior,
-          datosNuevos: snapshotNuevo
-        });
-      }
-      
-      return presupuestoActualizado;
     });
-  }  static async updateEstado(id: number, estado: string, usuarioId?: number) {
+    
+    // Registrar el cambio en el historial
+    const snapshotNuevo = await PresupuestoHistorialService.crearSnapshot(id);
+    if (snapshotAnterior && snapshotNuevo) {
+      await PresupuestoHistorialService.registrarCambio({
+        tipo: 'UPDATE',
+        presupuestoId: id,
+        usuarioId: userId,
+        datosAnteriores: snapshotAnterior,
+        datosNuevos: snapshotNuevo
+      });
+    }
+    
+    return this.transformPresupuesto(presupuestoActualizado);
+  }
+  
+  static async updateEstado(id: number, estado: string, usuarioId?: number) {
     // Crear snapshot del estado anterior
     const snapshotAnterior = await PresupuestoHistorialService.crearSnapshot(id);
 
@@ -385,13 +415,13 @@ export class PresupuestoService {
   static async findAll(clienteId?: number, estado?: string) {
     const where: any = {};
     if (clienteId) where.clienteId = clienteId;
-  if (estado) where.estado = estado as any;
+    if (estado) where.estado = estado as any;
 
-    return prisma.presupuesto.findMany({
+    const presupuestos = await prisma.presupuesto.findMany({
       where,
       include: {
         cliente: true,
-  empresa: true,
+        empresa: true,
         moneda: true,
         items: {
           include: {
@@ -403,8 +433,10 @@ export class PresupuestoService {
           include: {
             impuesto: true
           }
-  }
+        }
       }
     });
+    
+    return presupuestos.map(p => this.transformPresupuesto(p));
   }
 }

@@ -245,11 +245,9 @@ function _Select<
                         },
                     }
                 },
-                menu: (provided) => ({ ...provided, zIndex: 99999 }),
-                menuPortal: (provided) => ({ ...provided, zIndex: 99999 }),
+                menu: (provided) => ({ ...provided, zIndex: 9999 }),
                 ...style,
             }}
-            menuPortalTarget={typeof document !== 'undefined' ? document.body : undefined}
             theme={(theme) => ({
                 ...theme,
                 colors: {

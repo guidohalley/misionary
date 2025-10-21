@@ -5,14 +5,14 @@ import ProductoForm from '../ProductoForm/ProductoForm';
 import { useProducto } from '@/modules/producto/hooks/useProducto';
 import { Button, Notification, toast } from '@/components/ui';
 import type { ProductoFormData } from '../types';
-import { useAppSelector } from '@/store';
+import { useAuth } from '@/contexts/AuthContext';
 import { canEditProductoServicio, getErrorMessage } from '@/utils/permissions';
 
 const ProductoEdit: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const { productos, updateProducto, refreshProductos } = useProducto();
-  const currentUser = useAppSelector(state => state.auth.user);
+  const { user: currentUser } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -75,6 +75,7 @@ const ProductoEdit: React.FC = () => {
         proveedorId: data.proveedorId,
         monedaId: data.monedaId,
       };
+      
       await updateProducto(parseInt(id), payload);
       navigate('/productos');
     } catch (error: any) {
@@ -127,12 +128,12 @@ const ProductoEdit: React.FC = () => {
   }
 
   const initialData: ProductoFormData = {
-  nombre: producto.nombre,
-  costoProveedor: producto.costoProveedor,
-  margenAgencia: producto.margenAgencia,
-  precio: producto.precio,
-  proveedorId: producto.proveedorId,
-  monedaId: producto.monedaId,
+    nombre: producto.nombre,
+    costoProveedor: Number(producto.costoProveedor) || 0,
+    margenAgencia: Number(producto.margenAgencia) || 0,
+    precio: Number(producto.precio) || 0,
+    proveedorId: producto.proveedorId,
+    monedaId: producto.monedaId,
   };
 
   return (

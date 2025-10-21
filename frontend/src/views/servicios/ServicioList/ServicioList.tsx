@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Button, Badge, Pagination, Select, Input, Notification, toast, Tooltip } from '@/components/ui';
-import { HiOutlinePencil, HiOutlineTrash, HiOutlineEye, HiOutlineLock } from 'react-icons/hi';
+import { HiOutlinePencil, HiOutlineTrash, HiOutlineEye, HiLockClosed, HiChevronDown, HiChevronUp } from 'react-icons/hi';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useServicio } from '@/modules/servicio/hooks/useServicio';
 import type { Servicio } from '@/modules/servicio/types';
-import { useAppSelector } from '@/store';
+import { useAuth } from '@/contexts/AuthContext';
 import { 
   canEditProductoServicio, 
   canDeleteProductoServicio, 
@@ -22,12 +22,25 @@ interface ServicioListProps {
 const ServicioList: React.FC<ServicioListProps> = ({ className }) => {
   const navigate = useNavigate();
   const { servicios, loading, error, refreshServicios, deleteServicio } = useServicio();
-  const currentUser = useAppSelector(state => state.auth.user);
+  const { user: currentUser } = useAuth();
   
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredServicios, setFilteredServicios] = useState<Servicio[]>([]);
+  const [expandedCostos, setExpandedCostos] = useState<Set<number>>(new Set());
+
+  const toggleCosto = (servicioId: number) => {
+    setExpandedCostos(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(servicioId)) {
+        newSet.delete(servicioId);
+      } else {
+        newSet.add(servicioId);
+      }
+      return newSet;
+    });
+  };
 
   useEffect(() => {
     refreshServicios();
@@ -168,7 +181,11 @@ const ServicioList: React.FC<ServicioListProps> = ({ className }) => {
               <tr className="border-b border-gray-200 dark:border-gray-700">
                 <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Nombre</th>
                 <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Descripción</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Precio</th>
+                <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">
+                  {(currentUser?.roles?.includes('ADMIN') || currentUser?.roles?.includes('CONTADOR'))
+                    ? 'Precio Final' 
+                    : 'Precio'}
+                </th>
                 <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Proveedor</th>
                 <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Fecha Creación</th>
                 <th className="text-center py-3 px-4 font-semibold text-gray-700 dark:text-gray-300 min-w-[120px]">Acciones</th>
@@ -192,15 +209,76 @@ const ServicioList: React.FC<ServicioListProps> = ({ className }) => {
                     </div>
                   </td>
                   <td className="py-3 px-4">
-                    {canViewPrecios(currentUser, servicio.proveedorId) && servicio.precio !== null ? (
-                      <Badge className="bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300">
-                        {formatPrice(servicio.precio)}
-                      </Badge>
-                    ) : (
-                      <Badge className="bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400">
-                        —
-                      </Badge>
-                    )}
+                    {(() => {
+                      const puedeVerPrecios = canViewPrecios(currentUser, servicio.proveedorId);
+                      const esPropio = currentUser?.id === servicio.proveedorId;
+                      const esAdmin = currentUser?.roles?.includes('ADMIN');
+                      const esContador = currentUser?.roles?.includes('CONTADOR');
+                      const isExpanded = expandedCostos.has(servicio.id);
+                      
+                      if (!puedeVerPrecios) {
+                        return (
+                          <Badge className="bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400">
+                            —
+                          </Badge>
+                        );
+                      }
+
+                      // ADMIN ve precio final con botón para expandir costo
+                      if (esAdmin) {
+                        return (
+                          <div className="flex flex-col gap-1">
+                            <div className="flex items-center gap-1">
+                              <Badge className="bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300">
+                                {formatPrice(servicio.precio)}
+                              </Badge>
+                              <Tooltip title={isExpanded ? "Ocultar costo" : "Ver costo del proveedor"}>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    toggleCosto(servicio.id);
+                                  }}
+                                  className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                >
+                                  {isExpanded ? (
+                                    <HiChevronUp className="w-3 h-3 text-gray-600 dark:text-gray-400" />
+                                  ) : (
+                                    <HiChevronDown className="w-3 h-3 text-gray-600 dark:text-gray-400" />
+                                  )}
+                                </button>
+                              </Tooltip>
+                            </div>
+                            {isExpanded && (
+                              <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                              >
+                                <Badge className="bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300">
+                                  Costo: {formatPrice(servicio.costoProveedor)}
+                                </Badge>
+                              </motion.div>
+                            )}
+                          </div>
+                        );
+                      }
+
+                      // CONTADOR ve precio final
+                      if (esContador) {
+                        return (
+                          <Badge className="bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300">
+                            {formatPrice(servicio.precio)}
+                          </Badge>
+                        );
+                      }
+
+                      // PROVEEDOR ve su costo
+                      return (
+                        <Badge className="bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300">
+                          {formatPrice(servicio.costoProveedor)}
+                        </Badge>
+                      );
+                    })()}
                   </td>
                   <td className="py-3 px-4">
                     <div className="text-gray-900 dark:text-gray-100">{servicio.proveedor?.nombre || 'Sin proveedor'}</div>
@@ -269,7 +347,7 @@ const ServicioList: React.FC<ServicioListProps> = ({ className }) => {
                             {!puedeEditar && (
                               <Tooltip title="Servicio de otro proveedor">
                                 <span>
-                                  <HiOutlineLock className="w-4 h-4 text-gray-400" />
+                                  <HiLockClosed className="w-4 h-4 text-gray-400" />
                                 </span>
                               </Tooltip>
                             )}

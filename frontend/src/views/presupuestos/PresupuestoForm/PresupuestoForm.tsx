@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useForm, Controller, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Card, Button, FormItem, FormContainer, Input, Select, Notification, toast, Checkbox, DatePicker } from '@/components/ui';
+import MoneyInput from '@/components/shared/MoneyInput';
 import { HiOutlinePlus, HiOutlineTrash, HiOutlineCalendar } from 'react-icons/hi';
 import { HiOutlineSparkles, HiCheck, HiOutlineChartBar, HiOutlineLightBulb, HiOutlineCalculator } from 'react-icons/hi';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -81,6 +82,8 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
       monedaId: 1, // ARS por defecto
       periodoInicio: defaultDates.inicio,
       periodoFin: defaultDates.fin,
+      margenAgenciaGlobal: undefined,
+      montoGanancia: undefined,
     },
   });
 
@@ -90,12 +93,22 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
   });
 
   const watchItems = watch("items");
+  const watchMargenAgenciaGlobal = watch("margenAgenciaGlobal");
+  const watchMontoGanancia = watch("montoGanancia");
 
   // Usar el hook de cálculos con los impuestos seleccionados
   const { subtotal, impuestos, total, detalleImpuestos } = usePresupuestoCalculations(
     watchItems, 
     impuestosSeleccionados
   );
+
+  // Cálculo automático simple del monto de ganancia
+  useEffect(() => {
+    if (watchMargenAgenciaGlobal !== undefined && watchMargenAgenciaGlobal > 0 && subtotal > 0) {
+      const montoCalculado = subtotal * (watchMargenAgenciaGlobal / 100);
+      setValue("montoGanancia", Number(montoCalculado.toFixed(2)));
+    }
+  }, [watchMargenAgenciaGlobal, subtotal, setValue]);
 
   // Helpers para fechas y presets de vigencia
   const watchPeriodoInicio = watch('periodoInicio')
@@ -176,8 +189,6 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
       // Normalizar fechas ISO a YYYY-MM-DD para inputs type=date
       const norm = (d?: string) => (d ? new Date(d).toISOString().slice(0, 10) : undefined)
       
-      console.log('🔄 Inicializando formulario con datos:', initialData);
-      
       reset({
         ...initialData,
         periodoInicio: norm((initialData as any).periodoInicio),
@@ -189,7 +200,6 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
         const impuestosIds = (initialData as any).presupuestoImpuestos.map((pi: any) => pi.impuestoId);
         const impuestosDelPresupuesto = impuestosDisponibles.filter(imp => impuestosIds.includes(imp.id));
         setImpuestosSeleccionados(impuestosDelPresupuesto);
-        console.log('✅ Impuestos precargados:', impuestosDelPresupuesto);
       }
 
       initializedRef.current = true;
@@ -215,6 +225,10 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
         // Normalizar fechas a ISO si vienen como string YYYY-MM-DD
         periodoInicio: data.periodoInicio ? new Date(data.periodoInicio).toISOString() : undefined,
         periodoFin: data.periodoFin ? new Date(data.periodoFin).toISOString() : undefined,
+        // Mapear montoGanancia del frontend a montoGananciaAgencia del backend
+        montoGananciaAgencia: data.montoGanancia,
+        // Activar ganancia global si hay monto o porcentaje
+        usarGananciaGlobal: !!(data.montoGanancia || data.margenAgenciaGlobal),
       };
 
       await onSubmit(dataWithTotals);
@@ -492,39 +506,135 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
                 </div>
               </div>
 
-              {/* Impuestos */}
-              <div>
-                <label className="flex items-center gap-1 block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                  <HiOutlineCalculator className="w-4 h-4" />
-                  Impuestos a Aplicar
-                </label>
-                <div className="space-y-2 max-h-32 overflow-y-auto">
-                  {impuestosDisponibles.map((impuesto) => (
-                    <div key={impuesto.id} className="flex items-center">
-                      <Checkbox
-                        checked={impuestosSeleccionados.some(imp => imp.id === impuesto.id)}
-                        onChange={(checked) => handleImpuestoToggle(impuesto, checked)}
-                        disabled={isSubmitting}
-                      />
-                      <label className="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                        {impuesto.nombre} ({impuesto.porcentaje}%)
-                        {impuesto.descripcion && (
-                          <span className="text-gray-500 dark:text-gray-400 text-xs block">
-                            {impuesto.descripcion}
-                          </span>
-                        )}
-                      </label>
-                    </div>
-                  ))}
-                  {impuestosDisponibles.length === 0 && (
-                    <p className="text-sm text-gray-500 dark:text-gray-400">No hay impuestos configurados</p>
-                  )}
-                </div>
-                {impuestosSeleccionados.length === 0 && (
-                  <p className="text-sm text-red-600 dark:text-red-400 mt-1">
+              {/* Impuestos y Ganancia */}
+              <div className="space-y-4">
+                {/* Impuestos */}
+                <div>
+                  <label className="flex items-center gap-1 block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                    <HiOutlineCalculator className="w-4 h-4" />
+                    Impuestos a Aplicar
+                  </label>
+                  <div className="space-y-2 max-h-32 overflow-y-auto">
+                    {impuestosDisponibles.map((impuesto) => (
+                      <div key={impuesto.id} className="flex items-center">
+                        <Checkbox
+                          checked={impuestosSeleccionados.some(imp => imp.id === impuesto.id)}
+                          onChange={(checked) => handleImpuestoToggle(impuesto, checked)}
+                          disabled={isSubmitting}
+                        />
+                        <label className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                          {impuesto.nombre} ({impuesto.porcentaje}%)
+                          {impuesto.descripcion && (
+                            <span className="text-gray-500 dark:text-gray-400 text-xs block">
+                              {impuesto.descripcion}
+                            </span>
+                          )}
+                        </label>
+                      </div>
+                    ))}
+                    {impuestosDisponibles.length === 0 && (
+                      <p className="text-sm text-gray-500 dark:text-gray-400">No hay impuestos configurados</p>
+                    )}
+                  </div>
+                  {impuestosSeleccionados.length === 0 && (
+                    <p className="text-sm text-red-600 dark:text-red-400 mt-1">
                     Debe seleccionar al menos un impuesto
                   </p>
                 )}
+                </div>
+
+                {/* Ganancia Global */}
+                <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                  <label className="flex items-center gap-1 block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                    <HiOutlineChartBar className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
+                    Ganancia de Agencia
+                  </label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormItem
+                      label="Porcentaje de Ganancia (%)"
+                      invalid={!!errors.margenAgenciaGlobal}
+                      errorMessage={errors.margenAgenciaGlobal?.message}
+                    >
+                      <Controller
+                        name="margenAgenciaGlobal"
+                        control={control}
+                        render={({ field }) => (
+                          <Input
+                            {...field}
+                            type="number"
+                            min="0"
+                            max="100"
+                            step="0.01"
+                            placeholder="Ej: 20"
+                            suffix="%"
+                            value={field.value ?? ''}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              if (!value) {
+                                field.onChange(undefined);
+                                return;
+                              }
+                              const numValue = Number(value);
+                              // Validar que esté en rango 0-100
+                              if (numValue < 0) {
+                                field.onChange(0);
+                              } else if (numValue > 100) {
+                                field.onChange(100);
+                              } else {
+                                field.onChange(numValue);
+                              }
+                            }}
+                            onBlur={(e) => {
+                              // Al perder foco, validar y corregir si es necesario
+                              const value = e.target.value;
+                              if (value) {
+                                const numValue = Number(value);
+                                if (numValue < 0) {
+                                  field.onChange(0);
+                                } else if (numValue > 100) {
+                                  field.onChange(100);
+                                  toast.push(
+                                    <Notification title="Valor ajustado" type="warning">
+                                      El porcentaje máximo es 100%
+                                    </Notification>
+                                  );
+                                }
+                              }
+                            }}
+                          />
+                        )}
+                      />
+                    </FormItem>
+
+                    <FormItem
+                      label="Monto de Ganancia"
+                      invalid={!!errors.montoGanancia}
+                      errorMessage={errors.montoGanancia?.message}
+                    >
+                      <Controller
+                        name="montoGanancia"
+                        control={control}
+                        render={({ field }) => (
+                          <MoneyInput
+                            value={field.value ?? 0}
+                            onChange={(value) => {
+                              // Validar que no sea negativo
+                              if (value < 0) {
+                                field.onChange(0);
+                              } else {
+                                field.onChange(value);
+                              }
+                            }}
+                            currency="ARS"
+                            currencySymbol="$"
+                            placeholder="0,00"
+                            min={0}
+                          />
+                        )}
+                      />
+                    </FormItem>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -715,6 +825,7 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
               )}
             </div>
 
+
             {/* Totales */}
             <div className="mb-8 p-6 bg-gray-50 dark:bg-gray-800 rounded-lg">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Resumen</h3>
@@ -723,6 +834,15 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
                   <span className="text-gray-600 dark:text-gray-400">Subtotal:</span>
                   <span className="font-medium text-gray-900 dark:text-gray-100">{formatPrice(subtotal)}</span>
                 </div>
+                
+                {watchMontoGanancia && watchMontoGanancia > 0 && (
+                  <div className="flex justify-between border-l-4 border-yellow-500 pl-2 bg-yellow-50 dark:bg-yellow-900/20 py-1">
+                    <span className="text-yellow-700 dark:text-yellow-400 text-sm font-medium">
+                      Ganancia Agencia {watchMargenAgenciaGlobal ? `(${watchMargenAgenciaGlobal}%)` : ''}:
+                    </span>
+                    <span className="font-medium text-yellow-700 dark:text-yellow-400">{formatPrice(watchMontoGanancia)}</span>
+                  </div>
+                )}
                 
                 {detalleImpuestos.map((detalle) => (
                   <div key={detalle.impuesto.id} className="flex justify-between">

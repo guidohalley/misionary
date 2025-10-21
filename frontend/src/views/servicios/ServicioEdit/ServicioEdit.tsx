@@ -5,14 +5,14 @@ import ServicioForm from '../ServicioForm/ServicioForm';
 import { useServicio } from '@/modules/servicio/hooks/useServicio';
 import { Button, Notification, toast } from '@/components/ui';
 import type { ServicioFormData } from '../types';
-import { useAppSelector } from '@/store';
+import { useAuth } from '@/contexts/AuthContext';
 import { canEditProductoServicio, getErrorMessage } from '@/utils/permissions';
 
 const ServicioEdit: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const { servicios, updateServicio, refreshServicios } = useServicio();
-  const currentUser = useAppSelector(state => state.auth.user);
+  const { user: currentUser } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -119,8 +119,11 @@ const ServicioEdit: React.FC = () => {
   const initialData: ServicioFormData = {
     nombre: servicio.nombre,
     descripcion: servicio.descripcion,
-    precio: servicio.precio,
+    costoProveedor: Number(servicio.costoProveedor) || 0,
+    margenAgencia: Number(servicio.margenAgencia) || 0,
+    precio: Number(servicio.precio) || 0,
     proveedorId: servicio.proveedorId,
+    monedaId: servicio.monedaId,
   };
 
   return (

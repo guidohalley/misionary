@@ -42,8 +42,8 @@ const ProductoForm: React.FC<ProductoFormProps> = ({
   const { user } = useAuth();
 
   // Determinar permisos del usuario actual
-  const isAdmin = user?.roles.includes('ADMIN') || false;
-  const isProveedor = user?.roles.includes('PROVEEDOR') || false;
+  const isAdmin = user?.roles?.includes('ADMIN') || false;
+  const isProveedor = user?.roles?.includes('PROVEEDOR') || false;
   const canSelectAnyProvider = isAdmin; // Solo ADMIN puede elegir cualquier proveedor
   const mustUseOwnId = isProveedor && !isAdmin; // PROVEEDOR puro debe usar su propio ID
 
@@ -266,13 +266,16 @@ const ProductoForm: React.FC<ProductoFormProps> = ({
                         Pricing y Moneda
                       </h3>
                       <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                        Configure el costo del proveedor y margen de agencia. El precio se calculará automáticamente.
+                        {isProveedor 
+                          ? 'Configure el costo de su producto. El precio final se calculará automáticamente.'
+                          : 'Configure el costo del proveedor y margen de agencia. El precio se calculará automáticamente.'
+                        }
                       </p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <FormItem
-                        label="Costo del Proveedor"
+                        label={isProveedor ? "Costo del Producto" : "Costo del Proveedor"}
                         invalid={!!errors.costoProveedor}
                         errorMessage={errors.costoProveedor?.message}
                         asterisk
@@ -297,40 +300,43 @@ const ProductoForm: React.FC<ProductoFormProps> = ({
                         />
                       </FormItem>
 
-                      <FormItem
-                        label="Margen de Agencia (%)"
-                        invalid={!!errors.margenAgencia}
-                        errorMessage={errors.margenAgencia?.message}
-                        asterisk
-                      >
-                        <Controller
-                          name="margenAgencia"
-                          control={control}
-                          rules={{ 
-                            required: 'El margen de agencia es requerido',
-                            min: { value: 35, message: 'El margen mínimo debe ser 35%' },
-                            max: { value: 1000, message: 'El margen no puede exceder 1000%' }
-                          }}
-                          render={({ field }) => (
-                            <Input
-                              {...field}
-                              type="number"
-                              step="0.01"
-                              min="35"
-                              max="1000"
-                              value={field.value ?? ''}
-                              onChange={(e) => {
-                                const val = e.target.value;
-                                field.onChange(val === '' ? undefined : Number(val));
-                              }}
-                              placeholder="Ej: 35 (para 35% ganancia mínima)"
-                              disabled={isSubmitting}
-                              className="rounded-lg"
-                              suffix="%"
-                            />
-                          )}
-                        />
-                      </FormItem>
+                      {/* Solo mostrar margen de agencia si NO es proveedor */}
+                      {!isProveedor && (
+                        <FormItem
+                          label="Margen de Agencia (%)"
+                          invalid={!!errors.margenAgencia}
+                          errorMessage={errors.margenAgencia?.message}
+                          asterisk
+                        >
+                          <Controller
+                            name="margenAgencia"
+                            control={control}
+                            rules={{ 
+                              required: 'El margen de agencia es requerido',
+                              min: { value: 35, message: 'El margen mínimo debe ser 35%' },
+                              max: { value: 1000, message: 'El margen no puede exceder 1000%' }
+                            }}
+                            render={({ field }) => (
+                              <Input
+                                {...field}
+                                type="number"
+                                step="0.01"
+                                min="35"
+                                max="1000"
+                                value={field.value ?? ''}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  field.onChange(val === '' ? undefined : Number(val));
+                                }}
+                                placeholder="Ej: 35 (para 35% ganancia mínima)"
+                                disabled={isSubmitting}
+                                className="rounded-lg"
+                                suffix="%"
+                              />
+                            )}
+                          />
+                        </FormItem>
+                      )}
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
@@ -387,14 +393,35 @@ const ProductoForm: React.FC<ProductoFormProps> = ({
               </motion.div>
             </div>
 
-            {/* Columna Lateral - Proveedor y Configuración */}
+            {/* Columna Lateral - Información y Proveedor */}
             <div className="space-y-6">
+              
+              {/* Información del Sistema */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4, duration: 0.3 }}
+              >
+                <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
+                  <div className="p-6">
+                    <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                      💡 Información
+                    </h4>
+                    <ul className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
+                      <li>• Los precios se almacenan en la moneda seleccionada</li>
+                      <li>• ARS (Peso Argentino) es la moneda por defecto</li>
+                      <li>• El producto será visible en presupuestos</li>
+                      <li>• El proveedor debe estar registrado previamente</li>
+                    </ul>
+                  </div>
+                </Card>
+              </motion.div>
               
               {/* Proveedor */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4, duration: 0.3 }}
+                transition={{ delay: 0.5, duration: 0.3 }}
               >
                 <Card>
                   <div className="p-6">
@@ -432,27 +459,6 @@ const ProductoForm: React.FC<ProductoFormProps> = ({
                         )}
                       />
                     </FormItem>
-                  </div>
-                </Card>
-              </motion.div>
-              
-              {/* Información del Sistema */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5, duration: 0.3 }}
-              >
-                <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 relative z-10">
-                  <div className="p-6">
-                    <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                      💡 Información
-                    </h4>
-                    <ul className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
-                      <li>• Los precios se almacenan en la moneda seleccionada</li>
-                      <li>• ARS (Peso Argentino) es la moneda por defecto</li>
-                      <li>• El producto será visible en presupuestos</li>
-                      <li>• El proveedor debe estar registrado previamente</li>
-                    </ul>
                   </div>
                 </Card>
               </motion.div>
