@@ -166,19 +166,22 @@ const PresupuestoList: React.FC<PresupuestoListProps> = ({ className }) => {
 
   return (
     <div className={className}>
-      <div className="mb-6 flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Presupuestos</h2>
-          <p className="text-gray-600 dark:text-gray-400">Gestiona los presupuestos de clientes</p>
+      {/* Header Card */}
+      <Card className="mb-6 p-4">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Presupuestos</h2>
+            <p className="text-gray-600 dark:text-gray-400 text-sm">Gestiona los presupuestos de clientes</p>
+          </div>
+          <Button 
+            variant="solid" 
+            onClick={handleNewPresupuesto}
+            className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
+          >
+            Nuevo Presupuesto
+          </Button>
         </div>
-        <Button 
-          variant="solid" 
-          onClick={handleNewPresupuesto}
-          className="bg-blue-600 hover:bg-blue-700"
-        >
-          Nuevo Presupuesto
-        </Button>
-      </div>
+      </Card>
 
       <Card className="mb-6">
         <div className="flex justify-between items-center mb-4">
