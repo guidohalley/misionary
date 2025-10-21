@@ -13,15 +13,15 @@ export const NAV_MODE_DARK = 'dark'
 export const NAV_MODE_THEMED = 'themed'
 export const NAV_MODE_TRANSPARENT = 'transparent'
 
-export const SIDE_NAV_WIDTH = 290
-export const SIDE_NAV_COLLAPSED_WIDTH = 80
-export const SPLITTED_SIDE_NAV_MINI_WIDTH = 80
-export const SPLITTED_SIDE_NAV_SECONDARY_WIDTH = 250
-export const SIDE_NAV_CONTENT_GUTTER = 'px-4'
-export const LOGO_X_GUTTER = 'px-52'
-export const HEADER_HEIGHT_CLASS = 'h-16'
-export const PAGE_CONTAINER_GUTTER_X = 'px-4 sm:px-6 md:px-8'
-export const PAGE_CONTAINER_GUTTER_Y = 'py-4 sm:py-6 md:px-8'
+export const SIDE_NAV_WIDTH = 260
+export const SIDE_NAV_COLLAPSED_WIDTH = 70
+export const SPLITTED_SIDE_NAV_MINI_WIDTH = 70
+export const SPLITTED_SIDE_NAV_SECONDARY_WIDTH = 220
+export const SIDE_NAV_CONTENT_GUTTER = 'px-3'
+export const LOGO_X_GUTTER = 'px-48'
+export const HEADER_HEIGHT_CLASS = 'h-14'
+export const PAGE_CONTAINER_GUTTER_X = 'px-3 sm:px-4 md:px-6'
+export const PAGE_CONTAINER_GUTTER_Y = 'py-3 sm:py-4 md:py-6'
 
 export const THEME_ENUM = {
     DIR_RTL: DIR_RTL,
