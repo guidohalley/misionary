@@ -14,6 +14,24 @@ module.exports = {
 	],
 	darkMode: 'class',
 		theme: {
+			container: {
+				center: true,
+				padding: {
+					DEFAULT: '0.75rem',
+					sm: '1rem',
+					md: '1.5rem',
+					lg: '2rem',
+					xl: '2.5rem',
+					'2xl': '3rem',
+				},
+				screens: {
+					sm: '95%',
+					md: '90%',
+					lg: '88%',
+					xl: '85%',
+					'2xl': '80%',
+				},
+			},
 			fontFamily: {
 				sans: [
 					'Inter',

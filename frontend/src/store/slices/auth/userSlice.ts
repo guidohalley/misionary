@@ -5,7 +5,8 @@ export type UserState = {
     avatar?: string
     userName?: string
     email?: string
-    authority?: string[]
+    authority?: string[] // Legacy - deprecated, use roles instead
+    roles?: string[] // New: ADMIN, CONTADOR, PROVEEDOR
 }
 
 const initialState: UserState = {
@@ -13,6 +14,7 @@ const initialState: UserState = {
     userName: '',
     email: '',
     authority: [],
+    roles: [],
 }
 
 const userSlice = createSlice({
@@ -23,7 +25,9 @@ const userSlice = createSlice({
             state.avatar = action.payload?.avatar
             state.email = action.payload?.email
             state.userName = action.payload?.userName
-            state.authority = action.payload?.authority
+            // Support both authority (legacy) and roles (new)
+            state.authority = action.payload?.authority || action.payload?.roles
+            state.roles = action.payload?.roles || action.payload?.authority
         },
     },
 })

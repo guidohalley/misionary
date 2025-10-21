@@ -1,9 +1,9 @@
 @layer components {
   .button {
     @apply font-semibold focus:outline-none whitespace-nowrap inline-flex items-center justify-center;
-    padding: 0.875rem 2rem;
-    border-radius: 0.875rem;
-    font-size: 0.95rem;
+    padding: 0.625rem 1.5rem;
+    border-radius: 0.75rem;
+    font-size: 0.875rem;
     line-height: 1.5;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
@@ -14,7 +14,7 @@
     text-decoration: none;
     border: 1px solid transparent;
     font-weight: 600;
-    min-height: 48px;
+    min-height: 38px;
   }
 
   .button::before {

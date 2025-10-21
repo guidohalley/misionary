@@ -11,7 +11,7 @@ type FooterProps = {
 
 const FooterContent = () => {
     return (
-        <div className="flex items-center justify-between flex-auto w-full max-w-6xl mx-auto">
+        <div className="flex items-center justify-between flex-auto w-full max-w-[95%] md:max-w-[90%] xl:max-w-[85%] 2xl:max-w-[80%] mx-auto">
             {/* Logo y nombre */}
             <div className="flex items-center gap-3">
                 <div className="flex items-center gap-2">

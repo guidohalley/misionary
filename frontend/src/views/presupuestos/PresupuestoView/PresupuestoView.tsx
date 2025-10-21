@@ -168,7 +168,7 @@ const PresupuestoView: React.FC = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
-        className="max-w-4xl mx-auto print-container"
+        className="w-full max-w-[98%] sm:max-w-[95%] md:max-w-4xl mx-auto print-container"
       >
       {/* Header */}
       <div className="mb-6 flex justify-between items-start print-header">
@@ -251,60 +251,325 @@ const PresupuestoView: React.FC = () => {
         </div>
       </Card>
 
-      {/* Items del Presupuesto */}
-      <Card className="mb-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Items</h2>
-        <div className="overflow-x-auto">
-          <table className="w-full print-table">
-            <thead>
-              <tr className="border-b border-gray-200">
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">Tipo</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">Descripción</th>
-                <th className="text-right py-3 px-4 font-semibold text-gray-700">Cantidad</th>
-                <th className="text-right py-3 px-4 font-semibold text-gray-700">Precio Unit.</th>
-                <th className="text-right py-3 px-4 font-semibold text-gray-700">Subtotal</th>
-              </tr>
-            </thead>
-            <tbody>
-              {selectedPresupuesto.items.map((item, index) => (
-                <tr key={index} className="border-b border-gray-100">
-                  <td className="py-3 px-4">
-                    {item.productoId ? (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                        Producto
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        Servicio
-                      </span>
-                    )}
-                  </td>
-                  <td className="py-3 px-4">
-                    <div className="font-medium text-gray-900">
-                      {item.producto?.nombre || item.servicio?.nombre || 'N/A'}
+      {/* Productos */}
+      {(() => {
+        const productos = selectedPresupuesto.items.filter(item => item.productoId);
+        if (productos.length === 0) return null;
+        
+        return (
+          <Card className="mb-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                Productos
+              </span>
+            </h2>
+            {/* Vista Desktop - Tabla */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full print-table">
+                <thead>
+                  <tr className="border-b border-gray-200 bg-blue-50 dark:bg-blue-900/10">
+                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Descripción</th>
+                    <th className="text-right py-3 px-4 font-semibold text-gray-700">Cantidad</th>
+                    <th className="text-right py-3 px-4 font-semibold text-gray-700">Costo</th>
+                    <th className="text-right py-3 px-4 font-semibold text-gray-700">Margen %</th>
+                    <th className="text-right py-3 px-4 font-semibold text-gray-700">Precio Unit.</th>
+                    <th className="text-right py-3 px-4 font-semibold text-gray-700">Ganancia</th>
+                    <th className="text-right py-3 px-4 font-semibold text-gray-700">Subtotal</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {productos.map((item, index) => (
+                    <tr key={index} className="border-b border-gray-100">
+                      <td className="py-3 px-4">
+                        <div className="font-medium text-gray-900">
+                          {item.producto?.nombre || 'N/A'}
+                        </div>
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        {item.cantidad}
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        {formatPrice(Number(item.producto?.costoProveedor || 0))}
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        {Number(item.producto?.margenAgencia || 0).toFixed(2)}%
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        {formatPrice(item.precioUnitario)}
+                      </td>
+                      <td className="py-3 px-4 text-right text-yellow-700 dark:text-yellow-400 font-medium">
+                        {(() => {
+                          const costo = Number(item.producto?.costoProveedor || 0);
+                          const ganancia = (item.precioUnitario - costo) * item.cantidad;
+                          return formatPrice(ganancia);
+                        })()}
+                      </td>
+                      <td className="py-3 px-4 text-right font-semibold">
+                        {formatPrice(item.cantidad * item.precioUnitario)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Vista Mobile - Cards */}
+            <div className="md:hidden space-y-3">
+              {productos.map((item, index) => {
+                const costo = Number(item.producto?.costoProveedor || 0);
+                const ganancia = (item.precioUnitario - costo) * item.cantidad;
+                return (
+                  <div key={index} className="bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800 p-3">
+                    <div className="font-medium text-gray-900 dark:text-white mb-2">
+                      {item.producto?.nombre || 'N/A'}
                     </div>
-                    {item.producto?.nombre && (
-                      <div className="text-sm text-gray-600">{item.producto.nombre}</div>
-                    )}
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div>
+                        <span className="text-gray-500 dark:text-gray-400">Cantidad:</span>
+                        <span className="ml-2 font-medium text-gray-900 dark:text-white">{item.cantidad}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500 dark:text-gray-400">Costo:</span>
+                        <span className="ml-2 font-medium text-gray-900 dark:text-white">{formatPrice(costo)}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500 dark:text-gray-400">Margen:</span>
+                        <span className="ml-2 font-medium text-gray-900 dark:text-white">{Number(item.producto?.margenAgencia || 0).toFixed(2)}%</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500 dark:text-gray-400">P. Unit.:</span>
+                        <span className="ml-2 font-medium text-gray-900 dark:text-white">{formatPrice(item.precioUnitario)}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500 dark:text-gray-400">Ganancia:</span>
+                        <span className="ml-2 font-medium text-yellow-700 dark:text-yellow-400">{formatPrice(ganancia)}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500 dark:text-gray-400">Subtotal:</span>
+                        <span className="ml-2 font-bold text-gray-900 dark:text-white">{formatPrice(item.cantidad * item.precioUnitario)}</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            
+            {/* Resumen de Productos */}
+            <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 rounded">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex justify-between">
+                  <span className="text-sm font-medium text-blue-800 dark:text-blue-400">
+                    Subtotal Productos:
+                  </span>
+                  <span className="font-bold text-blue-700 dark:text-blue-400">
+                    {(() => {
+                      const subtotal = productos.reduce((sum, item) => sum + (item.cantidad * item.precioUnitario), 0);
+                      return formatPrice(subtotal);
+                    })()}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm font-medium text-yellow-800 dark:text-yellow-400">
+                    Ganancia Productos:
+                  </span>
+                  <span className="font-bold text-yellow-700 dark:text-yellow-400">
+                    {(() => {
+                      const ganancia = productos.reduce((sum, item) => {
+                        const costo = Number(item.producto?.costoProveedor || 0);
+                        return sum + ((item.precioUnitario - costo) * item.cantidad);
+                      }, 0);
+                      return formatPrice(ganancia);
+                    })()}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </Card>
+        );
+      })()}
+
+      {/* Servicios */}
+      {(() => {
+        const servicios = selectedPresupuesto.items.filter(item => item.servicioId);
+        if (servicios.length === 0) return null;
+        
+        return (
+          <Card className="mb-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                Servicios
+              </span>
+            </h2>
+            {/* Vista Desktop - Tabla */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full print-table">
+                <thead>
+                  <tr className="border-b border-gray-200 bg-green-50 dark:bg-green-900/10">
+                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Descripción</th>
+                    <th className="text-right py-3 px-4 font-semibold text-gray-700">Cantidad</th>
+                    <th className="text-right py-3 px-4 font-semibold text-gray-700">Costo</th>
+                    <th className="text-right py-3 px-4 font-semibold text-gray-700">Margen %</th>
+                    <th className="text-right py-3 px-4 font-semibold text-gray-700">Precio Unit.</th>
+                    <th className="text-right py-3 px-4 font-semibold text-gray-700">Ganancia</th>
+                    <th className="text-right py-3 px-4 font-semibold text-gray-700">Subtotal</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {servicios.map((item, index) => (
+                    <tr key={index} className="border-b border-gray-100">
+                      <td className="py-3 px-4">
+                        <div className="font-medium text-gray-900">
+                          {item.servicio?.nombre || 'N/A'}
+                        </div>
+                        {item.servicio?.descripcion && (
+                          <div className="text-sm text-gray-600">{item.servicio.descripcion}</div>
+                        )}
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        {item.cantidad}
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        {formatPrice(Number(item.servicio?.costoProveedor || 0))}
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        {Number(item.servicio?.margenAgencia || 0).toFixed(2)}%
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        {formatPrice(item.precioUnitario)}
+                      </td>
+                      <td className="py-3 px-4 text-right text-yellow-700 dark:text-yellow-400 font-medium">
+                        {(() => {
+                          const costo = Number(item.servicio?.costoProveedor || 0);
+                          const ganancia = (item.precioUnitario - costo) * item.cantidad;
+                          return formatPrice(ganancia);
+                        })()}
+                      </td>
+                      <td className="py-3 px-4 text-right font-semibold">
+                        {formatPrice(item.cantidad * item.precioUnitario)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Vista Mobile - Cards */}
+            <div className="md:hidden space-y-3">
+              {servicios.map((item, index) => {
+                const costo = Number(item.servicio?.costoProveedor || 0);
+                const ganancia = (item.precioUnitario - costo) * item.cantidad;
+                return (
+                  <div key={index} className="bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800 p-3">
+                    <div className="font-medium text-gray-900 dark:text-white mb-1">
+                      {item.servicio?.nombre || 'N/A'}
+                    </div>
                     {item.servicio?.descripcion && (
-                      <div className="text-sm text-gray-600">{item.servicio.descripcion}</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">{item.servicio.descripcion}</div>
                     )}
-                  </td>
-                  <td className="py-3 px-4 text-right">
-                    {item.cantidad}
-                  </td>
-                  <td className="py-3 px-4 text-right">
-                    {formatPrice(item.precioUnitario)}
-                  </td>
-                  <td className="py-3 px-4 text-right font-semibold">
-                    {formatPrice(item.cantidad * item.precioUnitario)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </Card>
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div>
+                        <span className="text-gray-500 dark:text-gray-400">Cantidad:</span>
+                        <span className="ml-2 font-medium text-gray-900 dark:text-white">{item.cantidad}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500 dark:text-gray-400">Costo:</span>
+                        <span className="ml-2 font-medium text-gray-900 dark:text-white">{formatPrice(costo)}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500 dark:text-gray-400">Margen:</span>
+                        <span className="ml-2 font-medium text-gray-900 dark:text-white">{Number(item.servicio?.margenAgencia || 0).toFixed(2)}%</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500 dark:text-gray-400">P. Unit.:</span>
+                        <span className="ml-2 font-medium text-gray-900 dark:text-white">{formatPrice(item.precioUnitario)}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500 dark:text-gray-400">Ganancia:</span>
+                        <span className="ml-2 font-medium text-yellow-700 dark:text-yellow-400">{formatPrice(ganancia)}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500 dark:text-gray-400">Subtotal:</span>
+                        <span className="ml-2 font-bold text-gray-900 dark:text-white">{formatPrice(item.cantidad * item.precioUnitario)}</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            
+            {/* Resumen de Servicios */}
+            <div className="mt-4 p-4 bg-green-50 dark:bg-green-900/20 border-l-4 border-green-500 rounded">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex justify-between">
+                  <span className="text-sm font-medium text-green-800 dark:text-green-400">
+                    Subtotal Servicios:
+                  </span>
+                  <span className="font-bold text-green-700 dark:text-green-400">
+                    {(() => {
+                      const subtotal = servicios.reduce((sum, item) => sum + (item.cantidad * item.precioUnitario), 0);
+                      return formatPrice(subtotal);
+                    })()}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm font-medium text-yellow-800 dark:text-yellow-400">
+                    Ganancia Servicios:
+                  </span>
+                  <span className="font-bold text-yellow-700 dark:text-yellow-400">
+                    {(() => {
+                      const ganancia = servicios.reduce((sum, item) => {
+                        const costo = Number(item.servicio?.costoProveedor || 0);
+                        return sum + ((item.precioUnitario - costo) * item.cantidad);
+                      }, 0);
+                      return formatPrice(ganancia);
+                    })()}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </Card>
+        );
+      })()}
+
+      {/* Impuestos Aplicados */}
+      {selectedPresupuesto.presupuestoImpuestos && selectedPresupuesto.presupuestoImpuestos.length > 0 && (
+        <Card className="mb-6">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
+              Impuestos Aplicados
+            </span>
+          </h2>
+          <div className="space-y-3">
+            {selectedPresupuesto.presupuestoImpuestos.map((presupuestoImpuesto, index) => (
+              <div key={index} className="flex justify-between items-center p-3 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-medium text-purple-800 dark:text-purple-400">
+                    {presupuestoImpuesto.impuesto?.nombre || 'Impuesto'}
+                  </span>
+                  <span className="text-xs text-purple-600 dark:text-purple-300">
+                    ({Number(presupuestoImpuesto.impuesto?.porcentaje || 0).toFixed(2)}%)
+                  </span>
+                </div>
+                <span className="font-bold text-purple-700 dark:text-purple-300">
+                  {formatPrice(Number(presupuestoImpuesto.monto || 0))}
+                </span>
+              </div>
+            ))}
+            
+            {/* Resumen de Impuestos */}
+            <div className="mt-4 p-4 bg-purple-100 dark:bg-purple-900/30 border-l-4 border-purple-500 rounded">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium text-purple-800 dark:text-purple-400">
+                  Total Impuestos:
+                </span>
+                <span className="text-lg font-bold text-purple-700 dark:text-purple-300">
+                  {formatPrice(Number(selectedPresupuesto.impuestos))}
+                </span>
+              </div>
+            </div>
+          </div>
+        </Card>
+      )}
 
       {/* Totales */}
       <Card>
@@ -314,6 +579,34 @@ const PresupuestoView: React.FC = () => {
             <span className="text-gray-600">Subtotal:</span>
             <span className="font-medium">{formatPrice(selectedPresupuesto.subtotal)}</span>
           </div>
+          
+          {/* Ganancia de Agencia Global */}
+          {(() => {
+            // El backend devuelve montoGananciaAgencia
+            let montoGanancia = (selectedPresupuesto as any).montoGananciaAgencia || selectedPresupuesto.montoGanancia;
+            
+            // Si no hay monto pero sí hay porcentaje, calcular automáticamente
+            if (!montoGanancia && selectedPresupuesto.margenAgenciaGlobal) {
+              const margen = Number(selectedPresupuesto.margenAgenciaGlobal);
+              const subtotal = Number(selectedPresupuesto.subtotal);
+              montoGanancia = (subtotal * margen) / 100;
+            }
+            
+            const montoGananciaNum = Number(montoGanancia);
+            
+            if (montoGananciaNum > 0) {
+              return (
+                <div className="flex justify-between border-l-4 border-yellow-500 pl-2 bg-yellow-50 dark:bg-yellow-900/20 py-2 my-2 rounded">
+                  <span className="text-sm font-medium text-yellow-800 dark:text-yellow-400">
+                    Ganancia Agencia Global {selectedPresupuesto.margenAgenciaGlobal ? `(${Number(selectedPresupuesto.margenAgenciaGlobal).toFixed(2)}%)` : ''}:
+                  </span>
+                  <span className="font-bold text-yellow-700 dark:text-yellow-400">{formatPrice(montoGananciaNum)}</span>
+                </div>
+              );
+            }
+            return null;
+          })()}
+          
           <div className="flex justify-between">
             <span className="text-gray-600">IVA (21%):</span>
             <span className="font-medium">{formatPrice(selectedPresupuesto.impuestos)}</span>

@@ -1,4 +1,5 @@
 import prisma from '../config/prisma'
+import { calcularGananciaPresupuesto } from '../utils/presupuestoGanancia'
 
 function toNumber(d: any): number {
   if (d === null || d === undefined) return 0
@@ -21,11 +22,10 @@ export async function resumenPresupuesto(presupuestoId: number) {
   if (!presupuesto) throw new Error('Presupuesto no encontrado')
 
   const totalPrecio = presupuesto.items.reduce((acc: number, it: any) => acc + toNumber(it.precioUnitario) * it.cantidad, 0)
-  const totalGananciaEmpresa = presupuesto.items.reduce((acc: number, it: any) => {
-    const pct = it.producto ? toNumber(it.producto.margenAgencia) : it.servicio ? toNumber(it.servicio.margenAgencia) : 0
-    const gain = toNumber(it.precioUnitario) * (pct / 100) * it.cantidad
-    return acc + gain
-  }, 0)
+  
+  // Calcular ganancia usando la nueva función que considera ganancia global
+  const { gananciaTotal, tipoCalculo } = calcularGananciaPresupuesto(presupuesto as any)
+  const totalGananciaEmpresa = gananciaTotal
 
   const pagosProveedor = await prisma.recibo.aggregate({
     _sum: { monto: true },
@@ -49,6 +49,10 @@ export async function resumenPresupuesto(presupuestoId: number) {
     totalPagadoProveedor,
     totalPagadoAdmin,
     disponibleAdmin,
+    tipoCalculoGanancia: tipoCalculo,
+    usarGananciaGlobal: presupuesto.usarGananciaGlobal || false,
+    margenAgenciaGlobal: presupuesto.margenAgenciaGlobal ? toNumber(presupuesto.margenAgenciaGlobal) : null,
+    montoGananciaAgencia: presupuesto.montoGananciaAgencia ? toNumber(presupuesto.montoGananciaAgencia) : null,
   }
 }
 
@@ -192,14 +196,11 @@ export async function kpisMensuales(params: { desde: Date; hasta: Date; adminId?
   let totalGananciaEmpresaPeriodo = 0
   const gananciaPorMoneda: Record<string, number> = {}
   for (const p of presupuestos as any[]) {
-    let g = 0
-    for (const it of p.items || []) {
-      const pct = it.producto ? toNumber(it.producto.margenAgencia) : it.servicio ? toNumber(it.servicio.margenAgencia) : 0
-      g += toNumber(it.precioUnitario) * (pct / 100) * Number(it.cantidad || 1)
-    }
-    totalGananciaEmpresaPeriodo += g
+    // Usar la función de cálculo que considera ganancia global
+    const { gananciaTotal } = calcularGananciaPresupuesto(p)
+    totalGananciaEmpresaPeriodo += gananciaTotal
     const code = p.moneda?.codigo || 'TOTAL'
-    gananciaPorMoneda[code] = (gananciaPorMoneda[code] || 0) + g
+    gananciaPorMoneda[code] = (gananciaPorMoneda[code] || 0) + gananciaTotal
   }
 
   // Pagos a admin del período

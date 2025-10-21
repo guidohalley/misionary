@@ -16,7 +16,8 @@ export class GastoController {
         fechaHasta,
         esRecurrente,
         activo,
-        search
+        search,
+        incluirProyecciones
       } = req.query;
 
       const filters: any = {};
@@ -26,13 +27,17 @@ export class GastoController {
       }
       if (proveedorId) filters.proveedorId = parseInt(proveedorId as string);
       if (monedaId) filters.monedaId = parseInt(monedaId as string);
-  if (fechaDesde) filters.fechaDesde = new Date(fechaDesde as string);
+      if (fechaDesde) filters.fechaDesde = new Date(fechaDesde as string);
       if (fechaHasta) filters.fechaHasta = new Date(fechaHasta as string);
       if (esRecurrente !== undefined) filters.esRecurrente = esRecurrente === 'true';
       if (activo !== undefined) filters.activo = activo === 'true';
       if (search) filters.search = search as string;
+      if (incluirProyecciones !== undefined) filters.incluirProyecciones = incluirProyecciones === 'true';
 
-      const gastos = await gastoService.getGastosOperativos(filters);
+      // Usar método con proyecciones si se solicita
+      const gastos = filters.incluirProyecciones 
+        ? await gastoService.getGastosOperativosConProyecciones(filters)
+        : await gastoService.getGastosOperativos(filters);
       
       res.json({
         success: true,

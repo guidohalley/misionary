@@ -1,11 +1,14 @@
 import React from 'react';
 import PresupuestoList from './PresupuestoList';
+import PermissionGuard from '@/components/shared/PermissionGuard';
 
 const PresupuestosView: React.FC = () => {
   return (
-    <div className="h-full">
-      <PresupuestoList />
-    </div>
+    <PermissionGuard allowedRoles={['ADMIN', 'CONTADOR']} showBlur={true}>
+      <div className="h-full">
+        <PresupuestoList />
+      </div>
+    </PermissionGuard>
   );
 };
 

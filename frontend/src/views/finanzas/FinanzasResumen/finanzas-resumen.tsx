@@ -289,7 +289,8 @@ const FinanzasResumen: React.FC = () => {
         <Card className="mt-6">
           <div className="p-4">
             <h3 className="text-lg font-semibold mb-3">Pagos a ADMIN</h3>
-            <div className="overflow-x-auto">
+            {/* Vista Desktop - Tabla */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="min-w-full text-sm">
                 <thead>
                   <tr className="text-left border-b">
@@ -313,6 +314,36 @@ const FinanzasResumen: React.FC = () => {
                 </tbody>
               </table>
             </div>
+
+            {/* Vista Mobile - Cards */}
+            <div className="md:hidden space-y-3">
+              {pagosAdmin.map((p: any, idx: number) => (
+                <div key={p.id || idx} className="bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-3">
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div>
+                      <span className="text-gray-500 dark:text-gray-400">Fecha:</span>
+                      <span className="ml-2 font-medium text-gray-900 dark:text-white">{p.fecha ? new Date(p.fecha).toLocaleDateString() : '-'}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500 dark:text-gray-400">Admin:</span>
+                      <span className="ml-2 font-medium text-gray-900 dark:text-white">{p.admin?.nombre || p.adminId}</span>
+                    </div>
+                    <div className="col-span-2">
+                      <span className="text-gray-500 dark:text-gray-400">Concepto:</span>
+                      <span className="ml-2 font-medium text-gray-900 dark:text-white">{p.concepto || '-'}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500 dark:text-gray-400">Monto:</span>
+                      <span className="ml-2 font-bold text-green-600 dark:text-green-400">{Number(p.monto || 0).toLocaleString('es-AR', { minimumFractionDigits: 2 })}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500 dark:text-gray-400">Método:</span>
+                      <span className="ml-2 font-medium text-gray-900 dark:text-white">{p.metodoPago}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </Card>
       )}
@@ -321,7 +352,8 @@ const FinanzasResumen: React.FC = () => {
         <Card className="mt-6">
           <div className="p-4">
             <h3 className="text-lg font-semibold mb-3">Pagos por proveedor</h3>
-            <div className="overflow-x-auto">
+            {/* Vista Desktop - Tabla */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="min-w-full text-sm">
                 <thead>
                   <tr className="text-left border-b">
@@ -351,6 +383,37 @@ const FinanzasResumen: React.FC = () => {
                   ))}
                 </tbody>
               </table>
+            </div>
+
+            {/* Vista Mobile - Cards */}
+            <div className="md:hidden space-y-3">
+              {proveedores.map(p => (
+                <div key={p.proveedorId} className="bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-3">
+                  <div className="mb-2">
+                    <div className="font-medium text-gray-900 dark:text-white">{p.proveedorNombre}</div>
+                    {p.proveedorEmail && <div className="text-xs text-gray-500 dark:text-gray-400">{p.proveedorEmail}</div>}
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-sm mb-3">
+                    <div>
+                      <span className="text-gray-500 dark:text-gray-400">Total costo:</span>
+                      <span className="ml-2 font-medium text-gray-900 dark:text-white">{p.totalCostoProveedor.toLocaleString('es-AR', { minimumFractionDigits: 2 })} {p.moneda}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500 dark:text-gray-400">Pagado:</span>
+                      <span className="ml-2 font-medium text-green-600 dark:text-green-400">{p.totalPagadoProveedor.toLocaleString('es-AR', { minimumFractionDigits: 2 })} {p.moneda}</span>
+                    </div>
+                    <div className="col-span-2">
+                      <span className="text-gray-500 dark:text-gray-400">Pendiente:</span>
+                      <span className="ml-2 font-bold text-orange-600 dark:text-orange-400">{p.pendienteProveedor.toLocaleString('es-AR', { minimumFractionDigits: 2 })} {p.moneda}</span>
+                    </div>
+                  </div>
+                  {isAdmin && (
+                    <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
+                      <Button size="sm" onClick={() => abrirPagoProveedor(p)} className="w-full">Pagar</Button>
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
         </Card>

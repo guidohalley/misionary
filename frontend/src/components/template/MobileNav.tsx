@@ -46,7 +46,7 @@ const MobileNav = () => {
         (state) => state.base.common.currentRouteKey,
     )
 
-    const userAuthority = useAppSelector((state) => state.auth.user.authority)
+    const userAuthority = useAppSelector((state) => state.auth.user.roles || state.auth.user.authority || [])
 
     const { smaller } = useResponsive()
 

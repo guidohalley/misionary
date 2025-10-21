@@ -175,6 +175,9 @@ model Presupuesto {
   periodoInicio        DateTime?
   precioPeriodo        Decimal?                  @db.Decimal(15, 2)
   renovacionAutomatica Boolean                   @default(false)
+  margenAgenciaGlobal  Decimal?                  @db.Decimal(5, 2)
+  montoGananciaAgencia Decimal?                  @db.Decimal(15, 2)
+  usarGananciaGlobal   Boolean                   @default(false)
   asignacionesGasto    AsignacionGastoProyecto[]
   cobrosCliente        CobroCliente[]
   facturas             Factura[]

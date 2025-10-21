@@ -36,10 +36,33 @@ export interface GastoResumenCategoriaDTO {
 
 export interface GastoDTO {
   id: number
+  concepto: string
+  descripcion?: string
   monto: number
-  moneda: { id: number; codigo: string; simbolo: string }
-  categoria: string
+  monedaId: number
   fecha: string
+  categoria: string
+  esRecurrente: boolean
+  frecuencia?: string
+  activo: boolean
+  createdAt: string
+  updatedAt: string
+  // Campos para proyecciones
+  esProyeccion?: boolean
+  gastoOrigenId?: number
+  fechaOriginal?: string
+  moneda?: {
+    id: number
+    codigo: string
+    simbolo: string
+    nombre: string
+  }
+  proveedor?: {
+    id: number
+    nombre: string
+    email?: string
+    telefono?: string
+  }
 }
 
 export interface PersonaDTO {

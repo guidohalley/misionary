@@ -29,12 +29,13 @@ const MoneyInput: React.FC<MoneyInputProps> = ({
 
   // Formatear número a moneda local
   const formatCurrency = (num: number): string => {
-    if (num === 0 && !isFocused) return '';
+    const numericValue = typeof num === 'number' ? num : 0;
+    if (numericValue === 0 && !isFocused) return '';
     
     return new Intl.NumberFormat('es-AR', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
-    }).format(num);
+    }).format(numericValue);
   };
 
   // Parsear string a número
@@ -76,18 +77,20 @@ const MoneyInput: React.FC<MoneyInputProps> = ({
   const handleFocus = () => {
     setIsFocused(true);
     // En focus, mostrar el valor numérico sin formato para facilitar edición
-    if (value === 0) {
+    const numericValue = typeof value === 'number' ? value : 0;
+    if (numericValue === 0) {
       setDisplayValue('');
     } else {
       // Mostrar con coma decimal para edición
-      setDisplayValue(value.toFixed(2).replace('.', ','));
+      setDisplayValue(numericValue.toFixed(2).replace('.', ','));
     }
   };
 
   const handleBlur = () => {
     setIsFocused(false);
     // Al perder focus, volver al formato con separadores de miles
-    setDisplayValue(formatCurrency(value));
+    const numericValue = typeof value === 'number' ? value : 0;
+    setDisplayValue(formatCurrency(numericValue));
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {

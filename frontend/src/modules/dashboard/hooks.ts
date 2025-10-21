@@ -45,10 +45,33 @@ export function useDashboardKpis() {
       try {
         setLoading(true)
         setError(null)
+        
+        // Determinar rol del usuario
+        const roles: any[] = (currentUser?.authority || []) as any
+        const isAdmin = roles?.includes('ADMIN')
+        
+        // Para admin: cargar gastos del mes actual por defecto
+        // Para otros: cargar últimos 30 días
+        let gastosDesde: string
+        let gastosHasta: string | undefined
+        
+        if (isAdmin) {
+          const now = new Date()
+          gastosDesde = toIso(startOfMonth(now))
+          gastosHasta = toIso(endOfMonth(now))
+        } else {
+          gastosDesde = isoDaysAgo(30)
+          gastosHasta = undefined
+        }
+        
         const [f, p, g, c, e] = await Promise.all([
           fetchFacturas({ fechaDesde: isoDaysAgo(30) }),
           fetchPresupuestos({}),
-          fetchGastos({ fechaDesde: isoDaysAgo(30) }),
+          fetchGastos({ 
+            fechaDesde: gastosDesde, 
+            ...(gastosHasta ? { fechaHasta: gastosHasta } : {}),
+            incluirProyecciones: true 
+          }),
           fetchClientes(),
           fetchEmpresas(),
         ])
@@ -57,6 +80,7 @@ export function useDashboardKpis() {
         setGastos(g)
         setClientes(c)
         setEmpresasCount(e.length)
+        
         // Si es proveedor, traemos sus recibos (pagos) para mostrar últimos ingresos
         const ls = localStorage.getItem('auth_user')
         let proveedorIdFromLs: number | undefined
@@ -64,7 +88,6 @@ export function useDashboardKpis() {
           const parsed = ls ? JSON.parse(ls) : null
           proveedorIdFromLs = parsed?.id as number | undefined
         } catch {}
-        const roles: any[] = (currentUser?.authority || []) as any
         const isProveedor = roles?.includes('PROVEEDOR')
         if (isProveedor && proveedorIdFromLs) {
           try {
@@ -77,18 +100,18 @@ export function useDashboardKpis() {
         } else {
           setRecibosProveedor([])
         }
-    // Si es ADMIN, obtener KPIs del mes actual por defecto
-        const isAdmin = roles?.includes('ADMIN')
+        
+        // Si es ADMIN, obtener KPIs del mes actual por defecto
         if (isAdmin) {
           try {
-      // Mes actual por defecto
-      const now = new Date()
-      const desde = startOfMonth(now)
-      const hasta = endOfMonth(now)
+            // Mes actual por defecto
+            const now = new Date()
+            const desde = startOfMonth(now)
+            const hasta = endOfMonth(now)
             const k = await fetchKpisMensuales({ desde: toIso(desde), hasta: toIso(hasta) })
             setKpisAdminMes(k)
-      setPeriodoSeleccionado('MES')
-      setRangoFechas({ desde: toIso(desde), hasta: toIso(hasta), label: formatRangeLabel(desde, hasta) })
+            setPeriodoSeleccionado('MES')
+            setRangoFechas({ desde: toIso(desde), hasta: toIso(hasta), label: formatRangeLabel(desde, hasta) })
             // Cobrado / Por cobrar del período (para primera card)
             const c = await fetchCobrosPeriodo({ desde: toIso(desde), hasta: toIso(hasta) })
             setCobrosPeriodo(c)
@@ -139,12 +162,14 @@ export function useDashboardKpis() {
       const roles: any[] = (currentUser?.authority || []) as any
       const isAdmin = roles?.includes('ADMIN')
       if (isAdmin) {
-        const [k, c] = await Promise.all([
+        const [k, c, g] = await Promise.all([
           fetchKpisMensuales({ desde: toIso(desde), hasta: toIso(hasta) }),
           fetchCobrosPeriodo({ desde: toIso(desde), hasta: toIso(hasta) }),
+          fetchGastos({ fechaDesde: toIso(desde), fechaHasta: toIso(hasta), incluirProyecciones: true }),
         ])
         setKpisAdminMes(k)
         setCobrosPeriodo(c)
+        setGastos(g)
       } else {
         setCobrosPeriodo(null)
       }
@@ -175,7 +200,21 @@ export function useDashboardKpis() {
 
   const clientesActivosCount = useMemo(() => clientes.filter(c => c.activo).length, [clientes])
 
-  const totalGastos = useMemo(() => gastos.reduce((sum, g) => sum + Number(g.monto || 0), 0), [gastos])
+  const totalGastos = useMemo(() => {
+    const reales = gastos.filter(g => !g.esProyeccion).reduce((sum, g) => sum + Number(g.monto || 0), 0);
+    const proyectados = gastos.filter(g => g.esProyeccion).reduce((sum, g) => sum + Number(g.monto || 0), 0);
+    return reales + proyectados;
+  }, [gastos]);
+
+  const totalGastosReales = useMemo(() => 
+    gastos.filter(g => !g.esProyeccion).reduce((sum, g) => sum + Number(g.monto || 0), 0), 
+    [gastos]
+  );
+
+  const totalGastosProyectados = useMemo(() => 
+    gastos.filter(g => g.esProyeccion).reduce((sum, g) => sum + Number(g.monto || 0), 0), 
+    [gastos]
+  );
 
   // Ganancia del proveedor (si el usuario actual tiene rol PROVEEDOR):
   // Sumamos por factura: (precioUnitario - costoProveedor) * cantidad de items donde el proveedor coincide
@@ -235,7 +274,27 @@ export function useDashboardKpis() {
     return recibosProveedor30d.reduce((acc: number, r: any) => acc + Number(r?.monto || 0), 0)
   }, [recibosProveedor30d])
 
-  return { loading, error, ingresosPorMoneda, pipeline, clientesActivosCount, totalGastos, clientes, empresasCount, gananciaProveedor30d, tieneRolProveedor, ultimosIngresosProveedor30d, recibosProveedor30d, kpisAdminMes, periodoSeleccionado, rangoFechas, seleccionarPeriodo, cobrosPeriodo }
+  return { 
+    loading, 
+    error, 
+    ingresosPorMoneda, 
+    pipeline, 
+    clientesActivosCount, 
+    totalGastos, 
+    totalGastosReales,
+    totalGastosProyectados,
+    clientes, 
+    empresasCount, 
+    gananciaProveedor30d, 
+    tieneRolProveedor, 
+    ultimosIngresosProveedor30d, 
+    recibosProveedor30d, 
+    kpisAdminMes, 
+    periodoSeleccionado, 
+    rangoFechas, 
+    seleccionarPeriodo, 
+    cobrosPeriodo 
+  }
 }
 
 export function useGastosPorCategoria() {

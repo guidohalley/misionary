@@ -21,7 +21,7 @@ type AllRoutesProps = ViewsProps
 const { authenticatedEntryPath } = appConfig
 
 const AllRoutes = (props: AllRoutesProps) => {
-    const userAuthority = useAppSelector((state) => state.auth.user.authority)
+    const userAuthority = useAppSelector((state) => state.auth.user.roles || state.auth.user.authority || [])
 
     // Encontrar las rutas de invitación específicas
     const invitationRoutes = publicRoutes.filter(route => 

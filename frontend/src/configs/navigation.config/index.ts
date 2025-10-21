@@ -23,7 +23,7 @@ const navigationConfig: NavigationTree[] = [
         translateKey: 'nav.analytics',
         icon: 'chartLine',
         type: NAV_ITEM_TYPE_ITEM,
-        authority: ['ADMIN'],
+        authority: ['ADMIN', 'CONTADOR'],
         subMenu: [],
     },
     
@@ -35,7 +35,7 @@ const navigationConfig: NavigationTree[] = [
         translateKey: 'nav.catalogos.title',
         icon: 'database',
         type: NAV_ITEM_TYPE_COLLAPSE,
-        authority: [],
+        authority: ['ADMIN', 'CONTADOR', 'PROVEEDOR'],
         subMenu: [
             {
                 key: 'catalogos.productos',
@@ -44,7 +44,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.catalogos.productos',
                 icon: 'package',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: [],
+                authority: ['ADMIN', 'CONTADOR', 'PROVEEDOR'],
                 subMenu: [],
             },
             {
@@ -54,7 +54,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.catalogos.servicios',
                 icon: 'briefcase',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: [],
+                authority: ['ADMIN', 'CONTADOR', 'PROVEEDOR'],
                 subMenu: [],
             },
             {
@@ -64,7 +64,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.catalogos.precios',
                 icon: 'chartBar',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: [],
+                authority: ['ADMIN', 'CONTADOR'],
                 subMenu: [],
             },
         ],
@@ -78,7 +78,7 @@ const navigationConfig: NavigationTree[] = [
         translateKey: 'nav.comercial.title',
         icon: 'briefcase',
         type: NAV_ITEM_TYPE_COLLAPSE,
-        authority: [],
+        authority: ['ADMIN', 'CONTADOR'],
         subMenu: [
             {
                 key: 'comercial.clientes',
@@ -87,7 +87,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.comercial.clientes',
                 icon: 'userGroup',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: [],
+                authority: ['ADMIN', 'CONTADOR'],
                 subMenu: [],
             },
             {
@@ -97,7 +97,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.comercial.empresas',
                 icon: 'building',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: [],
+                authority: ['ADMIN', 'CONTADOR'],
                 subMenu: [],
             },
             {
@@ -107,7 +107,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.comercial.proveedores',
                 icon: 'truck',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: [],
+                authority: ['ADMIN', 'CONTADOR'],
                 subMenu: [],
             },
             {
@@ -117,10 +117,22 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.comercial.presupuestos',
                 icon: 'calculator',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: [],
+                authority: ['ADMIN', 'CONTADOR'],
                 subMenu: [],
             },
         ],
+    },
+
+    // === PRESUPUESTOS PARA PROVEEDORES ===
+    {
+        key: 'mis-presupuestos',
+        path: '/presupuestos',
+        title: 'Mis Presupuestos',
+        translateKey: 'nav.presupuestos.mis',
+        icon: 'calculator',
+        type: NAV_ITEM_TYPE_ITEM,
+        authority: ['PROVEEDOR'],
+        subMenu: [],
     },
 
     // === OPERACIONES RÁPIDAS ===
@@ -131,7 +143,7 @@ const navigationConfig: NavigationTree[] = [
         translateKey: 'nav.operaciones.title',
         icon: 'lightning',
         type: NAV_ITEM_TYPE_COLLAPSE,
-        authority: [],
+        authority: ['ADMIN', 'CONTADOR'],
         subMenu: [
             {
                 key: 'operaciones.nuevo-cliente',
@@ -140,7 +152,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.operaciones.nuevoClienteConEmpresa',
                 icon: 'userAdd',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: [],
+                authority: ['ADMIN', 'CONTADOR'],
                 subMenu: [],
             },
             {
@@ -150,7 +162,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.operaciones.nuevoProveedor',
                 icon: 'buildingAdd',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: [],
+                authority: ['ADMIN', 'CONTADOR'],
                 subMenu: [],
             },
             {
@@ -160,7 +172,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.operaciones.nuevoPresupuesto',
                 icon: 'documentAdd',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: [],
+                authority: ['ADMIN', 'CONTADOR'],
                 subMenu: [],
             },
             {
@@ -170,7 +182,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.operaciones.nuevoGasto',
                 icon: 'receiptAdd',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: [],
+                authority: ['ADMIN', 'CONTADOR'],
                 subMenu: [],
             },
             {
@@ -180,7 +192,40 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.operaciones.nuevoUsuario',
                 icon: 'userPlus',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: ['ADMIN'], // Solo admins pueden crear usuarios internos
+                authority: ['ADMIN'],
+                subMenu: [],
+            },
+        ],
+    },
+
+    // === OPERACIONES PARA PROVEEDORES ===
+    {
+        key: 'mis-operaciones',
+        path: '',
+        title: 'Mis Operaciones',
+        translateKey: 'nav.operaciones.proveedor',
+        icon: 'lightning',
+        type: NAV_ITEM_TYPE_COLLAPSE,
+        authority: ['PROVEEDOR'],
+        subMenu: [
+            {
+                key: 'mis-operaciones.nuevo-producto',
+                path: '/productos/new',
+                title: 'Nuevo Producto',
+                translateKey: 'nav.operaciones.proveedor.nuevoProducto',
+                icon: 'package',
+                type: NAV_ITEM_TYPE_ITEM,
+                authority: ['PROVEEDOR'],
+                subMenu: [],
+            },
+            {
+                key: 'mis-operaciones.nuevo-servicio',
+                path: '/servicios/new',
+                title: 'Nuevo Servicio',
+                translateKey: 'nav.operaciones.proveedor.nuevoServicio',
+                icon: 'briefcase',
+                type: NAV_ITEM_TYPE_ITEM,
+                authority: ['PROVEEDOR'],
                 subMenu: [],
             },
         ],
@@ -194,16 +239,16 @@ const navigationConfig: NavigationTree[] = [
         translateKey: 'nav.finanzas.title',
         icon: 'chartLine',
         type: NAV_ITEM_TYPE_COLLAPSE,
-        authority: [],
+        authority: ['ADMIN', 'CONTADOR'],
         subMenu: [
             {
                 key: 'finanzas.resumen',
                 path: '/finanzas',
-                title: 'Presupuestos',
+                title: 'Resumen Financiero',
                 translateKey: 'nav.finanzas.resumen',
                 icon: 'chartLine',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: [],
+                authority: ['ADMIN'],
                 subMenu: [],
             },
             {
@@ -213,7 +258,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.finanzas.gastos',
                 icon: 'cash',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: [],
+                authority: ['ADMIN', 'CONTADOR'],
                 subMenu: [],
             },
             {
@@ -223,7 +268,17 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.finanzas.rentabilidad',
                 icon: 'trendingUp',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: [],
+                authority: ['ADMIN'],
+                subMenu: [],
+            },
+            {
+                key: 'finanzas.recibos',
+                path: '/recibos',
+                title: 'Recibos',
+                translateKey: 'nav.finanzas.recibos',
+                icon: 'receipt',
+                type: NAV_ITEM_TYPE_ITEM,
+                authority: ['ADMIN', 'CONTADOR'],
                 subMenu: [],
             },
         ],
@@ -237,7 +292,7 @@ const navigationConfig: NavigationTree[] = [
         translateKey: 'nav.configuracion.title',
         icon: 'cog',
         type: NAV_ITEM_TYPE_COLLAPSE,
-        authority: [],
+        authority: ['ADMIN'],
         subMenu: [
             {
                 key: 'configuracion.monedas',
@@ -246,7 +301,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.configuracion.monedas',
                 icon: 'currency',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: [],
+                authority: ['ADMIN'],
                 subMenu: [],
             },
             {
@@ -256,7 +311,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.configuracion.impuestos',
                 icon: 'percentage',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: [],
+                authority: ['ADMIN'],
                 subMenu: [],
             },
         ],
