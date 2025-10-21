@@ -135,8 +135,27 @@ export class PersonaController {
   static async delete(req: Request, res: Response) {
     try {
       const id = parseInt(req.params.id);
-  await PersonaService.delete(id);
-  return res.status(204).send();
+      // Verificar relaciones para decidir soft/hard delete
+      const persona = await PersonaService.findById(id);
+      if (!persona) {
+        return res.status(404).json({ error: 'Persona no encontrada' });
+      }
+
+      const tieneRelaciones = Boolean(
+        (persona as any).empresas?.length ||
+        (persona as any).productos?.length ||
+        (persona as any).servicios?.length ||
+        (persona as any).presupuestos?.length ||
+        (persona as any).recibos?.length
+      );
+
+      if (tieneRelaciones) {
+        await PersonaService.update(id, { activo: false } as any);
+        return res.status(200).json({ message: 'Persona desactivada exitosamente' });
+      }
+
+      await PersonaService.delete(id);
+      return res.status(204).send();
     } catch (error) {
   return res.status(500).json({ error: 'Error al eliminar la persona' });
     }
