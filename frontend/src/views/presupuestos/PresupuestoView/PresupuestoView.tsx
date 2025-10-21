@@ -263,7 +263,8 @@ const PresupuestoView: React.FC = () => {
                 Productos
               </span>
             </h2>
-            <div className="overflow-x-auto">
+            {/* Vista Desktop - Tabla */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full print-table">
                 <thead>
                   <tr className="border-b border-gray-200 bg-blue-50 dark:bg-blue-900/10">
@@ -310,6 +311,47 @@ const PresupuestoView: React.FC = () => {
                   ))}
                 </tbody>
               </table>
+            </div>
+
+            {/* Vista Mobile - Cards */}
+            <div className="md:hidden space-y-3">
+              {productos.map((item, index) => {
+                const costo = Number(item.producto?.costoProveedor || 0);
+                const ganancia = (item.precioUnitario - costo) * item.cantidad;
+                return (
+                  <div key={index} className="bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800 p-3">
+                    <div className="font-medium text-gray-900 dark:text-white mb-2">
+                      {item.producto?.nombre || 'N/A'}
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div>
+                        <span className="text-gray-500 dark:text-gray-400">Cantidad:</span>
+                        <span className="ml-2 font-medium text-gray-900 dark:text-white">{item.cantidad}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500 dark:text-gray-400">Costo:</span>
+                        <span className="ml-2 font-medium text-gray-900 dark:text-white">{formatPrice(costo)}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500 dark:text-gray-400">Margen:</span>
+                        <span className="ml-2 font-medium text-gray-900 dark:text-white">{Number(item.producto?.margenAgencia || 0).toFixed(2)}%</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500 dark:text-gray-400">P. Unit.:</span>
+                        <span className="ml-2 font-medium text-gray-900 dark:text-white">{formatPrice(item.precioUnitario)}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500 dark:text-gray-400">Ganancia:</span>
+                        <span className="ml-2 font-medium text-yellow-700 dark:text-yellow-400">{formatPrice(ganancia)}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500 dark:text-gray-400">Subtotal:</span>
+                        <span className="ml-2 font-bold text-gray-900 dark:text-white">{formatPrice(item.cantidad * item.precioUnitario)}</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
             
             {/* Resumen de Productos */}
@@ -358,7 +400,8 @@ const PresupuestoView: React.FC = () => {
                 Servicios
               </span>
             </h2>
-            <div className="overflow-x-auto">
+            {/* Vista Desktop - Tabla */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full print-table">
                 <thead>
                   <tr className="border-b border-gray-200 bg-green-50 dark:bg-green-900/10">
@@ -408,6 +451,50 @@ const PresupuestoView: React.FC = () => {
                   ))}
                 </tbody>
               </table>
+            </div>
+
+            {/* Vista Mobile - Cards */}
+            <div className="md:hidden space-y-3">
+              {servicios.map((item, index) => {
+                const costo = Number(item.servicio?.costoProveedor || 0);
+                const ganancia = (item.precioUnitario - costo) * item.cantidad;
+                return (
+                  <div key={index} className="bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800 p-3">
+                    <div className="font-medium text-gray-900 dark:text-white mb-1">
+                      {item.servicio?.nombre || 'N/A'}
+                    </div>
+                    {item.servicio?.descripcion && (
+                      <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">{item.servicio.descripcion}</div>
+                    )}
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div>
+                        <span className="text-gray-500 dark:text-gray-400">Cantidad:</span>
+                        <span className="ml-2 font-medium text-gray-900 dark:text-white">{item.cantidad}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500 dark:text-gray-400">Costo:</span>
+                        <span className="ml-2 font-medium text-gray-900 dark:text-white">{formatPrice(costo)}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500 dark:text-gray-400">Margen:</span>
+                        <span className="ml-2 font-medium text-gray-900 dark:text-white">{Number(item.servicio?.margenAgencia || 0).toFixed(2)}%</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500 dark:text-gray-400">P. Unit.:</span>
+                        <span className="ml-2 font-medium text-gray-900 dark:text-white">{formatPrice(item.precioUnitario)}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500 dark:text-gray-400">Ganancia:</span>
+                        <span className="ml-2 font-medium text-yellow-700 dark:text-yellow-400">{formatPrice(ganancia)}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500 dark:text-gray-400">Subtotal:</span>
+                        <span className="ml-2 font-bold text-gray-900 dark:text-white">{formatPrice(item.cantidad * item.precioUnitario)}</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
             
             {/* Resumen de Servicios */}
