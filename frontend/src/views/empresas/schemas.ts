@@ -62,7 +62,13 @@ export const updateEmpresaSchema = z.object({
     .string()
     .max(20, 'El CUIT no puede exceder 20 caracteres')
     .optional()
-    .or(z.literal('')),
+    .or(z.literal(''))
+    .refine((val) => {
+      if (!val || val.trim() === '') return true;
+      // Permitir CUIT con o sin guiones
+      const cuitRegex = /^\d{2}-?\d{8}-?\d{1}$/;
+      return cuitRegex.test(val);
+    }, 'El CUIT debe tener el formato XX-XXXXXXXX-X'),
   
   telefono: z
     .string()

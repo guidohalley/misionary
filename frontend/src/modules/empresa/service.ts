@@ -95,16 +95,28 @@ export const empresaService = {
   // Actualizar empresa
   async updateEmpresa(id: number, data: UpdateEmpresaRequest): Promise<Empresa> {
     try {
+      console.log('Service: Updating empresa with ID:', id, 'Data:', data);
+      
       const response = await ApiService.fetchData<Empresa>({
         url: ENDPOINTS.empresaById(id),
         method: 'PUT',
         data: data as unknown as Record<string, unknown>
       });
       
+      console.log('Service: Update response:', response);
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating empresa:', error);
-      throw new Error('Error al actualizar empresa');
+      
+      // Extraer mensaje de error más específico
+      let errorMessage = 'Error al actualizar empresa';
+      if (error?.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+      
+      throw new Error(errorMessage);
     }
   },
 

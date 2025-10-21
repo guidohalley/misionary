@@ -65,8 +65,16 @@ const updateEmpresaValidation = [
   
   body('cuit')
     .optional()
-    .matches(/^\d{2}-\d{8}-\d{1}$/)
-    .withMessage('El CUIT debe tener el formato XX-XXXXXXXX-X'),
+    .custom((value) => {
+      if (value && value.trim() !== '') {
+        // Permitir CUIT con o sin guiones
+        const cuitRegex = /^\d{2}-?\d{8}-?\d{1}$/;
+        if (!cuitRegex.test(value)) {
+          throw new Error('El CUIT debe tener el formato XX-XXXXXXXX-X o XXXXXXXX-X');
+        }
+      }
+      return true;
+    }),
   
   body('telefono')
     .optional()
@@ -82,6 +90,18 @@ const updateEmpresaValidation = [
     .optional()
     .isLength({ max: 300 })
     .withMessage('La dirección no puede exceder 300 caracteres'),
+  
+  body('clienteId')
+    .optional()
+    .custom((value) => {
+      if (value !== undefined && value !== null) {
+        const num = parseInt(value);
+        if (isNaN(num) || num < 1) {
+          throw new Error('El ID del cliente debe ser un número entero positivo');
+        }
+      }
+      return true;
+    }),
   
   body('activo')
     .optional()

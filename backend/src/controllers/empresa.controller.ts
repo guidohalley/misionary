@@ -81,29 +81,42 @@ export const empresaController = {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
+        console.error('Validation errors:', errors.array());
         throw new HttpError(400, 'Datos de entrada inválidos');
       }
 
       const { id } = req.params;
       const updateData = req.body;
 
+      console.log('Updating empresa with ID:', id, 'Data:', updateData);
+
       // Verificar si la empresa existe
       const existingEmpresa = await EmpresaService.findById(parseInt(id));
       if (!existingEmpresa) {
+        console.error('Empresa not found with ID:', id);
         throw new HttpError(404, 'Empresa no encontrada');
       }
 
       // Verificar CUIT duplicado si se está actualizando
-      if (updateData.cuit && updateData.cuit !== existingEmpresa.cuit) {
+      if (updateData.cuit && updateData.cuit.trim() !== '' && updateData.cuit !== existingEmpresa.cuit) {
         const duplicateEmpresa = await EmpresaService.findByCuit(updateData.cuit);
         if (duplicateEmpresa) {
           throw new HttpError(400, 'Ya existe una empresa con este CUIT');
         }
       }
 
-      const empresaActualizada = await EmpresaService.update(parseInt(id), updateData);
+      // Limpiar datos vacíos
+      const cleanedData = Object.fromEntries(
+        Object.entries(updateData).filter(([_, value]) => value !== '' && value !== null && value !== undefined)
+      );
+
+      console.log('Cleaned data for update:', cleanedData);
+
+      const empresaActualizada = await EmpresaService.update(parseInt(id), cleanedData);
+      console.log('Empresa updated successfully:', empresaActualizada.id);
       res.json(empresaActualizada);
     } catch (error) {
+      console.error('Error updating empresa:', error);
       next(error);
     }
   },

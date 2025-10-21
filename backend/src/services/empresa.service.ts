@@ -49,16 +49,32 @@ export class EmpresaService {
   }
 
   static async update(id: number, data: Partial<Empresa>) {
-    console.log('EmpresaService.update - ID:', id, 'Data:', data);
-    const result = await prisma.empresa.update({
-      where: { id },
-      data,
-      include: {
-        cliente: true
+    try {
+      console.log('EmpresaService.update - ID:', id, 'Data:', data);
+      
+      // Verificar que la empresa existe antes de actualizar
+      const existingEmpresa = await prisma.empresa.findUnique({
+        where: { id }
+      });
+      
+      if (!existingEmpresa) {
+        throw new Error(`Empresa with ID ${id} not found`);
       }
-    });
-    console.log('EmpresaService.update - Result:', result);
-    return result;
+
+      const result = await prisma.empresa.update({
+        where: { id },
+        data,
+        include: {
+          cliente: true
+        }
+      });
+      
+      console.log('EmpresaService.update - Result:', result);
+      return result;
+    } catch (error) {
+      console.error('Error in EmpresaService.update:', error);
+      throw error;
+    }
   }
 
   static async delete(id: number) {

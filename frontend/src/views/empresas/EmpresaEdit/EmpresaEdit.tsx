@@ -86,7 +86,18 @@ const EmpresaEdit: React.FC = () => {
 
     try {
       setError(null);
-      await updateEmpresa(parseInt(id), data as UpdateEmpresaFormData);
+      console.log('Submitting empresa update:', data);
+      
+      // Limpiar datos vacíos antes de enviar
+      const cleanedData = Object.fromEntries(
+        Object.entries(data).filter(([_, value]) => 
+          value !== '' && value !== null && value !== undefined
+        )
+      );
+      
+      console.log('Cleaned data to send:', cleanedData);
+      
+      await updateEmpresa(parseInt(id), cleanedData as UpdateEmpresaFormData);
       
       toast.push(
         <Notification title="Éxito" type="success">
@@ -95,13 +106,14 @@ const EmpresaEdit: React.FC = () => {
       );
       
       navigate('/empresas');
-    } catch (err) {
-      setError('Error al actualizar la empresa');
+    } catch (err: any) {
+      const errorMessage = err?.message || 'Error al actualizar la empresa';
+      setError(errorMessage);
       console.error('Error updating empresa:', err);
       
       toast.push(
         <Notification title="Error" type="danger">
-          Error al actualizar la empresa
+          {errorMessage}
         </Notification>
       );
     }
