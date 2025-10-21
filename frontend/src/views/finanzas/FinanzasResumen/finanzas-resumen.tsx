@@ -289,7 +289,8 @@ const FinanzasResumen: React.FC = () => {
         <Card className="mt-6">
           <div className="p-4">
             <h3 className="text-lg font-semibold mb-3">Pagos a ADMIN</h3>
-            <div className="overflow-x-auto">
+            {/* Vista Desktop - Tabla */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="min-w-full text-sm">
                 <thead>
                   <tr className="text-left border-b">
@@ -312,6 +313,36 @@ const FinanzasResumen: React.FC = () => {
                   ))}
                 </tbody>
               </table>
+            </div>
+
+            {/* Vista Mobile - Cards */}
+            <div className="md:hidden space-y-3">
+              {pagosAdmin.map((p: any, idx: number) => (
+                <div key={p.id || idx} className="bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-3">
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div>
+                      <span className="text-gray-500 dark:text-gray-400">Fecha:</span>
+                      <span className="ml-2 font-medium text-gray-900 dark:text-white">{p.fecha ? new Date(p.fecha).toLocaleDateString() : '-'}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500 dark:text-gray-400">Admin:</span>
+                      <span className="ml-2 font-medium text-gray-900 dark:text-white">{p.admin?.nombre || p.adminId}</span>
+                    </div>
+                    <div className="col-span-2">
+                      <span className="text-gray-500 dark:text-gray-400">Concepto:</span>
+                      <span className="ml-2 font-medium text-gray-900 dark:text-white">{p.concepto || '-'}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500 dark:text-gray-400">Monto:</span>
+                      <span className="ml-2 font-bold text-green-600 dark:text-green-400">{Number(p.monto || 0).toLocaleString('es-AR', { minimumFractionDigits: 2 })}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500 dark:text-gray-400">Método:</span>
+                      <span className="ml-2 font-medium text-gray-900 dark:text-white">{p.metodoPago}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </Card>
