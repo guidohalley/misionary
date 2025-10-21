@@ -196,10 +196,23 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
       });
 
       // Precargar impuestos seleccionados si existen
-      if ((initialData as any).presupuestoImpuestos && impuestosDisponibles.length > 0) {
-        const impuestosIds = (initialData as any).presupuestoImpuestos.map((pi: any) => pi.impuestoId);
-        const impuestosDelPresupuesto = impuestosDisponibles.filter(imp => impuestosIds.includes(imp.id));
-        setImpuestosSeleccionados(impuestosDelPresupuesto);
+      if (impuestosDisponibles.length > 0) {
+        let impuestosIds: number[] = [];
+        
+        // Caso 1: initialData tiene presupuestoImpuestos (objeto completo del backend)
+        if ((initialData as any).presupuestoImpuestos) {
+          impuestosIds = (initialData as any).presupuestoImpuestos.map((pi: any) => pi.impuestoId);
+        }
+        // Caso 2: initialData tiene impuestosSeleccionados (array de IDs desde PresupuestoEdit)
+        else if (initialData.impuestosSeleccionados && Array.isArray(initialData.impuestosSeleccionados)) {
+          impuestosIds = initialData.impuestosSeleccionados;
+        }
+        
+        if (impuestosIds.length > 0) {
+          const impuestosDelPresupuesto = impuestosDisponibles.filter(imp => impuestosIds.includes(imp.id));
+          setImpuestosSeleccionados(impuestosDelPresupuesto);
+          console.log('✅ Impuestos precargados:', impuestosDelPresupuesto);
+        }
       }
 
       initializedRef.current = true;
@@ -207,12 +220,36 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
     }
   }, [initialData, reset, impuestosDisponibles]);
 
+  // useEffect adicional para cargar impuestos cuando impuestosDisponibles se carga después de initialData
+  useEffect(() => {
+    if (initialData && impuestosDisponibles.length > 0 && initializedRef.current) {
+      let impuestosIds: number[] = [];
+      
+      // Caso 1: initialData tiene presupuestoImpuestos (objeto completo del backend)
+      if ((initialData as any).presupuestoImpuestos) {
+        impuestosIds = (initialData as any).presupuestoImpuestos.map((pi: any) => pi.impuestoId);
+      }
+      // Caso 2: initialData tiene impuestosSeleccionados (array de IDs desde PresupuestoEdit)
+      else if (initialData.impuestosSeleccionados && Array.isArray(initialData.impuestosSeleccionados)) {
+        impuestosIds = initialData.impuestosSeleccionados;
+      }
+      
+      if (impuestosIds.length > 0) {
+        const impuestosDelPresupuesto = impuestosDisponibles.filter(imp => impuestosIds.includes(imp.id));
+        if (impuestosDelPresupuesto.length > 0) {
+          setImpuestosSeleccionados(impuestosDelPresupuesto);
+          console.log('✅ Impuestos precargados (segundo intento):', impuestosDelPresupuesto);
+        }
+      }
+    }
+  }, [impuestosDisponibles, initialData]);
+
   const handleFormSubmit = async (data: PresupuestoFormData) => {
     try {
       setIsSubmitting(true);
       
       // Agregar totales calculados e impuestos seleccionados
-      const dataWithTotals = {
+      const dataWithTotals: any = {
         ...data,
         subtotal,
         impuestos,
@@ -230,6 +267,9 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
         // Activar ganancia global si hay monto o porcentaje
         usarGananciaGlobal: !!(data.montoGanancia || data.margenAgenciaGlobal),
       };
+      
+      // Eliminar montoGanancia porque el backend usa montoGananciaAgencia
+      delete dataWithTotals.montoGanancia;
 
       await onSubmit(dataWithTotals);
       toast.push(
@@ -300,7 +340,7 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
     >
-      <Card className="max-w-4xl mx-auto">
+      <Card className="w-full max-w-[98%] sm:max-w-[95%] md:max-w-4xl mx-auto">
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
             {isEdit ? 'Editar Presupuesto' : 'Nuevo Presupuesto'}

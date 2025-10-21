@@ -144,7 +144,7 @@ const ServicioForm: React.FC<ServicioFormProps> = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="container mx-auto p-4 max-w-7xl"
+      className="w-full max-w-[98%] sm:max-w-[95%] md:max-w-[90%] xl:max-w-7xl mx-auto p-3 sm:p-4"
     >
       {/* Header con breadcrumbs */}
       <motion.div

@@ -19,6 +19,12 @@ const PresupuestoEdit: React.FC = () => {
 
   useEffect(() => {
     if (selectedPresupuesto) {
+      console.log('🔍 DEBUG PresupuestoEdit - selectedPresupuesto:', selectedPresupuesto);
+      console.log('🔍 DEBUG presupuestoImpuestos:', selectedPresupuesto.presupuestoImpuestos);
+      
+      const impuestosSeleccionados = selectedPresupuesto.presupuestoImpuestos?.map(pi => pi.impuestoId) || [];
+      console.log('🔍 DEBUG impuestosSeleccionados mapeados:', impuestosSeleccionados);
+      
       setInitialData({
         clienteId: selectedPresupuesto.clienteId,
         items: selectedPresupuesto.items.map(item => ({
@@ -33,7 +39,7 @@ const PresupuestoEdit: React.FC = () => {
         margenAgenciaGlobal: selectedPresupuesto.margenAgenciaGlobal ? Number(selectedPresupuesto.margenAgenciaGlobal) : undefined,
         // IMPORTANTE: El backend devuelve montoGananciaAgencia, mapearlo a montoGanancia para el form
         montoGanancia: (selectedPresupuesto as any).montoGananciaAgencia ? Number((selectedPresupuesto as any).montoGananciaAgencia) : undefined,
-        impuestosSeleccionados: selectedPresupuesto.presupuestoImpuestos?.map(pi => pi.impuestoId) || [],
+        impuestosSeleccionados,
       });
     }
   }, [selectedPresupuesto]);

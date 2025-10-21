@@ -31,7 +31,7 @@ const Home = () => {
     const labelPeriodoCorto = periodoSeleccionado === '30D' ? 'últimos 30 días' : periodoSeleccionado === 'TRIMESTRE' ? 'trimestre' : 'mes'
 
     return (
-        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
+        <div className="w-full max-w-[98%] sm:max-w-[95%] md:max-w-[92%] xl:max-w-[88%] 2xl:max-w-[85%] mx-auto px-3 sm:px-4 py-4 sm:py-6">
             {/* Header responsive - Stack en mobile, inline en desktop */}
             <div className="mb-5 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
                 <div>
