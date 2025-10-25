@@ -1,6 +1,8 @@
 import prisma from '../config/prisma';
+import { EstadoPresupuesto } from '@prisma/client';
 import PresupuestoHistorialService from './presupuesto-historial.service';
 import { calcularMontoSugerido, validarGananciaGlobal } from '../utils/presupuestoGanancia';
+import { roundCurrency, currencyEquals } from '../utils/currency';
 
 export class PresupuestoService {
   /**
@@ -21,6 +23,20 @@ export class PresupuestoService {
         ...item,
         cantidad: item.cantidad ? Number(item.cantidad) : item.cantidad,
         precioUnitario: item.precioUnitario ? Number(item.precioUnitario) : item.precioUnitario,
+        // Transform producto decimals if exists
+        producto: item.producto ? {
+          ...item.producto,
+          precio: item.producto.precio ? Number(item.producto.precio) : item.producto.precio,
+          costoProveedor: item.producto.costoProveedor ? Number(item.producto.costoProveedor) : item.producto.costoProveedor,
+          margenAgencia: item.producto.margenAgencia ? Number(item.producto.margenAgencia) : item.producto.margenAgencia,
+        } : null,
+        // Transform servicio decimals if exists
+        servicio: item.servicio ? {
+          ...item.servicio,
+          precio: item.servicio.precio ? Number(item.servicio.precio) : item.servicio.precio,
+          costoProveedor: item.servicio.costoProveedor ? Number(item.servicio.costoProveedor) : item.servicio.costoProveedor,
+          margenAgencia: item.servicio.margenAgencia ? Number(item.servicio.margenAgencia) : item.servicio.margenAgencia,
+        } : null,
       })) || [],
       presupuestoImpuestos: presupuesto.presupuestoImpuestos?.map((pi: any) => ({
         ...pi,
@@ -93,6 +109,25 @@ export class PresupuestoService {
       
       console.log('Validaciones pasadas, creando presupuesto...');
       
+      // Validar coherencia: subtotal debe ser igual a la suma de items
+      const subtotalCalculado = data.items.reduce((sum, item) => {
+        return sum + (item.cantidad * item.precioUnitario);
+      }, 0);
+
+      if (!currencyEquals(roundCurrency(subtotalCalculado, 2), data.subtotal, 0.01)) {
+        throw new Error(
+          `Subtotal inconsistente. Suma de items: ${roundCurrency(subtotalCalculado, 2)}, Subtotal enviado: ${data.subtotal}`
+        );
+      }
+
+      // Validar coherencia: total debe ser igual a subtotal + impuestos
+      const totalCalculado = roundCurrency(data.subtotal + data.impuestos, 2);
+      if (!currencyEquals(totalCalculado, data.total, 0.01)) {
+        throw new Error(
+          `Total inconsistente. Calculado: ${totalCalculado}, Enviado: ${data.total}`
+        );
+      }
+      
       // Validar ganancia global si se proporciona
       if (data.usarGananciaGlobal) {
         const validacion = validarGananciaGlobal(
@@ -118,7 +153,7 @@ export class PresupuestoService {
           impuestos: data.impuestos,
           total: data.total,
           monedaId: data.monedaId || 1,
-          estado: 'BORRADOR' as any,
+          estado: EstadoPresupuesto.BORRADOR,
           // Vigencia del presupuesto (opcional)
           periodoInicio: data.periodoInicio ? new Date(data.periodoInicio) : undefined,
           periodoFin: data.periodoFin ? new Date(data.periodoFin) : undefined,
@@ -227,8 +262,18 @@ export class PresupuestoService {
         moneda: true,
         items: {
           include: {
-            producto: true,
-            servicio: true
+            producto: {
+              include: {
+                proveedor: true,
+                moneda: true
+              }
+            },
+            servicio: {
+              include: {
+                proveedor: true,
+                moneda: true
+              }
+            }
           }
         },
         presupuestoImpuestos: {
@@ -392,7 +437,7 @@ export class PresupuestoService {
 
     return prisma.presupuesto.update({
       where: { id },
-      data: { estado: estado as any }
+      data: { estado: estado as EstadoPresupuesto }
     }).then(async (presupuestoActualizado) => {
       // Registrar el cambio de estado en el historial
       const snapshotNuevo = await PresupuestoHistorialService.crearSnapshot(id);
@@ -420,7 +465,7 @@ export class PresupuestoService {
   static async findAll(clienteId?: number, estado?: string) {
     const where: any = {};
     if (clienteId) where.clienteId = clienteId;
-    if (estado) where.estado = estado as any;
+    if (estado) where.estado = estado as EstadoPresupuesto;
 
     const presupuestos = await prisma.presupuesto.findMany({
       where,

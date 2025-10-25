@@ -1,5 +1,7 @@
 import prisma from '../config/prisma'
+import { RolUsuario } from '@prisma/client'
 import { calcularGananciaPresupuesto } from '../utils/presupuestoGanancia'
+import type { PresupuestoConItems } from '../utils/presupuestoGanancia'
 
 function toNumber(d: any): number {
   if (d === null || d === undefined) return 0
@@ -24,7 +26,7 @@ export async function resumenPresupuesto(presupuestoId: number) {
   const totalPrecio = presupuesto.items.reduce((acc: number, it: any) => acc + toNumber(it.precioUnitario) * it.cantidad, 0)
   
   // Calcular ganancia usando la nueva función que considera ganancia global
-  const { gananciaTotal, tipoCalculo } = calcularGananciaPresupuesto(presupuesto as any)
+  const { gananciaTotal, tipoCalculo } = calcularGananciaPresupuesto(presupuesto as PresupuestoConItems)
   const totalGananciaEmpresa = gananciaTotal
 
   const pagosProveedor = await prisma.recibo.aggregate({
@@ -67,7 +69,7 @@ export async function crearPagoAdmin(input: {
 }) {
   const admin = await prisma.persona.findUnique({ where: { id: input.adminId } })
   if (!admin) throw new Error('Admin no encontrado')
-  if (!admin.roles.includes('ADMIN' as any)) throw new Error('El receptor no es ADMIN')
+  if (!admin.roles.includes(RolUsuario.ADMIN)) throw new Error('El receptor no es ADMIN')
 
   const resumen = await resumenPresupuesto(input.presupuestoId)
   if (input.monto > resumen.disponibleAdmin) throw new Error('Monto excede la ganancia disponible')
