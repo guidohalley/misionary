@@ -2,23 +2,8 @@
 node_modules/
 package-lock.json
 
-# Reportes de Playwright
-reports/
-test-results/
-playwright-report/
-blob-report/
-
-# Logs de tests
-logs/
-*.log
-
-# Screenshots y videos
-screenshots/
-videos/
-traces/
-
-# Estados de sesión (contienen información sensible)
-fixtures/*-state.json
+# Reportes y resultados (todo en una carpeta)
+/output/
 
 # Temporales
 .DS_Store
@@ -30,6 +15,3 @@ fixtures/*-state.json
 .vscode/
 .idea/
 *.sublime-*
-
-# Sistema
-Thumbs.db

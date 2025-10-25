@@ -4,7 +4,13 @@
   "description": "## Descripción",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:admin": "playwright test tests/admin-proveedor.spec.ts --headed",
+    "test:proveedor": "playwright test tests/proveedor-productos-servicios.spec.ts --headed",
+    "test:flujo": "playwright test tests/admin-flujo-completo.spec.ts --headed --timeout=120000",
+    "report": "playwright show-report output/reports",
+    "clean": "rm -rf output"
   },
   "keywords": [],
   "author": "",
