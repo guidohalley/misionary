@@ -1,16 +1,27 @@
 import { Request, Response, RequestHandler } from 'express'
 import { crearRecibo, listarRecibos } from '../services/recibo.service'
+import { toNumber, isValidCurrencyValue } from '../utils/currency'
 
 export const postRecibo: RequestHandler = async (req: Request, res: Response) => {
   const { personaId, concepto, monto, fecha, metodoPago, emailNotificacion, presupuestoId, monedaId } = req.body
+  
+  // Validar campos obligatorios
   if (!personaId || !concepto || !monto || !fecha || !metodoPago) {
-  res.status(400).json({ success: false, message: 'Datos incompletos' })
-  return
+    res.status(400).json({ success: false, message: 'Datos incompletos' })
+    return
   }
+  
+  // Validar y convertir monto
+  const montoNumber = toNumber(monto, NaN)
+  if (!isValidCurrencyValue(montoNumber, false, false)) {
+    res.status(400).json({ success: false, message: 'El monto debe ser un número positivo válido' })
+    return
+  }
+  
   const recibo = await crearRecibo({
     personaId: Number(personaId),
     concepto,
-    monto: Number(monto),
+    monto: montoNumber,
     fecha: new Date(fecha),
     metodoPago,
     emailNotificacion,
