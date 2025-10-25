@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Card, Button } from '@/components/ui';
+import { Card, Button, Input, Select, Pagination } from '@/components/ui';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
 import PersonaList from './PersonaList';
 import InviteProviderModal from './InviteProviderModal';
@@ -22,6 +22,12 @@ const PersonasView: React.FC<PersonasViewProps> = ({ tipoFiltro }) => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [personaToDelete, setPersonaToDelete] = useState<number | null>(null);
   const [showInviteModal, setShowInviteModal] = useState(false);
+  
+  // Estados para búsqueda y paginación
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredPersonas, setFilteredPersonas] = useState<Persona[]>([]);
 
   // Obtener tipo de filtro desde URL o prop
   const tipoFromUrl = searchParams.get('tipo') as TipoPersona | null;
@@ -37,6 +43,33 @@ const PersonasView: React.FC<PersonasViewProps> = ({ tipoFiltro }) => {
 
   // Verificar si el usuario es admin
   const isAdmin = user?.authority?.includes('ADMIN');
+
+  // Filtrar personas cuando cambie el término de búsqueda o la lista de personas
+  useEffect(() => {
+    const filtered = personas.filter(persona =>
+      persona.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      persona.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      persona.tipo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      persona.telefono?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredPersonas(filtered);
+    setCurrentPage(1); // Reset a primera página al filtrar
+  }, [personas, searchTerm]);
+
+  // Opciones de tamaño de página
+  const pageSizeOptions: { value: number; label: string }[] = [
+    { value: 10, label: '10 por página' },
+    { value: 25, label: '25 por página' },
+    { value: 50, label: '50 por página' },
+  ];
+  const selectedPageSize = pageSizeOptions.find(o => o.value === pageSize) || pageSizeOptions[0];
+
+  // Calcular paginación
+  const totalItems = filteredPersonas.length;
+  const totalPages = Math.ceil(totalItems / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const currentItems = filteredPersonas.slice(startIndex, endIndex);
 
   // Obtener título según el tipo de filtro
   const getTitulo = () => {
@@ -131,13 +164,61 @@ const PersonasView: React.FC<PersonasViewProps> = ({ tipoFiltro }) => {
       >
         <Card>
           <div className="p-6">
+            {/* Barra de búsqueda y selector de tamaño */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+              <div className="flex-1 w-full sm:w-auto">
+                <Input
+                  placeholder="Buscar por nombre, email, tipo o teléfono..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full"
+                />
+              </div>
+              <div className="w-full sm:w-auto">
+                <Select
+                  value={selectedPageSize}
+                  onChange={(opt: any) => {
+                    if (opt && typeof opt.value === 'number') {
+                      setPageSize(opt.value);
+                      setCurrentPage(1);
+                    }
+                  }}
+                  options={pageSizeOptions}
+                  isSearchable={false}
+                  className="w-full sm:w-48"
+                />
+              </div>
+            </div>
+
+            {/* Tabla de personas */}
             <PersonaList
-              personas={personas}
+              personas={currentItems}
               loading={loading}
               error={error}
               onEdit={handleEdit}
               onDelete={handleDelete}
             />
+
+            {/* Paginación */}
+            {totalPages > 1 && (
+              <div className="mt-6 flex justify-center">
+                <Pagination
+                  total={totalItems}
+                  pageSize={pageSize}
+                  currentPage={currentPage}
+                  onChange={(page) => setCurrentPage(page)}
+                />
+              </div>
+            )}
+
+            {/* Mensaje cuando no hay resultados */}
+            {!loading && filteredPersonas.length === 0 && (
+              <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                {searchTerm 
+                  ? 'No se encontraron personas que coincidan con la búsqueda' 
+                  : 'No hay personas registradas'}
+              </div>
+            )}
           </div>
         </Card>
       </motion.div>

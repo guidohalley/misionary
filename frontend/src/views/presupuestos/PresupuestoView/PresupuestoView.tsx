@@ -257,7 +257,7 @@ const PresupuestoView: React.FC = () => {
         if (productos.length === 0) return null;
         
         return (
-          <Card className="mb-6">
+      <Card className="mb-6">
             <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
               <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
                 Productos
@@ -265,22 +265,22 @@ const PresupuestoView: React.FC = () => {
             </h2>
             {/* Vista Desktop - Tabla */}
             <div className="hidden md:block overflow-x-auto">
-              <table className="w-full print-table">
-                <thead>
+          <table className="w-full print-table">
+            <thead>
                   <tr className="border-b border-gray-200 bg-blue-50 dark:bg-blue-900/10">
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Descripción</th>
-                    <th className="text-right py-3 px-4 font-semibold text-gray-700">Cantidad</th>
+                <th className="text-left py-3 px-4 font-semibold text-gray-700">Descripción</th>
+                <th className="text-right py-3 px-4 font-semibold text-gray-700">Cantidad</th>
                     <th className="text-right py-3 px-4 font-semibold text-gray-700">Costo</th>
                     <th className="text-right py-3 px-4 font-semibold text-gray-700">Margen %</th>
-                    <th className="text-right py-3 px-4 font-semibold text-gray-700">Precio Unit.</th>
+                <th className="text-right py-3 px-4 font-semibold text-gray-700">Precio Unit.</th>
                     <th className="text-right py-3 px-4 font-semibold text-gray-700">Ganancia</th>
-                    <th className="text-right py-3 px-4 font-semibold text-gray-700">Subtotal</th>
-                  </tr>
-                </thead>
-                <tbody>
+                <th className="text-right py-3 px-4 font-semibold text-gray-700">Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
                   {productos.map((item, index) => (
-                    <tr key={index} className="border-b border-gray-100">
-                      <td className="py-3 px-4">
+                <tr key={index} className="border-b border-gray-100">
+                  <td className="py-3 px-4">
                         <div className="font-medium text-gray-900">
                           {item.producto?.nombre || 'N/A'}
                         </div>
@@ -380,7 +380,7 @@ const PresupuestoView: React.FC = () => {
                       }, 0);
                       return formatPrice(ganancia);
                     })()}
-                  </span>
+                      </span>
                 </div>
               </div>
             </div>
@@ -398,7 +398,7 @@ const PresupuestoView: React.FC = () => {
             <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
               <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
                 Servicios
-              </span>
+                      </span>
             </h2>
             {/* Vista Desktop - Tabla */}
             <div className="hidden md:block overflow-x-auto">
@@ -417,26 +417,26 @@ const PresupuestoView: React.FC = () => {
                 <tbody>
                   {servicios.map((item, index) => (
                     <tr key={index} className="border-b border-gray-100">
-                      <td className="py-3 px-4">
-                        <div className="font-medium text-gray-900">
+                  <td className="py-3 px-4">
+                    <div className="font-medium text-gray-900">
                           {item.servicio?.nombre || 'N/A'}
-                        </div>
-                        {item.servicio?.descripcion && (
-                          <div className="text-sm text-gray-600">{item.servicio.descripcion}</div>
-                        )}
-                      </td>
-                      <td className="py-3 px-4 text-right">
-                        {item.cantidad}
-                      </td>
+                    </div>
+                    {item.servicio?.descripcion && (
+                      <div className="text-sm text-gray-600">{item.servicio.descripcion}</div>
+                    )}
+                  </td>
+                  <td className="py-3 px-4 text-right">
+                    {item.cantidad}
+                  </td>
                       <td className="py-3 px-4 text-right">
                         {formatPrice(Number(item.servicio?.costoProveedor || 0))}
                       </td>
                       <td className="py-3 px-4 text-right">
                         {Number(item.servicio?.margenAgencia || 0).toFixed(2)}%
                       </td>
-                      <td className="py-3 px-4 text-right">
-                        {formatPrice(item.precioUnitario)}
-                      </td>
+                  <td className="py-3 px-4 text-right">
+                    {formatPrice(item.precioUnitario)}
+                  </td>
                       <td className="py-3 px-4 text-right text-yellow-700 dark:text-yellow-400 font-medium">
                         {(() => {
                           const costo = Number(item.servicio?.costoProveedor || 0);
@@ -444,14 +444,14 @@ const PresupuestoView: React.FC = () => {
                           return formatPrice(ganancia);
                         })()}
                       </td>
-                      <td className="py-3 px-4 text-right font-semibold">
-                        {formatPrice(item.cantidad * item.precioUnitario)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  <td className="py-3 px-4 text-right font-semibold">
+                    {formatPrice(item.cantidad * item.precioUnitario)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
 
             {/* Vista Mobile - Cards */}
             <div className="md:hidden space-y-3">
@@ -527,7 +527,7 @@ const PresupuestoView: React.FC = () => {
                 </div>
               </div>
             </div>
-          </Card>
+      </Card>
         );
       })()}
 
