@@ -100,9 +100,9 @@ const PersonaList: React.FC<PersonaListProps> = ({
             transition={{ duration: 0.2 }}
             whileHover={{ scale: 1.05 }}
           >
-            <Badge className={getBadgeColor(tipo)}>
-              {getDisplayName(tipo)}
-            </Badge>
+          <Badge className={getBadgeColor(tipo)}>
+            {getDisplayName(tipo)}
+          </Badge>
           </motion.div>
         );
       },
@@ -203,8 +203,8 @@ const PersonaList: React.FC<PersonaListProps> = ({
                   whileHover={{ scale: 1.05, y: -2 }}
                 >
                   <Tag className={`text-xs`} color={getRoleColor(rol)}>
-                    {getRoleDisplayName(rol)}
-                  </Tag>
+                  {getRoleDisplayName(rol)}
+                </Tag>
                 </motion.div>
               );
             })
@@ -273,16 +273,16 @@ const PersonaList: React.FC<PersonaListProps> = ({
               whileHover={{ scale: 1.1, rotate: 5 }}
               whileTap={{ scale: 0.9 }}
               transition={{ type: "spring", stiffness: 400, damping: 17 }}
-              className="p-2 rounded-full transition-all duration-200 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 hover:shadow-md hover:shadow-blue-200 dark:hover:shadow-blue-900/30 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400"
+                className="p-2 rounded-full transition-all duration-200 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 hover:shadow-md hover:shadow-blue-200 dark:hover:shadow-blue-900/30 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400"
               onClick={(e) => {
                 e.stopPropagation();
                 setSelectedPersona(row);
                 setShowDetailsModal(true);
               }}
-            >
-              <HiOutlineEye className="w-4 h-4" />
+              >
+                <HiOutlineEye className="w-4 h-4" />
             </motion.button>
-          </Tooltip>
+            </Tooltip>
           <Tooltip title="Editar">
             <motion.button
               whileHover={{ scale: 1.1, rotate: -5 }}
@@ -294,7 +294,7 @@ const PersonaList: React.FC<PersonaListProps> = ({
                 onEdit(row);
               }}
             >
-              <HiOutlinePencil className="w-4 h-4" />
+                <HiOutlinePencil className="w-4 h-4" />
             </motion.button>
           </Tooltip>
           <Tooltip title="Eliminar">
@@ -308,7 +308,7 @@ const PersonaList: React.FC<PersonaListProps> = ({
                 onDelete(row.id);
               }}
             >
-              <HiOutlineTrash className="w-4 h-4" />
+                <HiOutlineTrash className="w-4 h-4" />
             </motion.button>
           </Tooltip>
         </div>

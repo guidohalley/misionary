@@ -364,27 +364,30 @@ const ProductoForm: React.FC<ProductoFormProps> = ({
                         />
                       </FormItem>
 
-                      <FormItem
-                        label="Precio Final (Calculado automáticamente)"
-                        invalid={!!errors.precio}
-                        errorMessage={errors.precio?.message}
-                      >
-                        <Controller
-                          name="precio"
-                          control={control}
-                          render={({ field }) => (
-                            <MoneyInput
-                              value={field.value || 0}
-                              onChange={() => {}} // No permitir edición manual
-                              currency={monedaSeleccionada?.codigo || 'ARS'}
-                              currencySymbol={monedaSeleccionada?.simbolo || '$'}
-                              placeholder="0,00"
-                              disabled={true}
-                              className="bg-gray-50 dark:bg-gray-700"
-                            />
-                          )}
-                        />
-                      </FormItem>
+                      {/* Campo precio visible solo para ADMIN */}
+                      {isAdmin && (
+                        <FormItem
+                          label="Precio Final (Calculado automáticamente)"
+                          invalid={!!errors.precio}
+                          errorMessage={errors.precio?.message}
+                        >
+                          <Controller
+                            name="precio"
+                            control={control}
+                            render={({ field }) => (
+                              <MoneyInput
+                                value={field.value || 0}
+                                onChange={() => {}} // No permitir edición manual
+                                currency={monedaSeleccionada?.codigo || 'ARS'}
+                                currencySymbol={monedaSeleccionada?.simbolo || '$'}
+                                placeholder="0,00"
+                                disabled={true}
+                                className="bg-gray-50 dark:bg-gray-700"
+                              />
+                            )}
+                          />
+                        </FormItem>
+                      )}
                     </div>
                   </div>
                 </Card>
