@@ -7,6 +7,8 @@ export interface Persona {
   telefono?: string;
   cvu?: string;
   roles: RolUsuario[];
+  providerRoles?: string[];  // Áreas de especialidad del proveedor
+  providerArea?: string;     // Área principal (legacy)
   email: string;
   password?: string;  // Opcional - solo para usuarios del sistema
   activo: boolean;

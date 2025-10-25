@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Card, Button, Badge, Pagination, Select, Input, Notification, toast, Tooltip } from '@/components/ui';
-import { HiOutlinePencil, HiOutlineTrash, HiOutlineEye, HiLockClosed, HiChevronDown, HiChevronUp } from 'react-icons/hi';
+import { HiOutlinePencil, HiOutlineTrash, HiOutlineEye, HiLockClosed, HiChevronDown, HiChevronUp, HiOutlineFilter, HiOutlineViewBoards } from 'react-icons/hi';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useServicio } from '@/modules/servicio/hooks/useServicio';
 import type { Servicio } from '@/modules/servicio/types';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePersona } from '@/modules/persona/hooks/usePersona';
+import { TipoPersona, RolUsuario } from '@/views/personas/schemas';
 import { 
   canEditProductoServicio, 
   canDeleteProductoServicio, 
@@ -22,13 +24,30 @@ interface ServicioListProps {
 const ServicioList: React.FC<ServicioListProps> = ({ className }) => {
   const navigate = useNavigate();
   const { servicios, loading, error, refreshServicios, deleteServicio } = useServicio();
+  const { personas } = usePersona();
   const { user: currentUser } = useAuth();
   
+  // Estados básicos
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filteredServicios, setFilteredServicios] = useState<Servicio[]>([]);
   const [expandedCostos, setExpandedCostos] = useState<Set<number>>(new Set());
+  
+  // Estados de filtros avanzados
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [proveedorFilter, setProveedorFilter] = useState<number | null>(null);
+  const [areaFilter, setAreaFilter] = useState<string>('');
+  const [minPrecio, setMinPrecio] = useState<number | null>(null);
+  const [maxPrecio, setMaxPrecio] = useState<number | null>(null);
+  const [fechaDesde, setFechaDesde] = useState<string>('');
+  const [fechaHasta, setFechaHasta] = useState<string>('');
+  
+  // Estados de ordenamiento
+  const [sortBy, setSortBy] = useState<'nombre' | 'precio' | 'proveedor' | 'fechaCreacion' | 'area'>('fechaCreacion');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  
+  // Estados de agrupación
+  const [groupByProveedor, setGroupByProveedor] = useState(false);
 
   const toggleCosto = (servicioId: number) => {
     setExpandedCostos(prev => {
@@ -46,15 +65,154 @@ const ServicioList: React.FC<ServicioListProps> = ({ className }) => {
     refreshServicios();
   }, [refreshServicios]);
 
-  useEffect(() => {
-    const filtered = servicios.filter(servicio =>
-      servicio.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      servicio.descripcion.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      servicio.proveedor?.nombre.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    setFilteredServicios(filtered);
+  // Filtrado avanzado con useMemo para optimización
+  const filteredServicios = useMemo(() => {
+    let filtered = servicios.filter(servicio => {
+      // Filtro de búsqueda
+      const matchesSearch = searchTerm === '' || 
+        servicio.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        servicio.descripcion?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        servicio.proveedor?.nombre.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      // Filtro de proveedor
+      const matchesProveedor = proveedorFilter === null || servicio.proveedorId === proveedorFilter;
+      
+      // Filtro de área
+      const matchesArea = areaFilter === '' || 
+        (servicio.proveedor?.providerRoles && servicio.proveedor.providerRoles.some((role: string) => 
+          role.toLowerCase().includes(areaFilter.toLowerCase())
+        ));
+      
+      // Filtro de precio (solo si el usuario puede ver precios)
+      const canSeePrice = canViewPrecios(currentUser, servicio.proveedorId);
+      let matchesPrecio = true;
+      if (canSeePrice && (minPrecio !== null || maxPrecio !== null)) {
+        const precio = currentUser?.roles?.includes('PROVEEDOR') && !currentUser?.roles?.includes('ADMIN') 
+          ? servicio.costoProveedor 
+          : servicio.precio;
+        
+        if (minPrecio !== null && precio < minPrecio) matchesPrecio = false;
+        if (maxPrecio !== null && precio > maxPrecio) matchesPrecio = false;
+      }
+      
+      // Filtro de fecha
+      let matchesFecha = true;
+      if (fechaDesde || fechaHasta) {
+        const servicioFecha = new Date(servicio.createdAt);
+        if (fechaDesde && servicioFecha < new Date(fechaDesde)) matchesFecha = false;
+        if (fechaHasta && servicioFecha > new Date(fechaHasta + 'T23:59:59')) matchesFecha = false;
+      }
+      
+      return matchesSearch && matchesProveedor && matchesArea && matchesPrecio && matchesFecha;
+    });
+    
+    // Ordenamiento
+    filtered.sort((a, b) => {
+      let aValue: any, bValue: any;
+      
+      switch (sortBy) {
+        case 'nombre':
+          aValue = a.nombre.toLowerCase();
+          bValue = b.nombre.toLowerCase();
+          break;
+        case 'precio':
+          const canSeePrice = canViewPrecios(currentUser, a.proveedorId);
+          if (!canSeePrice) return 0;
+          aValue = currentUser?.roles?.includes('PROVEEDOR') && !currentUser?.roles?.includes('ADMIN') 
+            ? a.costoProveedor : a.precio;
+          bValue = currentUser?.roles?.includes('PROVEEDOR') && !currentUser?.roles?.includes('ADMIN') 
+            ? b.costoProveedor : b.precio;
+          break;
+        case 'proveedor':
+          aValue = a.proveedor?.nombre?.toLowerCase() || '';
+          bValue = b.proveedor?.nombre?.toLowerCase() || '';
+          break;
+        case 'area':
+          aValue = a.proveedor?.providerRoles?.[0]?.toLowerCase() || '';
+          bValue = b.proveedor?.providerRoles?.[0]?.toLowerCase() || '';
+          break;
+        case 'fechaCreacion':
+        default:
+          aValue = new Date(a.createdAt).getTime();
+          bValue = new Date(b.createdAt).getTime();
+          break;
+      }
+      
+      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+    
+    return filtered;
+  }, [servicios, searchTerm, proveedorFilter, areaFilter, minPrecio, maxPrecio, fechaDesde, fechaHasta, sortBy, sortDirection, currentUser]);
+
+  // Opciones de proveedores para filtro
+  const proveedorOptions = useMemo(() => {
+    const proveedores = personas.filter(p => p.tipo === TipoPersona.PROVEEDOR || p.roles?.includes(RolUsuario.PROVEEDOR));
+    return proveedores.map(p => ({ value: p.id, label: p.nombre }));
+  }, [personas]);
+
+  // Opciones de áreas para filtro
+  const areaOptions = useMemo(() => {
+    const areas = new Set<string>();
+    servicios.forEach(servicio => {
+      if (servicio.proveedor?.providerRoles) {
+        servicio.proveedor.providerRoles.forEach((role: string) => areas.add(role));
+      }
+    });
+    return Array.from(areas).sort().map(area => ({ value: area, label: area }));
+  }, [servicios]);
+
+  // Opciones de ordenamiento
+  const sortOptions = [
+    { value: 'fechaCreacion', label: 'Fecha de Creación' },
+    { value: 'nombre', label: 'Nombre' },
+    { value: 'proveedor', label: 'Proveedor' },
+    { value: 'area', label: 'Área' },
+    ...(currentUser?.roles?.includes('ADMIN') || currentUser?.roles?.includes('CONTADOR') 
+      ? [{ value: 'precio', label: 'Precio' }] 
+      : [])
+  ];
+
+  // Agrupación por proveedor
+  const groupedServicios = useMemo(() => {
+    if (!groupByProveedor) return null;
+    
+    const groups: Record<string, Servicio[]> = {};
+    filteredServicios.forEach(servicio => {
+      const proveedorNombre = servicio.proveedor?.nombre || 'Sin proveedor';
+      if (!groups[proveedorNombre]) {
+        groups[proveedorNombre] = [];
+      }
+      groups[proveedorNombre].push(servicio);
+    });
+    
+    return Object.entries(groups).sort(([a], [b]) => a.localeCompare(b));
+  }, [filteredServicios, groupByProveedor]);
+
+  // Función para limpiar filtros
+  const clearFilters = () => {
+    setSearchTerm('');
+    setProveedorFilter(null);
+    setAreaFilter('');
+    setMinPrecio(null);
+    setMaxPrecio(null);
+    setFechaDesde('');
+    setFechaHasta('');
+    setSortBy('fechaCreacion');
+    setSortDirection('desc');
     setCurrentPage(1);
-  }, [servicios, searchTerm]);
+  };
+
+  // Función para manejar ordenamiento
+  const handleSort = (column: typeof sortBy) => {
+    if (sortBy === column) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(column);
+      setSortDirection('asc');
+    }
+  };
 
   const handleEdit = (servicio: Servicio) => {
     // Validar permisos antes de navegar
@@ -110,11 +268,22 @@ const ServicioList: React.FC<ServicioListProps> = ({ className }) => {
     }).format(price);
   };
 
+  // Opciones de tamaño de página
+  const pageSizeOptions: { value: number; label: string }[] = [
+    { value: 5, label: '5 por página' },
+    { value: 10, label: '10 por página' },
+    { value: 25, label: '25 por página' },
+    { value: 50, label: '50 por página' },
+    { value: 100, label: '100 por página' },
+  ];
+  const selectedPageSize = pageSizeOptions.find(o => o.value === pageSize) || pageSizeOptions[1];
+
+  // Paginación
   const totalItems = filteredServicios.length;
   const totalPages = Math.ceil(totalItems / pageSize);
   const startIndex = (currentPage - 1) * pageSize;
   const endIndex = startIndex + pageSize;
-  const currentItems = filteredServicios.slice(startIndex, endIndex);
+  const currentItems = groupByProveedor ? filteredServicios : filteredServicios.slice(startIndex, endIndex);
 
   if (loading) {
     return (
@@ -155,27 +324,171 @@ const ServicioList: React.FC<ServicioListProps> = ({ className }) => {
       </Card>
 
       <Card className="mb-6">
-        <div className="flex justify-between items-center mb-4">
-          <div className="flex items-center space-x-4">
-            <Input
-              placeholder="Buscar servicios..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-64"
-            />
-            <Select
-              value={pageSize}
-              onChange={setPageSize}
-              options={[
-                { value: 10, label: '10 por página' },
-                { value: 25, label: '25 por página' },
-                { value: 50, label: '50 por página' },
-              ]}
-            />
+        <div className="space-y-4">
+          {/* Controles principales */}
+          <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+              <Input
+                placeholder="Buscar servicios..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full sm:w-64"
+              />
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="plain"
+                  size="sm"
+                  onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                  icon={<HiOutlineFilter />}
+                  className="whitespace-nowrap"
+                >
+                  Filtros {showAdvancedFilters ? 'Avanzados' : ''}
+                </Button>
+                <Button
+                  variant="plain"
+                  size="sm"
+                  onClick={() => setGroupByProveedor(!groupByProveedor)}
+                  icon={<HiOutlineViewBoards />}
+                  className="whitespace-nowrap"
+                >
+                  {groupByProveedor ? 'Vista Lista' : 'Agrupar'}
+                </Button>
+              </div>
+            </div>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+              <div className="flex items-center gap-2">
+                <Select
+                  value={sortOptions.find(opt => opt.value === sortBy)}
+                  onChange={(opt) => {
+                    if (opt) setSortBy(opt.value as typeof sortBy);
+                  }}
+                  options={sortOptions}
+                  isSearchable={false}
+                  className="w-40"
+                  placeholder="Ordenar por..."
+                />
+                <Button
+                  variant="plain"
+                  size="sm"
+                  onClick={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')}
+                  className="px-2"
+                >
+                  {sortDirection === 'asc' ? '↑' : '↓'}
+                </Button>
+              </div>
+              <Select
+                value={selectedPageSize}
+                onChange={(opt: { value: number; label: string } | null) => {
+                  if (opt && typeof opt.value === 'number') {
+                    setPageSize(opt.value);
+                    setCurrentPage(1);
+                  }
+                }}
+                options={pageSizeOptions}
+                isSearchable={false}
+                className="w-full sm:w-auto"
+              />
+              <div className="text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                {filteredServicios.length} servicio{filteredServicios.length !== 1 ? 's' : ''}
+              </div>
+            </div>
           </div>
-          <div className="text-sm text-gray-600 dark:text-gray-400">
-            Mostrando {startIndex + 1}-{Math.min(endIndex, totalItems)} de {totalItems} servicios
-          </div>
+
+          {/* Filtros avanzados */}
+          <AnimatePresence>
+            {showAdvancedFilters && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="border-t border-gray-200 dark:border-gray-700 pt-4"
+              >
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Proveedor
+                    </label>
+                    <Select
+                      value={proveedorOptions.find(opt => opt.value === proveedorFilter) || null}
+                      onChange={(opt) => setProveedorFilter(opt?.value || null)}
+                      options={proveedorOptions}
+                      placeholder="Todos los proveedores"
+                      isClearable
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Área
+                    </label>
+                    <Select
+                      value={areaOptions.find(opt => opt.value === areaFilter) || null}
+                      onChange={(opt) => setAreaFilter(opt?.value || '')}
+                      options={areaOptions}
+                      placeholder="Todas las áreas"
+                      isClearable
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Precio Mínimo
+                    </label>
+                    <Input
+                      type="number"
+                      placeholder="0"
+                      value={minPrecio || ''}
+                      onChange={(e) => setMinPrecio(e.target.value ? Number(e.target.value) : null)}
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Precio Máximo
+                    </label>
+                    <Input
+                      type="number"
+                      placeholder="999999"
+                      value={maxPrecio || ''}
+                      onChange={(e) => setMaxPrecio(e.target.value ? Number(e.target.value) : null)}
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Fecha Desde
+                    </label>
+                    <Input
+                      type="date"
+                      value={fechaDesde}
+                      onChange={(e) => setFechaDesde(e.target.value)}
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Fecha Hasta
+                    </label>
+                    <Input
+                      type="date"
+                      value={fechaHasta}
+                      onChange={(e) => setFechaHasta(e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className="flex items-end">
+                    <Button
+                      variant="plain"
+                      onClick={clearFilters}
+                      className="w-full"
+                    >
+                      Limpiar Filtros
+                    </Button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Vista Desktop - Tabla */}
@@ -183,15 +496,64 @@ const ServicioList: React.FC<ServicioListProps> = ({ className }) => {
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-200 dark:border-gray-700">
-                <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Nombre</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Descripción</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">
-                  {(currentUser?.roles?.includes('ADMIN') || currentUser?.roles?.includes('CONTADOR'))
-                    ? 'Precio Final' 
-                    : 'Precio'}
+                <th 
+                  className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+                  onClick={() => handleSort('nombre')}
+                >
+                  <div className="flex items-center gap-1">
+                    Nombre
+                    {sortBy === 'nombre' && (
+                      <span className="text-xs">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                    )}
+                  </div>
                 </th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Proveedor</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Fecha Creación</th>
+                <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Descripción</th>
+                <th 
+                  className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+                  onClick={() => handleSort('precio')}
+                >
+                  <div className="flex items-center gap-1">
+                    {(currentUser?.roles?.includes('ADMIN') || currentUser?.roles?.includes('CONTADOR'))
+                      ? 'Precio Final' 
+                      : 'Precio'}
+                    {sortBy === 'precio' && (
+                      <span className="text-xs">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                    )}
+                  </div>
+                </th>
+                <th 
+                  className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+                  onClick={() => handleSort('proveedor')}
+                >
+                  <div className="flex items-center gap-1">
+                    Proveedor
+                    {sortBy === 'proveedor' && (
+                      <span className="text-xs">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                    )}
+                  </div>
+                </th>
+                <th 
+                  className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+                  onClick={() => handleSort('area')}
+                >
+                  <div className="flex items-center gap-1">
+                    Área
+                    {sortBy === 'area' && (
+                      <span className="text-xs">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                    )}
+                  </div>
+                </th>
+                <th 
+                  className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+                  onClick={() => handleSort('fechaCreacion')}
+                >
+                  <div className="flex items-center gap-1">
+                    Fecha Creación
+                    {sortBy === 'fechaCreacion' && (
+                      <span className="text-xs">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                    )}
+                  </div>
+                </th>
                 <th className="text-center py-3 px-4 font-semibold text-gray-700 dark:text-gray-300 min-w-[120px]">Acciones</th>
               </tr>
             </thead>
@@ -286,6 +648,27 @@ const ServicioList: React.FC<ServicioListProps> = ({ className }) => {
                   </td>
                   <td className="py-3 px-4">
                     <div className="text-gray-900 dark:text-gray-100">{servicio.proveedor?.nombre || 'Sin proveedor'}</div>
+                  </td>
+                  <td className="py-3 px-4">
+                    <div className="flex flex-wrap gap-1">
+                      {servicio.proveedor?.providerRoles && servicio.proveedor.providerRoles.length > 0 ? (
+                        servicio.proveedor.providerRoles.slice(0, 2).map((role: string, idx: number) => (
+                          <span
+                            key={idx}
+                            className="inline-flex items-center rounded-full bg-blue-100 text-blue-800 px-2 py-0.5 text-xs font-medium ring-1 ring-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:ring-blue-800"
+                          >
+                            {role}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-xs text-gray-500 dark:text-gray-400">—</span>
+                      )}
+                      {servicio.proveedor?.providerRoles && servicio.proveedor.providerRoles.length > 2 && (
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          +{servicio.proveedor.providerRoles.length - 2}
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td className="py-3 px-4">
                     <div className="text-gray-600 dark:text-gray-400">

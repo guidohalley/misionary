@@ -383,8 +383,8 @@ const ServicioForm: React.FC<ServicioFormProps> = ({
                         />
                       </FormItem>
 
-                      {/* Solo mostrar precio final si NO es proveedor */}
-                      {!isProveedor && (
+                      {/* Campo precio visible solo para ADMIN */}
+                      {isAdmin && (
                         <FormItem
                           label="Precio Final (Calculado automáticamente)"
                           invalid={!!errors.precio}
@@ -396,11 +396,11 @@ const ServicioForm: React.FC<ServicioFormProps> = ({
                             render={({ field }) => (
                               <MoneyInput
                                 value={field.value || 0}
-                                onChange={field.onChange}
+                                onChange={() => {}} // No permitir edición manual
                                 currency={monedaSeleccionada?.codigo || 'ARS'}
                                 currencySymbol={monedaSeleccionada?.simbolo || '$'}
                                 placeholder="0,00"
-                                disabled={true} // Siempre readonly porque se calcula automáticamente
+                                disabled={true}
                                 className="bg-gray-50 dark:bg-gray-700"
                               />
                             )}

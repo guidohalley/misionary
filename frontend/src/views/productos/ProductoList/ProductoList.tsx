@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Card, Button, Pagination, Select, Input, Notification, toast, Tooltip } from '@/components/ui';
-import { HiOutlinePencil, HiOutlineTrash, HiOutlineEye, HiLockClosed, HiChevronDown, HiChevronUp } from 'react-icons/hi';
+import { HiOutlinePencil, HiOutlineTrash, HiOutlineEye, HiLockClosed, HiChevronDown, HiChevronUp, HiOutlineFilter, HiOutlineViewBoards } from 'react-icons/hi';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useProducto } from '@/modules/producto/hooks/useProducto';
 import type { Producto } from '@/modules/producto/types';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePersona } from '@/modules/persona/hooks/usePersona';
+import { TipoPersona, RolUsuario } from '@/views/personas/schemas';
 import { 
   canEditProductoServicio, 
   canDeleteProductoServicio, 
@@ -22,13 +24,30 @@ interface ProductoListProps {
 const ProductoList: React.FC<ProductoListProps> = ({ className }) => {
   const navigate = useNavigate();
   const { productos, loading, error, refreshProductos, deleteProducto } = useProducto();
+  const { personas } = usePersona();
   const { user: currentUser } = useAuth();
   
+  // Estados básicos
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filteredProductos, setFilteredProductos] = useState<Producto[]>([]);
   const [expandedCostos, setExpandedCostos] = useState<Set<number>>(new Set());
+  
+  // Estados de filtros avanzados
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [proveedorFilter, setProveedorFilter] = useState<number | null>(null);
+  const [areaFilter, setAreaFilter] = useState<string>('');
+  const [minPrecio, setMinPrecio] = useState<number | null>(null);
+  const [maxPrecio, setMaxPrecio] = useState<number | null>(null);
+  const [fechaDesde, setFechaDesde] = useState<string>('');
+  const [fechaHasta, setFechaHasta] = useState<string>('');
+  
+  // Estados de ordenamiento
+  const [sortBy, setSortBy] = useState<'nombre' | 'precio' | 'proveedor' | 'fechaCreacion' | 'area'>('fechaCreacion');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  
+  // Estados de agrupación
+  const [groupByProveedor, setGroupByProveedor] = useState(false);
 
   const toggleCosto = (productoId: number) => {
     setExpandedCostos(prev => {
@@ -46,22 +65,163 @@ const ProductoList: React.FC<ProductoListProps> = ({ className }) => {
     refreshProductos();
   }, [refreshProductos]);
 
-  useEffect(() => {
-    const filtered = productos.filter(producto =>
+  // Filtrado avanzado con useMemo para optimización
+  const filteredProductos = useMemo(() => {
+    let filtered = productos.filter(producto => {
+      // Filtro de búsqueda
+      const matchesSearch = searchTerm === '' || 
       producto.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      producto.proveedor?.nombre.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    setFilteredProductos(filtered);
-    setCurrentPage(1);
-  }, [productos, searchTerm]);
+        producto.proveedor?.nombre.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      // Filtro de proveedor
+      const matchesProveedor = proveedorFilter === null || producto.proveedorId === proveedorFilter;
+      
+      // Filtro de área
+      const matchesArea = areaFilter === '' || 
+        (producto.proveedor?.providerRoles && producto.proveedor.providerRoles.some((role: string) => 
+          role.toLowerCase().includes(areaFilter.toLowerCase())
+        ));
+      
+      // Filtro de precio (solo si el usuario puede ver precios)
+      const canSeePrice = canViewPrecios(currentUser, producto.proveedorId);
+      let matchesPrecio = true;
+      if (canSeePrice && (minPrecio !== null || maxPrecio !== null)) {
+        const precio = currentUser?.roles?.includes('PROVEEDOR') && !currentUser?.roles?.includes('ADMIN') 
+          ? producto.costoProveedor 
+          : producto.precio;
+        
+        if (minPrecio !== null && precio < minPrecio) matchesPrecio = false;
+        if (maxPrecio !== null && precio > maxPrecio) matchesPrecio = false;
+      }
+      
+      // Filtro de fecha
+      let matchesFecha = true;
+      if (fechaDesde || fechaHasta) {
+        const productoFecha = new Date(producto.createdAt);
+        if (fechaDesde && productoFecha < new Date(fechaDesde)) matchesFecha = false;
+        if (fechaHasta && productoFecha > new Date(fechaHasta + 'T23:59:59')) matchesFecha = false;
+      }
+      
+      return matchesSearch && matchesProveedor && matchesArea && matchesPrecio && matchesFecha;
+    });
+    
+    // Ordenamiento
+    filtered.sort((a, b) => {
+      let aValue: any, bValue: any;
+      
+      switch (sortBy) {
+        case 'nombre':
+          aValue = a.nombre.toLowerCase();
+          bValue = b.nombre.toLowerCase();
+          break;
+        case 'precio':
+          const canSeePrice = canViewPrecios(currentUser, a.proveedorId);
+          if (!canSeePrice) return 0;
+          aValue = currentUser?.roles?.includes('PROVEEDOR') && !currentUser?.roles?.includes('ADMIN') 
+            ? a.costoProveedor : a.precio;
+          bValue = currentUser?.roles?.includes('PROVEEDOR') && !currentUser?.roles?.includes('ADMIN') 
+            ? b.costoProveedor : b.precio;
+          break;
+        case 'proveedor':
+          aValue = a.proveedor?.nombre?.toLowerCase() || '';
+          bValue = b.proveedor?.nombre?.toLowerCase() || '';
+          break;
+        case 'area':
+          aValue = a.proveedor?.providerRoles?.[0]?.toLowerCase() || '';
+          bValue = b.proveedor?.providerRoles?.[0]?.toLowerCase() || '';
+          break;
+        case 'fechaCreacion':
+        default:
+          aValue = new Date(a.createdAt).getTime();
+          bValue = new Date(b.createdAt).getTime();
+          break;
+      }
+      
+      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+    
+    return filtered;
+  }, [productos, searchTerm, proveedorFilter, areaFilter, minPrecio, maxPrecio, fechaDesde, fechaHasta, sortBy, sortDirection, currentUser]);
 
-  // Opciones de tamaño de página tipadas para Select
+  // Opciones de proveedores para filtro
+  const proveedorOptions = useMemo(() => {
+    const proveedores = personas.filter(p => p.tipo === TipoPersona.PROVEEDOR || p.roles?.includes(RolUsuario.PROVEEDOR));
+    return proveedores.map(p => ({ value: p.id, label: p.nombre }));
+  }, [personas]);
+
+  // Opciones de áreas para filtro
+  const areaOptions = useMemo(() => {
+    const areas = new Set<string>();
+    productos.forEach(producto => {
+      if (producto.proveedor?.providerRoles) {
+        producto.proveedor.providerRoles.forEach((role: string) => areas.add(role));
+      }
+    });
+    return Array.from(areas).sort().map(area => ({ value: area, label: area }));
+  }, [productos]);
+
+  // Opciones de ordenamiento
+  const sortOptions = [
+    { value: 'fechaCreacion', label: 'Fecha de Creación' },
+    { value: 'nombre', label: 'Nombre' },
+    { value: 'proveedor', label: 'Proveedor' },
+    { value: 'area', label: 'Área' },
+    ...(currentUser?.roles?.includes('ADMIN') || currentUser?.roles?.includes('CONTADOR') 
+      ? [{ value: 'precio', label: 'Precio' }] 
+      : [])
+  ];
+
+  // Agrupación por proveedor
+  const groupedProductos = useMemo(() => {
+    if (!groupByProveedor) return null;
+    
+    const groups: Record<string, Producto[]> = {};
+    filteredProductos.forEach(producto => {
+      const proveedorNombre = producto.proveedor?.nombre || 'Sin proveedor';
+      if (!groups[proveedorNombre]) {
+        groups[proveedorNombre] = [];
+      }
+      groups[proveedorNombre].push(producto);
+    });
+    
+    return Object.entries(groups).sort(([a], [b]) => a.localeCompare(b));
+  }, [filteredProductos, groupByProveedor]);
+
+  // Función para limpiar filtros
+  const clearFilters = () => {
+    setSearchTerm('');
+    setProveedorFilter(null);
+    setAreaFilter('');
+    setMinPrecio(null);
+    setMaxPrecio(null);
+    setFechaDesde('');
+    setFechaHasta('');
+    setSortBy('fechaCreacion');
+    setSortDirection('desc');
+    setCurrentPage(1);
+  };
+
+  // Función para manejar ordenamiento
+  const handleSort = (column: typeof sortBy) => {
+    if (sortBy === column) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(column);
+      setSortDirection('asc');
+    }
+  };
+
+  // Opciones de tamaño de página
   const pageSizeOptions: { value: number; label: string }[] = [
+    { value: 5, label: '5 por página' },
     { value: 10, label: '10 por página' },
     { value: 25, label: '25 por página' },
     { value: 50, label: '50 por página' },
+    { value: 100, label: '100 por página' },
   ];
-  const selectedPageSize = pageSizeOptions.find(o => o.value === pageSize) || pageSizeOptions[0];
+  const selectedPageSize = pageSizeOptions.find(o => o.value === pageSize) || pageSizeOptions[1];
 
   const handleEdit = (producto: Producto) => {
     // Validar permisos antes de navegar
@@ -117,11 +277,12 @@ const ProductoList: React.FC<ProductoListProps> = ({ className }) => {
     }).format(price);
   };
 
+  // Paginación
   const totalItems = filteredProductos.length;
   const totalPages = Math.ceil(totalItems / pageSize);
   const startIndex = (currentPage - 1) * pageSize;
   const endIndex = startIndex + pageSize;
-  const currentItems = filteredProductos.slice(startIndex, endIndex);
+  const currentItems = groupByProveedor ? filteredProductos : filteredProductos.slice(startIndex, endIndex);
 
   if (loading) {
     return (
@@ -147,56 +308,384 @@ const ProductoList: React.FC<ProductoListProps> = ({ className }) => {
       {/* Header Card */}
       <Card className="mb-6 p-4">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Productos</h2>
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Productos</h2>
             <p className="text-gray-600 dark:text-gray-400 text-sm">Gestiona el catálogo de productos</p>
-          </div>
-          <Button 
-            variant="solid" 
-            onClick={handleNewProducto}
-            className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
-          >
-            Nuevo Producto
-          </Button>
         </div>
+        <Button 
+          variant="solid" 
+          onClick={handleNewProducto}
+            className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
+        >
+          Nuevo Producto
+        </Button>
+      </div>
       </Card>
 
       <Card className="mb-6">
-        <div className="flex justify-between items-center mb-4">
-          <div className="flex items-center space-x-4">
+        <div className="space-y-4">
+          {/* Controles principales */}
+          <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
             <Input
               placeholder="Buscar productos..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-64"
-            />
+                className="w-full sm:w-64"
+              />
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="plain"
+                  size="sm"
+                  onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                  icon={<HiOutlineFilter />}
+                  className="whitespace-nowrap"
+                >
+                  Filtros {showAdvancedFilters ? 'Avanzados' : ''}
+                </Button>
+                <Button
+                  variant="plain"
+                  size="sm"
+                  onClick={() => setGroupByProveedor(!groupByProveedor)}
+                  icon={<HiOutlineViewBoards />}
+                  className="whitespace-nowrap"
+                >
+                  {groupByProveedor ? 'Vista Lista' : 'Agrupar'}
+                </Button>
+              </div>
+            </div>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+              <div className="flex items-center gap-2">
+                <Select
+                  value={sortOptions.find(opt => opt.value === sortBy)}
+                  onChange={(opt) => {
+                    if (opt) setSortBy(opt.value as typeof sortBy);
+                  }}
+                  options={sortOptions}
+                  isSearchable={false}
+                  className="w-40"
+                  placeholder="Ordenar por..."
+                />
+                <Button
+                  variant="plain"
+                  size="sm"
+                  onClick={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')}
+                  className="px-2"
+                >
+                  {sortDirection === 'asc' ? '↑' : '↓'}
+                </Button>
+              </div>
             <Select
               value={selectedPageSize}
               onChange={(opt: { value: number; label: string } | null) => {
-                if (opt && typeof opt.value === 'number') setPageSize(opt.value)
+                  if (opt && typeof opt.value === 'number') {
+                    setPageSize(opt.value);
+                    setCurrentPage(1);
+                  }
               }}
               options={pageSizeOptions}
               isSearchable={false}
+                className="w-full sm:w-auto"
             />
+              <div className="text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                {filteredProductos.length} producto{filteredProductos.length !== 1 ? 's' : ''}
+              </div>
+            </div>
           </div>
-          <div className="text-sm text-gray-600 dark:text-gray-400">
-            Mostrando {startIndex + 1}-{Math.min(endIndex, totalItems)} de {totalItems} productos
+
+          {/* Filtros avanzados */}
+          <AnimatePresence>
+            {showAdvancedFilters && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="border-t border-gray-200 dark:border-gray-700 pt-4"
+              >
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Proveedor
+                    </label>
+                    <Select
+                      value={proveedorOptions.find(opt => opt.value === proveedorFilter) || null}
+                      onChange={(opt) => setProveedorFilter(opt?.value || null)}
+                      options={proveedorOptions}
+                      placeholder="Todos los proveedores"
+                      isClearable
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Área
+                    </label>
+                    <Select
+                      value={areaOptions.find(opt => opt.value === areaFilter) || null}
+                      onChange={(opt) => setAreaFilter(opt?.value || '')}
+                      options={areaOptions}
+                      placeholder="Todas las áreas"
+                      isClearable
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Precio Mínimo
+                    </label>
+                    <Input
+                      type="number"
+                      placeholder="0"
+                      value={minPrecio || ''}
+                      onChange={(e) => setMinPrecio(e.target.value ? Number(e.target.value) : null)}
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Precio Máximo
+                    </label>
+                    <Input
+                      type="number"
+                      placeholder="999999"
+                      value={maxPrecio || ''}
+                      onChange={(e) => setMaxPrecio(e.target.value ? Number(e.target.value) : null)}
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Fecha Desde
+                    </label>
+                    <Input
+                      type="date"
+                      value={fechaDesde}
+                      onChange={(e) => setFechaDesde(e.target.value)}
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Fecha Hasta
+                    </label>
+                    <Input
+                      type="date"
+                      value={fechaHasta}
+                      onChange={(e) => setFechaHasta(e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className="flex items-end">
+                    <Button
+                      variant="plain"
+                      onClick={clearFilters}
+                      className="w-full"
+                    >
+                      Limpiar Filtros
+                    </Button>
+                  </div>
           </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
+        {/* Vista Agrupada por Proveedor */}
+        {groupByProveedor && groupedProductos && (
+          <div className="space-y-6">
+            {groupedProductos.map(([proveedorNombre, productos]) => (
+              <motion.div
+                key={proveedorNombre}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden"
+              >
+                {/* Header del grupo */}
+                <div className="bg-gray-50 dark:bg-gray-800 px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                      {proveedorNombre}
+                    </h3>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      {productos.length} producto{productos.length !== 1 ? 's' : ''}
+                    </span>
+                  </div>
+                </div>
+                
+                {/* Productos del grupo */}
+                <div className="divide-y divide-gray-200 dark:divide-gray-700">
+                  {productos.map((producto, index) => (
+                    <motion.div
+                      key={producto.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                    >
+                      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                        <div className="flex-1">
+                          <h4 className="font-medium text-gray-900 dark:text-white">
+                            {producto.nombre}
+                          </h4>
+                          <div className="flex items-center gap-4 mt-2">
+                            <div className="text-sm text-gray-600 dark:text-gray-400">
+                              Creado: {new Date(producto.createdAt).toLocaleDateString('es-AR')}
+                            </div>
+                            {(() => {
+                              const puedeVerPrecios = canViewPrecios(currentUser, producto.proveedorId);
+                              const esAdmin = currentUser?.roles?.includes('ADMIN');
+                              const esContador = currentUser?.roles?.includes('CONTADOR');
+                              
+                              if (!puedeVerPrecios) return null;
+                              
+                              if (esAdmin || esContador) {
+                                return (
+                                  <span className="inline-flex items-center rounded-full bg-green-100 text-green-800 px-2.5 py-0.5 text-xs font-medium ring-1 ring-green-200">
+                                    {formatPrice(producto.precio)}
+                                  </span>
+                                );
+                              }
+                              
+                              return (
+                                <span className="inline-flex items-center rounded-full bg-blue-100 text-blue-800 px-2.5 py-0.5 text-xs font-medium ring-1 ring-blue-200">
+                                  {formatPrice(producto.costoProveedor)}
+                                </span>
+                              );
+                            })()}
+                          </div>
+                        </div>
+                        
+                        {/* Acciones */}
+                        <div className="flex items-center gap-2">
+                          {(() => {
+                            const puedeEditar = canEditProductoServicio(currentUser, producto.proveedorId);
+                            const puedeEliminar = canDeleteProductoServicio(currentUser, producto.proveedorId);
+                            
+                            return (
+                              <>
+                                <Tooltip title={puedeEditar ? "Ver/Editar" : getNoEditTooltip(currentUser)}>
+                                  <span>
+                                    <button
+                                      onClick={() => handleEdit(producto)}
+                                      disabled={!puedeEditar}
+                                      className={`p-2 rounded-full transition-all duration-200 ${
+                                        puedeEditar
+                                          ? 'text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20'
+                                          : 'text-gray-400 cursor-not-allowed'
+                                      }`}
+                                    >
+                                      <HiOutlineEye className="w-4 h-4" />
+                                    </button>
+                                  </span>
+                                </Tooltip>
+                                
+                                <Tooltip title={puedeEditar ? "Editar" : getNoEditTooltip(currentUser)}>
+                                  <span>
+                                    <button
+                                      onClick={() => handleEdit(producto)}
+                                      disabled={!puedeEditar}
+                                      className={`p-2 rounded-full transition-all duration-200 ${
+                                        puedeEditar
+                                          ? 'text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20'
+                                          : 'text-gray-400 cursor-not-allowed'
+                                      }`}
+                                    >
+                                      <HiOutlinePencil className="w-4 h-4" />
+                                    </button>
+                                  </span>
+                                </Tooltip>
+                                
+                                <Tooltip title={puedeEliminar ? "Eliminar" : getNoDeleteTooltip(currentUser)}>
+                                  <span>
+                                    <button
+                                      onClick={() => handleDelete(producto)}
+                                      disabled={!puedeEliminar}
+                                      className={`p-2 rounded-full transition-all duration-200 ${
+                                        puedeEliminar
+                                          ? 'text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20'
+                                          : 'text-gray-400 cursor-not-allowed'
+                                      }`}
+                                    >
+                                      <HiOutlineTrash className="w-4 h-4" />
+                                    </button>
+                                  </span>
+                                </Tooltip>
+                              </>
+                            );
+                          })()}
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
+
         {/* Vista Desktop - Tabla */}
+        {!groupByProveedor && (
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-200 dark:border-gray-700">
-                <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Nombre</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">
-                  {(currentUser?.roles?.includes('ADMIN') || currentUser?.roles?.includes('CONTADOR'))
-                    ? 'Precio Final' 
-                    : 'Precio'}
+                <th 
+                  className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+                  onClick={() => handleSort('nombre')}
+                >
+                  <div className="flex items-center gap-1">
+                    Nombre
+                    {sortBy === 'nombre' && (
+                      <span className="text-xs">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                    )}
+                  </div>
                 </th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Proveedor</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Fecha Creación</th>
+                <th 
+                  className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+                  onClick={() => handleSort('precio')}
+                >
+                  <div className="flex items-center gap-1">
+                    {(currentUser?.roles?.includes('ADMIN') || currentUser?.roles?.includes('CONTADOR'))
+                      ? 'Precio Final' 
+                      : 'Precio'}
+                    {sortBy === 'precio' && (
+                      <span className="text-xs">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                    )}
+                  </div>
+                </th>
+                <th 
+                  className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+                  onClick={() => handleSort('proveedor')}
+                >
+                  <div className="flex items-center gap-1">
+                    Proveedor
+                    {sortBy === 'proveedor' && (
+                      <span className="text-xs">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                    )}
+                  </div>
+                </th>
+                <th 
+                  className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+                  onClick={() => handleSort('area')}
+                >
+                  <div className="flex items-center gap-1">
+                    Área
+                    {sortBy === 'area' && (
+                      <span className="text-xs">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                    )}
+                  </div>
+                </th>
+                <th 
+                  className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+                  onClick={() => handleSort('fechaCreacion')}
+                >
+                  <div className="flex items-center gap-1">
+                    Fecha Creación
+                    {sortBy === 'fechaCreacion' && (
+                      <span className="text-xs">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                    )}
+                  </div>
+                </th>
                 <th className="text-center py-3 px-4 font-semibold text-gray-700 dark:text-gray-300 min-w-[120px]">Acciones</th>
               </tr>
             </thead>
@@ -269,9 +758,9 @@ const ProductoList: React.FC<ProductoListProps> = ({ className }) => {
                       // CONTADOR ve precio final
                       if (esContador) {
                         return (
-                          <span className="inline-flex items-center rounded-full bg-misionary-100 text-misionary-800 px-2.5 py-0.5 text-xs font-medium ring-1 ring-misionary-200">
-                            {formatPrice(producto.precio)}
-                          </span>
+                    <span className="inline-flex items-center rounded-full bg-misionary-100 text-misionary-800 px-2.5 py-0.5 text-xs font-medium ring-1 ring-misionary-200">
+                      {formatPrice(producto.precio)}
+                    </span>
                         );
                       }
 
@@ -289,6 +778,27 @@ const ProductoList: React.FC<ProductoListProps> = ({ className }) => {
                     </span>
                   </td>
                   <td className="py-3 px-4">
+                    <div className="flex flex-wrap gap-1">
+                      {producto.proveedor?.providerRoles && producto.proveedor.providerRoles.length > 0 ? (
+                        producto.proveedor.providerRoles.slice(0, 2).map((role: string, idx: number) => (
+                          <span
+                            key={idx}
+                            className="inline-flex items-center rounded-full bg-blue-100 text-blue-800 px-2 py-0.5 text-xs font-medium ring-1 ring-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:ring-blue-800"
+                          >
+                            {role}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-xs text-gray-500 dark:text-gray-400">—</span>
+                      )}
+                      {producto.proveedor?.providerRoles && producto.proveedor.providerRoles.length > 2 && (
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          +{producto.proveedor.providerRoles.length - 2}
+                        </span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="py-3 px-4">
                     <div className="text-gray-600 dark:text-gray-400">
                       {new Date(producto.createdAt).toLocaleDateString('es-AR')}
                     </div>
@@ -303,7 +813,7 @@ const ProductoList: React.FC<ProductoListProps> = ({ className }) => {
                           <>
                             <Tooltip title={puedeEditar ? "Ver/Editar" : getNoEditTooltip(currentUser)}>
                               <span>
-                                <button
+                      <button
                                   onClick={() => handleEdit(producto)}
                                   disabled={!puedeEditar}
                                   className={`p-2 rounded-full transition-all duration-200 ${
@@ -311,15 +821,15 @@ const ProductoList: React.FC<ProductoListProps> = ({ className }) => {
                                       ? 'text-gray-700 dark:text-blue-300 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-600 dark:to-slate-700 hover:shadow-lg hover:shadow-blue-200 dark:hover:shadow-blue-900/50 active:shadow-inner cursor-pointer'
                                       : 'text-gray-400 dark:text-gray-600 bg-gray-100 dark:bg-gray-800 cursor-not-allowed opacity-50'
                                   }`}
-                                >
-                                  <HiOutlineEye className="w-5 h-5" />
-                                </button>
+                      >
+                        <HiOutlineEye className="w-5 h-5" />
+                      </button>
                               </span>
                             </Tooltip>
                             
                             <Tooltip title={puedeEditar ? "Editar" : getNoEditTooltip(currentUser)}>
                               <span>
-                                <button
+                      <button
                                   onClick={() => handleEdit(producto)}
                                   disabled={!puedeEditar}
                                   className={`p-2 rounded-full transition-all duration-200 ${
@@ -327,15 +837,15 @@ const ProductoList: React.FC<ProductoListProps> = ({ className }) => {
                                       ? 'text-gray-700 dark:text-amber-300 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-600 dark:to-slate-700 hover:shadow-lg hover:shadow-amber-200 dark:hover:shadow-amber-900/50 active:shadow-inner cursor-pointer'
                                       : 'text-gray-400 dark:text-gray-600 bg-gray-100 dark:bg-gray-800 cursor-not-allowed opacity-50'
                                   }`}
-                                >
-                                  <HiOutlinePencil className="w-5 h-5" />
-                                </button>
+                      >
+                        <HiOutlinePencil className="w-5 h-5" />
+                      </button>
                               </span>
                             </Tooltip>
                             
                             <Tooltip title={puedeEliminar ? "Eliminar" : getNoDeleteTooltip(currentUser)}>
                               <span>
-                                <button
+                      <button
                                   onClick={() => handleDelete(producto)}
                                   disabled={!puedeEliminar}
                                   className={`p-2 rounded-full transition-all duration-200 ${
@@ -343,9 +853,9 @@ const ProductoList: React.FC<ProductoListProps> = ({ className }) => {
                                       ? 'text-gray-700 dark:text-red-300 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-600 dark:to-slate-700 hover:shadow-lg hover:shadow-red-200 dark:hover:shadow-red-900/50 active:shadow-inner cursor-pointer'
                                       : 'text-gray-400 dark:text-gray-600 bg-gray-100 dark:bg-gray-800 cursor-not-allowed opacity-50'
                                   }`}
-                                >
-                                  <HiOutlineTrash className="w-5 h-5" />
-                                </button>
+                      >
+                        <HiOutlineTrash className="w-5 h-5" />
+                      </button>
                               </span>
                             </Tooltip>
                             
@@ -366,8 +876,10 @@ const ProductoList: React.FC<ProductoListProps> = ({ className }) => {
             </tbody>
           </table>
         </div>
+        )}
 
         {/* Vista Mobile - Cards */}
+        {!groupByProveedor && (
         <div className="md:hidden space-y-4">
           {currentItems.map((producto, index) => {
             const puedeVerPrecios = canViewPrecios(currentUser, producto.proveedorId);
@@ -457,18 +969,39 @@ const ProductoList: React.FC<ProductoListProps> = ({ className }) => {
                   </div>
                 </div>
 
-                {/* Proveedor y Fecha */}
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                  <div>
-                    <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Proveedor</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">
-                      {producto.proveedor?.nombre || 'Sin proveedor'}
+                {/* Proveedor, Área y Fecha */}
+                <div className="space-y-3 mb-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Proveedor</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">
+                        {producto.proveedor?.nombre || 'Sin proveedor'}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Fecha Creación</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">
+                        {new Date(producto.createdAt).toLocaleDateString('es-AR')}
+                      </div>
                     </div>
                   </div>
+                  
+                  {/* Áreas */}
                   <div>
-                    <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Fecha Creación</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">
-                      {new Date(producto.createdAt).toLocaleDateString('es-AR')}
+                    <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Áreas</div>
+                    <div className="flex flex-wrap gap-1">
+                      {producto.proveedor?.providerRoles && producto.proveedor.providerRoles.length > 0 ? (
+                        producto.proveedor.providerRoles.map((role: string, idx: number) => (
+                          <span
+                            key={idx}
+                            className="inline-flex items-center rounded-full bg-blue-100 text-blue-800 px-2 py-0.5 text-xs font-medium ring-1 ring-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:ring-blue-800"
+                          >
+                            {role}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-xs text-gray-500 dark:text-gray-400">Sin áreas definidas</span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -535,8 +1068,9 @@ const ProductoList: React.FC<ProductoListProps> = ({ className }) => {
             );
           })}
         </div>
+        )}
 
-        {totalPages > 1 && (
+        {totalPages > 1 && !groupByProveedor && (
           <div className="flex justify-center mt-6">
             <Pagination
               pageSize={pageSize}
