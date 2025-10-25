@@ -15,12 +15,16 @@ import { useMoneda } from '@/modules/moneda/hooks/useMoneda';
 import { useImpuesto } from '@/modules/impuesto/hooks/useImpuesto';
 import { usePresupuestoCalculations } from '../hooks/usePresupuestoCalculations';
 import { Impuesto } from '@/modules/impuesto/types';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface PresupuestoFormProps {
   initialData?: PresupuestoFormData;
   onSubmit: (data: PresupuestoFormData) => Promise<void>;
   onCancel: () => void;
   isEdit?: boolean;
+  initialItemTypes?: ('producto' | 'servicio')[];
+  initialItemProveedores?: (number | undefined)[];
+  currentEstado?: string;
 }
 
 const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
@@ -28,10 +32,23 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
   onSubmit,
   onCancel,
   isEdit = false,
+  initialItemTypes = [],
+  initialItemProveedores = [],
+  currentEstado,
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [impuestosSeleccionados, setImpuestosSeleccionados] = useState<Impuesto[]>([]);
   const [vigenciaPreset, setVigenciaPreset] = useState<'NONE' | '1M' | '3M' | '6M' | '1Y'>(isEdit ? 'NONE' : '1M')
+  const [itemTypes, setItemTypes] = useState<('producto' | 'servicio')[]>(initialItemTypes);
+  const [itemProveedores, setItemProveedores] = useState<(number | undefined)[]>(initialItemProveedores);
+  
+  const { user } = useAuth();
+  const isAdmin = user?.roles?.includes('ADMIN') || false;
+  
+  // Lógica de permisos basada en estado del presupuesto
+  const isLocked = currentEstado === 'FACTURADO';
+  const isApproved = currentEstado === 'APROBADO';
+  const canEdit = !isLocked && (!isApproved || isAdmin);
   
   const { personas, refreshPersonas } = usePersona();
   const { productos, refreshProductos } = useProducto();
@@ -91,6 +108,28 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
     control,
     name: "items",
   });
+
+  // Sincronizar itemTypes e itemProveedores cuando cambian los props iniciales
+  useEffect(() => {
+    if (initialItemTypes.length > 0 && itemTypes.length !== initialItemTypes.length) {
+      setItemTypes(initialItemTypes);
+    }
+  }, [initialItemTypes]);
+
+  useEffect(() => {
+    if (initialItemProveedores.length > 0 && itemProveedores.length !== initialItemProveedores.length) {
+      setItemProveedores(initialItemProveedores);
+    }
+  }, [initialItemProveedores]);
+
+  // Inicializar tipos de items si no vienen de props
+  useEffect(() => {
+    if (fields.length > 0 && itemTypes.length === 0 && initialItemTypes.length === 0) {
+      setItemTypes(fields.map((field: any) => 
+        field.productoId ? 'producto' : field.servicioId ? 'servicio' : 'producto'
+      ));
+    }
+  }, [fields, initialItemTypes]);
 
   const watchItems = watch("items");
   const watchMargenAgenciaGlobal = watch("margenAgenciaGlobal");
@@ -211,7 +250,6 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
         if (impuestosIds.length > 0) {
           const impuestosDelPresupuesto = impuestosDisponibles.filter(imp => impuestosIds.includes(imp.id));
           setImpuestosSeleccionados(impuestosDelPresupuesto);
-          console.log('✅ Impuestos precargados:', impuestosDelPresupuesto);
         }
       }
 
@@ -238,7 +276,6 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
         const impuestosDelPresupuesto = impuestosDisponibles.filter(imp => impuestosIds.includes(imp.id));
         if (impuestosDelPresupuesto.length > 0) {
           setImpuestosSeleccionados(impuestosDelPresupuesto);
-          console.log('✅ Impuestos precargados (segundo intento):', impuestosDelPresupuesto);
         }
       }
     }
@@ -291,12 +328,28 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
 
   const handleAddItem = () => {
     append({ cantidad: 1, precioUnitario: 0 });
+    setItemTypes(prev => [...prev, 'producto']); // Default a producto
+    setItemProveedores(prev => [...prev, undefined]);
   };
 
   const handleRemoveItem = (index: number) => {
     if (fields.length > 1) {
       remove(index);
+      setItemTypes(prev => prev.filter((_, i) => i !== index));
+      setItemProveedores(prev => prev.filter((_, i) => i !== index));
     }
+  };
+
+  const setItemType = (index: number, type: 'producto' | 'servicio') => {
+    const newTypes = [...itemTypes];
+    newTypes[index] = type;
+    setItemTypes(newTypes);
+  };
+
+  const setItemProveedor = (index: number, proveedorId: number | undefined) => {
+    const newProveedores = [...itemProveedores];
+    newProveedores[index] = proveedorId;
+    setItemProveedores(newProveedores);
   };
 
   // Filtrar solo clientes
@@ -309,6 +362,15 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
     label: cliente.nombre
   }));
 
+  // Opciones de proveedores (filtrando personas)
+  const proveedorOptions = personas
+    .filter(p => p.tipo === 'PROVEEDOR')
+    .map(proveedor => ({
+      value: proveedor.id,
+      label: proveedor.nombre,
+      email: proveedor.email
+    }));
+
   const monedaOptions = monedas.map(moneda => ({
     value: moneda.id,
     label: `${moneda.nombre} (${moneda.simbolo})`
@@ -316,14 +378,16 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
 
   const productoOptions = productos.map(producto => ({
     value: producto.id,
-    label: `${producto.nombre} - ${formatPrice(producto.precio)}`,
-    precio: producto.precio
+    label: producto.nombre,
+    precio: producto.precio,
+    proveedorId: producto.proveedorId
   }));
 
   const servicioOptions = servicios.map(servicio => ({
     value: servicio.id,
-    label: `${servicio.nombre} - ${formatPrice(servicio.precio)}`,
-    precio: servicio.precio
+    label: servicio.nombre,
+    precio: servicio.precio,
+    proveedorId: servicio.proveedorId
   }));
 
   const handleImpuestoToggle = (impuesto: Impuesto, checked: boolean) => {
@@ -349,6 +413,31 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
             {isEdit ? 'Modifica la información del presupuesto' : 'Completa los datos del nuevo presupuesto'}
           </p>
         </div>
+
+        {/* Alerta de estado bloqueado/aprobado */}
+        {isLocked && (
+          <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+            <p className="text-red-800 dark:text-red-200 font-semibold flex items-center gap-2">
+              <span className="text-xl">🔒</span>
+              Presupuesto Facturado - No se puede editar
+            </p>
+            <p className="text-red-600 dark:text-red-300 text-sm mt-1">
+              Este presupuesto ya ha sido facturado y no puede modificarse.
+            </p>
+          </div>
+        )}
+        
+        {isApproved && !isAdmin && !isLocked && (
+          <div className="mb-6 p-4 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg">
+            <p className="text-orange-800 dark:text-orange-200 font-semibold flex items-center gap-2">
+              <span className="text-xl">⚠️</span>
+              Presupuesto Aprobado - Solo Admin puede editar
+            </p>
+            <p className="text-orange-600 dark:text-orange-300 text-sm mt-1">
+              Este presupuesto ha sido aprobado. Solo los administradores pueden modificarlo.
+            </p>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit(handleFormSubmit)}>
           <FormContainer>
@@ -725,66 +814,137 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
                       )}
                     </div>
 
+                    {/* Toggle Producto/Servicio */}
+                    <div className="mb-4">
+                      <label className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-2 block">
+                        Tipo de Item
+                      </label>
+                      <div className="inline-flex rounded-md shadow-sm" role="group">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setItemType(index, 'producto');
+                            setItemProveedor(index, undefined);
+                            setValue(`items.${index}.servicioId`, undefined);
+                            setValue(`items.${index}.productoId`, undefined);
+                            setValue(`items.${index}.precioUnitario`, 0);
+                          }}
+                          className={`px-4 py-2 text-sm font-medium rounded-l border transition-colors ${
+                            itemTypes[index] === 'producto' || !itemTypes[index]
+                              ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900 border-gray-900 dark:border-white z-10'
+                              : 'bg-white text-gray-700 border-gray-300 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
+                          }`}
+                        >
+                          Producto
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setItemType(index, 'servicio');
+                            setItemProveedor(index, undefined);
+                            setValue(`items.${index}.productoId`, undefined);
+                            setValue(`items.${index}.servicioId`, undefined);
+                            setValue(`items.${index}.precioUnitario`, 0);
+                          }}
+                          className={`px-4 py-2 text-sm font-medium rounded-r border transition-colors ${
+                            itemTypes[index] === 'servicio'
+                              ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900 border-gray-900 dark:border-white z-10'
+                              : 'bg-white text-gray-700 border-gray-300 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
+                          }`}
+                        >
+                          Servicio
+                        </button>
+                      </div>
+                    </div>
+
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                      {/* Producto */}
-                      <FormItem
-                        label="Producto"
-                        invalid={!!errors.items?.[index]?.productoId}
-                        errorMessage={errors.items?.[index]?.productoId?.message}
-                      >
-                        <Controller
-                          name={`items.${index}.productoId`}
-                          control={control}
-                          render={({ field }) => (
-                            <Select
-                              {...field}
-                              options={[{ value: '', label: 'Sin producto' }, ...productoOptions]}
-                              placeholder="Seleccionar producto"
-                              isDisabled={isSubmitting || !!watchItems?.[index]?.servicioId}
-                              onChange={(option) => {
-                                field.onChange(option?.value || undefined);
-                                // Auto-completar precio si selecciona producto
-                                if (option && 'precio' in option && option.precio) {
-                                  setValue(`items.${index}.precioUnitario`, option.precio);
-                                  // Limpiar servicio si selecciona producto
-                                  setValue(`items.${index}.servicioId`, undefined);
-                                }
-                              }}
-                              value={productoOptions.find(option => option.value === field.value) || { value: '', label: 'Sin producto' }}
-                            />
-                          )}
+                      {/* Selector de Proveedor */}
+                      <FormItem label="Proveedor">
+                        <Select
+                          options={proveedorOptions}
+                          placeholder="Buscar proveedor..."
+                          isSearchable={true}
+                          isDisabled={isSubmitting}
+                          onChange={(option: any) => {
+                            setItemProveedor(index, option?.value);
+                            // Limpiar producto/servicio al cambiar proveedor
+                            setValue(`items.${index}.productoId`, undefined);
+                            setValue(`items.${index}.servicioId`, undefined);
+                            setValue(`items.${index}.precioUnitario`, 0);
+                          }}
+                          value={proveedorOptions.find(option => option.value === itemProveedores[index]) || null}
                         />
                       </FormItem>
 
-                      {/* Servicio (alternativo a producto) */}
-                      <FormItem
-                        label="Servicio"
-                        invalid={!!errors.items?.[index]?.servicioId}
-                        errorMessage={errors.items?.[index]?.servicioId?.message}
-                      >
-                        <Controller
-                          name={`items.${index}.servicioId`}
-                          control={control}
-                          render={({ field }) => (
-                            <Select
-                              {...field}
-                              options={[{ value: '', label: 'Sin servicio' }, ...servicioOptions]}
-                              placeholder="Seleccionar servicio"
-                              isDisabled={isSubmitting || !!watchItems?.[index]?.productoId}
-                              onChange={(option) => {
-                                field.onChange(option?.value || undefined);
-                                // Auto-completar precio si selecciona servicio
-                                if (option && 'precio' in option && option.precio) {
-                                  setValue(`items.${index}.precioUnitario`, option.precio);
-                                  // Limpiar producto si selecciona servicio
-                                  setValue(`items.${index}.productoId`, undefined);
-                                }
-                              }}
-                              value={servicioOptions.find(option => option.value === field.value) || { value: '', label: 'Sin servicio' }}
-                            />
-                          )}
-                        />
-                      </FormItem>
+                      {/* Producto - Solo si seleccionó proveedor y está en modo producto */}
+                      {itemProveedores[index] && (itemTypes[index] === 'producto' || !itemTypes[index]) && (
+                        <FormItem
+                          label="Producto"
+                          invalid={!!errors.items?.[index]?.productoId}
+                          errorMessage={errors.items?.[index]?.productoId?.message}
+                        >
+                          <Controller
+                            name={`items.${index}.productoId`}
+                            control={control}
+                            render={({ field }) => {
+                              const productosFiltrados = productoOptions.filter(
+                                p => p.proveedorId === itemProveedores[index]
+                              );
+                              return (
+                                <Select
+                                  {...field}
+                                  options={productosFiltrados}
+                                  placeholder={productosFiltrados.length > 0 ? "Seleccionar producto" : "Sin productos disponibles"}
+                                  isDisabled={isSubmitting || productosFiltrados.length === 0}
+                                  isSearchable={true}
+                                  onChange={(option: any) => {
+                                    field.onChange(option?.value || undefined);
+                                    if (option && option.precio) {
+                                      setValue(`items.${index}.precioUnitario`, option.precio);
+                                    }
+                                  }}
+                                  value={productosFiltrados.find(option => option.value === field.value) || null}
+                                />
+                              );
+                            }}
+                          />
+                        </FormItem>
+                      )}
+
+                      {/* Servicio - Solo si seleccionó proveedor y está en modo servicio */}
+                      {itemProveedores[index] && itemTypes[index] === 'servicio' && (
+                        <FormItem
+                          label="Servicio"
+                          invalid={!!errors.items?.[index]?.servicioId}
+                          errorMessage={errors.items?.[index]?.servicioId?.message}
+                        >
+                          <Controller
+                            name={`items.${index}.servicioId`}
+                            control={control}
+                            render={({ field }) => {
+                              const serviciosFiltrados = servicioOptions.filter(
+                                s => s.proveedorId === itemProveedores[index]
+                              );
+                              return (
+                                <Select
+                                  {...field}
+                                  options={serviciosFiltrados}
+                                  placeholder={serviciosFiltrados.length > 0 ? "Seleccionar servicio" : "Sin servicios disponibles"}
+                                  isDisabled={isSubmitting || serviciosFiltrados.length === 0}
+                                  isSearchable={true}
+                                  onChange={(option: any) => {
+                                    field.onChange(option?.value || undefined);
+                                    if (option && option.precio) {
+                                      setValue(`items.${index}.precioUnitario`, option.precio);
+                                    }
+                                  }}
+                                  value={serviciosFiltrados.find(option => option.value === field.value) || null}
+                                />
+                              );
+                            }}
+                          />
+                        </FormItem>
+                      )}
 
                       {/* Cantidad */}
                       <FormItem
@@ -821,17 +981,11 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
                           name={`items.${index}.precioUnitario`}
                           control={control}
                           render={({ field }) => (
-                            <Input
-                              {...field}
-                              type="number"
-                              step="0.01"
-                              min="0"
-                              placeholder="0.00"
-                              disabled={isSubmitting}
-                              onChange={(e) => {
-                                const val = Number(e.target.value)
-                                field.onChange(Number.isFinite(val) && val >= 0 ? val : 0)
-                              }}
+                            <MoneyInput
+                              value={field.value || 0}
+                              onChange={(value) => field.onChange(value)}
+                              disabled={isSubmitting || !canEdit}
+                              placeholder="0,00"
                             />
                           )}
                         />
@@ -839,19 +993,7 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
                     </div>
 
                     {/* Subtotal del item */}
-                    <div className="mt-4 flex justify-between items-center">
-                      <div className="flex items-center space-x-2">
-                        {watchItems?.[index]?.productoId && (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300">
-                            Producto
-                          </span>
-                        )}
-                        {watchItems?.[index]?.servicioId && (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300">
-                            Servicio
-                          </span>
-                        )}
-                      </div>
+                    <div className="mt-4 pt-3 border-t border-gray-200 dark:border-gray-700 flex justify-end">
                       <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                         Subtotal: {formatPrice((watchItems?.[index]?.cantidad || 0) * (watchItems?.[index]?.precioUnitario || 0))}
                       </span>
@@ -916,16 +1058,18 @@ const PresupuestoForm: React.FC<PresupuestoFormProps> = ({
                 onClick={onCancel}
                 disabled={isSubmitting}
               >
-                Cancelar
+                {canEdit ? 'Cancelar' : 'Volver'}
               </Button>
-              <Button
-                type="submit"
-                variant="solid"
-                loading={isSubmitting}
-                disabled={isSubmitting}
-              >
-                {isEdit ? 'Actualizar' : 'Crear'} Presupuesto
-              </Button>
+              {canEdit && (
+                <Button
+                  type="submit"
+                  variant="solid"
+                  loading={isSubmitting}
+                  disabled={isSubmitting || !canEdit}
+                >
+                  {isEdit ? 'Actualizar' : 'Crear'} Presupuesto
+                </Button>
+              )}
             </div>
           </FormContainer>
         </form>
