@@ -2,12 +2,47 @@ import { Request, Response, NextFunction } from 'express';
 import { FacturaService } from '../services/factura.service';
 import { EstadoFactura } from '@prisma/client';
 import { HttpError } from '../utils/http-error';
+import { toNumber, isValidCurrencyValue, roundCurrency, currencyEquals } from '../utils/currency';
 
 export class FacturaController {
   static async create(req: Request, res: Response, next: NextFunction) {
     try {
-  const factura = await FacturaService.create(req.body);
-  return res.status(201).json(factura);
+      const { subtotal, impuestos, total, ...rest } = req.body;
+      
+      // Validar que sean números válidos
+      const subtotalNum = toNumber(subtotal, NaN);
+      const impuestosNum = toNumber(impuestos, NaN);
+      const totalNum = toNumber(total, NaN);
+      
+      // Validar rangos
+      if (!isValidCurrencyValue(subtotalNum, false, false)) {
+        throw HttpError.BadRequest('Subtotal inválido o negativo');
+      }
+      
+      if (!isValidCurrencyValue(impuestosNum, true, false)) {
+        throw HttpError.BadRequest('Impuestos inválidos o negativos');
+      }
+      
+      if (!isValidCurrencyValue(totalNum, false, false)) {
+        throw HttpError.BadRequest('Total inválido o negativo');
+      }
+      
+      // Validar coherencia: subtotal + impuestos = total
+      const totalCalculado = roundCurrency(subtotalNum + impuestosNum, 2);
+      if (!currencyEquals(totalCalculado, totalNum, 0.01)) {
+        throw HttpError.BadRequest(
+          `Total inconsistente. Calculado: ${totalCalculado}, recibido: ${totalNum}`
+        );
+      }
+      
+      const factura = await FacturaService.create({
+        ...rest,
+        subtotal: subtotalNum,
+        impuestos: impuestosNum,
+        total: totalNum,
+      });
+      
+      return res.status(201).json(factura);
     } catch (error) {
       next(error);
     }
