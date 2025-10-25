@@ -65,7 +65,9 @@ const ServicioEdit: React.FC = () => {
         return;
       }
       
-      await updateServicio(parseInt(id), data);
+      // No enviar precio: el backend lo calcula
+      const { precio, ...dataWithoutPrecio } = data;
+      await updateServicio(parseInt(id), dataWithoutPrecio);
       navigate('/servicios');
     } catch (error: any) {
       const errorMessage = getErrorMessage(error);

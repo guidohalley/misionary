@@ -11,7 +11,9 @@ const ServicioNew: React.FC = () => {
 
   const handleSubmit = async (data: ServicioFormData) => {
     try {
-      await createServicio(data);
+      // No enviar precio: el backend lo calculará automáticamente
+      const { precio, ...dataWithoutPrecio } = data;
+      await createServicio(dataWithoutPrecio);
       navigate('/servicios');
     } catch (error) {
       console.error('Error creating servicio:', error);
