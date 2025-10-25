@@ -11,7 +11,9 @@ const ProductoNew: React.FC = () => {
 
   const handleSubmit = async (data: ProductoFormData) => {
     try {
-      await createProducto(data);
+      // No enviar precio: el backend lo calculará automáticamente
+      const { precio, ...dataWithoutPrecio } = data;
+      await createProducto(dataWithoutPrecio);
       navigate('/productos');
     } catch (error) {
       console.error('Error creating producto:', error);

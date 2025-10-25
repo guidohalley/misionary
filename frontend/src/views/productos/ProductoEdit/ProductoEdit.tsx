@@ -65,13 +65,11 @@ const ProductoEdit: React.FC = () => {
         return;
       }
       
-      // Normalizar payload: solo enviar campos relevantes del update
+      // Normalizar payload: NO enviar precio, el backend lo calcula
       const payload = {
         nombre: data.nombre,
         costoProveedor: data.costoProveedor,
         margenAgencia: data.margenAgencia,
-        // precio es calculado en backend si no se envía; si viene calculado, lo incluimos
-        ...(typeof data.precio === 'number' ? { precio: data.precio } : {}),
         proveedorId: data.proveedorId,
         monedaId: data.monedaId,
       };
