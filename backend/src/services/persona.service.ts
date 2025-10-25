@@ -18,15 +18,129 @@ export class PersonaService {
   }
 
   static async findById(id: number) {
-    return prisma.persona.findUnique({
+    const persona = await prisma.persona.findUnique({
       where: { id },
       include: {
-        productos: true,
-        servicios: true,
-        presupuestos: true,
+        productos: {
+          include: {
+            moneda: true
+          }
+        },
+        servicios: {
+          include: {
+            moneda: true
+          }
+        },
+        presupuestos: {
+          include: {
+            cliente: {
+              select: {
+                id: true,
+                nombre: true
+              }
+            },
+            empresa: {
+              select: {
+                id: true,
+                nombre: true,
+                razonSocial: true
+              }
+            },
+            moneda: true
+          },
+          orderBy: {
+            createdAt: 'desc'
+          }
+        },
+        empresas: {
+          orderBy: {
+            createdAt: 'desc'
+          }
+        },
         recibos: true
       }
     });
+
+    if (!persona) return null;
+
+    // Para proveedores, buscar presupuestos donde participan sus productos/servicios
+    let presupuestosRelacionados: any[] = [];
+    if (persona.tipo === 'PROVEEDOR') {
+      const items = await prisma.item.findMany({
+        where: {
+          OR: [
+            { productoId: { in: persona.productos.map(p => p.id) } },
+            { servicioId: { in: persona.servicios.map(s => s.id) } }
+          ]
+        },
+        include: {
+          presupuesto: {
+            include: {
+              cliente: {
+                select: {
+                  id: true,
+                  nombre: true
+                }
+              },
+              empresa: {
+                select: {
+                  id: true,
+                  nombre: true,
+                  razonSocial: true
+                }
+              },
+              moneda: true
+            }
+          },
+          producto: true,
+          servicio: true
+        }
+      });
+
+      // Agrupar por presupuesto único
+      const presupuestosMap = new Map();
+      items.forEach(item => {
+        if (!presupuestosMap.has(item.presupuesto.id)) {
+          presupuestosMap.set(item.presupuesto.id, {
+            ...item.presupuesto,
+            items: []
+          });
+        }
+        presupuestosMap.get(item.presupuesto.id).items.push(item);
+      });
+
+      presupuestosRelacionados = Array.from(presupuestosMap.values());
+    }
+
+    // Transform Decimal to Number
+    return {
+      ...persona,
+      productos: persona.productos.map(p => ({
+        ...p,
+        precio: p.precio ? Number(p.precio) : p.precio,
+        costoProveedor: p.costoProveedor ? Number(p.costoProveedor) : p.costoProveedor,
+        margenAgencia: p.margenAgencia ? Number(p.margenAgencia) : p.margenAgencia,
+      })),
+      servicios: persona.servicios.map(s => ({
+        ...s,
+        precio: s.precio ? Number(s.precio) : s.precio,
+        costoProveedor: s.costoProveedor ? Number(s.costoProveedor) : s.costoProveedor,
+        margenAgencia: s.margenAgencia ? Number(s.margenAgencia) : s.margenAgencia,
+      })),
+      presupuestos: persona.tipo === 'CLIENTE' 
+        ? persona.presupuestos.map(pr => ({
+            ...pr,
+            subtotal: pr.subtotal ? Number(pr.subtotal) : pr.subtotal,
+            impuestos: pr.impuestos ? Number(pr.impuestos) : pr.impuestos,
+            total: pr.total ? Number(pr.total) : pr.total,
+          }))
+        : presupuestosRelacionados.map(pr => ({
+            ...pr,
+            subtotal: pr.subtotal ? Number(pr.subtotal) : pr.subtotal,
+            impuestos: pr.impuestos ? Number(pr.impuestos) : pr.impuestos,
+            total: pr.total ? Number(pr.total) : pr.total,
+          })),
+    };
   }
 
   static async findByEmail(email: string) {
