@@ -150,13 +150,10 @@ export class PersonaService {
   }
 
   static async update(id: number, data: Partial<Persona>) {
-    console.log('PersonaService.update - ID:', id, 'Data:', data);
-    const result = await prisma.persona.update({
+    return prisma.persona.update({
       where: { id },
       data
     });
-    console.log('PersonaService.update - Result:', result);
-    return result;
   }
 
   static async delete(id: number) {
