@@ -1,5 +1,6 @@
 import { PrismaClient, Moneda, TipoCambio, CodigoMoneda, TipoCotizacion } from '@prisma/client';
 import { Decimal } from '@prisma/client/runtime/library';
+import { roundCurrency, toNumber } from '../utils/currency';
 
 const prisma = new PrismaClient();
 
@@ -156,10 +157,11 @@ export class MonedaService {
       throw new Error(`No se encontró tipo de cambio para las monedas especificadas`);
     }
 
-    const montoConvertido = monto * parseFloat(tipoCambio.valor.toString());
+    const tipoCambioNumber = toNumber(tipoCambio.valor);
+    const montoConvertido = roundCurrency(monto * tipoCambioNumber, 2);
 
     return {
-      montoConvertido: Math.round(montoConvertido * 100) / 100, // Redondear a 2 decimales
+      montoConvertido,
       tipoCambio
     };
   }
