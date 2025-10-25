@@ -25,11 +25,11 @@ export async function crearRecibo(input: {
     data: {
       personaId: input.personaId,
       concepto: input.concepto,
-      monto: input.monto as any,
+      monto: input.monto,
       fecha: input.fecha,
       metodoPago: input.metodoPago,
-  presupuestoId: input.presupuestoId,
-  monedaId: input.monedaId || 1,
+      presupuestoId: input.presupuestoId,
+      monedaId: input.monedaId || 1,
     },
   })
 
