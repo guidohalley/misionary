@@ -43,7 +43,6 @@ const PersonaEdit: React.FC = () => {
     
     const persona = personas.find((p: any) => p.id === parseInt(id));
     if (persona) {
-      console.log('Persona encontrada para editar:', persona);
       reset({
         nombre: persona.nombre,
         email: persona.email,
@@ -59,13 +58,10 @@ const PersonaEdit: React.FC = () => {
 
   const onSubmit = async (data: UpdatePersonaAdminFormData) => {
     if (!id) return;
-
-    console.log('Datos a enviar:', data);
     
     try {
       setError(null);
-      const result = await updatePersona(parseInt(id), data);
-      console.log('Resultado de actualización:', result);
+      await updatePersona(parseInt(id), data);
       navigate('/personas');
     } catch (err) {
       setError('Error al actualizar la persona');

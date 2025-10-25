@@ -50,11 +50,6 @@ const PersonaQuickViewModal: React.FC<PersonaQuickViewModalProps> = ({
     setLoading(true);
     try {
       const response = await BaseService.get(`/personas/${persona.id}`);
-      console.log('📊 Detalles de persona completos:', response.data);
-      console.log('📦 Productos:', response.data.productos);
-      console.log('🛠️ Servicios:', response.data.servicios);
-      console.log('📄 Presupuestos:', response.data.presupuestos);
-      console.log('🏢 Empresas:', response.data.empresas);
       
       const newDetails = {
         productos: Array.isArray(response.data.productos) ? response.data.productos : [],
@@ -63,7 +58,6 @@ const PersonaQuickViewModal: React.FC<PersonaQuickViewModalProps> = ({
         empresas: Array.isArray(response.data.empresas) ? response.data.empresas : [],
       };
       
-      console.log('✅ Details procesados:', newDetails);
       setDetails(newDetails);
     } catch (error) {
       console.error('❌ Error al cargar detalles:', error);
