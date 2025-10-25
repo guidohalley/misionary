@@ -13,6 +13,26 @@ export enum RolUsuario {
   PROVEEDOR = 'PROVEEDOR'
 }
 
+// Áreas predefinidas para proveedores
+export const PROVIDER_AREAS = [
+  'Desarrollador de Software',
+  'Backend',
+  'Frontend',
+  'Tester',
+  'Analista',
+  'Paid Media',
+  'Social Media',
+  'Data Entry',
+  'Productor Audiovisual',
+  'Edición de Video',
+  'Diseñador Gráfico',
+] as const;
+
+export const providerAreaOptions = PROVIDER_AREAS.map(area => ({
+  value: area,
+  label: area
+}));
+
 // ====================================
 // SCHEMAS ESPECÍFICOS POR TIPO
 // ====================================
@@ -109,6 +129,14 @@ export const proveedorSchema = z.object({
     .optional()
     .or(z.literal('')),
   
+  providerArea: z.string()
+    .optional()
+    .or(z.literal('')),
+  
+  providerRoles: z.array(z.string())
+    .optional()
+    .default([]),
+  
   cvu: z.string()
     .length(22, 'El CVU debe tener exactamente 22 dígitos')
     .optional()
@@ -191,6 +219,14 @@ export const updatePersonaAdminSchema = z.object({
     .min(10, 'El teléfono debe tener al menos 10 dígitos')
     .optional()
     .or(z.literal('')),
+  
+  providerArea: z.string()
+    .optional()
+    .or(z.literal('')),
+  
+  providerRoles: z.array(z.string())
+    .optional()
+    .default([]),
   
   cvu: z.string()
     .length(22, 'El CVU debe tener exactamente 22 dígitos')
