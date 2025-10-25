@@ -376,11 +376,14 @@ const PresupuestoView: React.FC = () => {
                     {(() => {
                       const ganancia = productos.reduce((sum, item) => {
                         const costo = Number(item.producto?.costoProveedor || 0);
-                        return sum + ((item.precioUnitario - costo) * item.cantidad);
+                        const gananciaItem = (item.precioUnitario - costo) * item.cantidad;
+                        return sum + gananciaItem;
                       }, 0);
-                      return formatPrice(ganancia);
+                      // Redondear a 2 decimales antes de formatear
+                      const gananciaRedondeada = Math.round(ganancia * 100) / 100;
+                      return formatPrice(gananciaRedondeada);
                     })()}
-                      </span>
+                  </span>
                 </div>
               </div>
             </div>
