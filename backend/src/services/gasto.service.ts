@@ -487,6 +487,23 @@ class GastoService {
       throw new HttpError(400, 'Ya existe una asignación de este gasto para este proyecto');
     }
 
+    // Validar que la suma de porcentajes no exceda 100%
+    const asignacionesExistentes = await prisma.asignacionGastoProyecto.findMany({
+      where: { gastoId: data.gastoId }
+    });
+
+    const totalPorcentajeAsignado = asignacionesExistentes.reduce(
+      (sum, a) => sum + Number(a.porcentaje),
+      0
+    );
+
+    if (totalPorcentajeAsignado + data.porcentaje > 100) {
+      throw new HttpError(
+        400,
+        `El total de asignaciones (${(totalPorcentajeAsignado + data.porcentaje).toFixed(2)}%) excede el 100%. Disponible: ${(100 - totalPorcentajeAsignado).toFixed(2)}%`
+      );
+    }
+
     // Calcular el monto asignado
     const montoAsignado = (gasto.monto.toNumber() * data.porcentaje) / 100;
 
@@ -533,11 +550,32 @@ class GastoService {
 
     let montoAsignado = asignacionExistente.montoAsignado.toNumber();
 
-    // Si se actualiza el porcentaje, recalcular el monto
+    // Si se actualiza el porcentaje, recalcular el monto y validar total
     if (data.porcentaje !== undefined) {
       if (data.porcentaje <= 0 || data.porcentaje > 100) {
         throw new HttpError(400, 'El porcentaje debe estar entre 0.01 y 100');
       }
+
+      // Validar que la suma de porcentajes no exceda 100%
+      const asignacionesOtras = await prisma.asignacionGastoProyecto.findMany({
+        where: {
+          gastoId: asignacionExistente.gastoId,
+          id: { not: id } // Excluir la asignación actual
+        }
+      });
+
+      const totalPorcentajeOtros = asignacionesOtras.reduce(
+        (sum, a) => sum + Number(a.porcentaje),
+        0
+      );
+
+      if (totalPorcentajeOtros + data.porcentaje > 100) {
+        throw new HttpError(
+          400,
+          `El total de asignaciones (${(totalPorcentajeOtros + data.porcentaje).toFixed(2)}%) excede el 100%. Disponible: ${(100 - totalPorcentajeOtros).toFixed(2)}%`
+        );
+      }
+
       montoAsignado = (asignacionExistente.gasto.monto.toNumber() * data.porcentaje) / 100;
     }
 
