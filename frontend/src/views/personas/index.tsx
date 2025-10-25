@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Card, Button, Input, Select, Pagination } from '@/components/ui';
+import { Card, Button } from '@/components/ui';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
 import PersonaList from './PersonaList';
 import InviteProviderModal from './InviteProviderModal';
 import { usePersona } from './hooks';
-import { Persona, UpdatePersonaDTO } from './types';
+import { Persona } from './types';
 import { TipoPersona } from './schemas';
 import useAuth from '@/utils/hooks/useAuth';
-import { HiOutlinePlus, HiOutlineMail, HiOutlineUserAdd } from 'react-icons/hi';
+import { HiOutlinePlus, HiOutlineUserAdd } from 'react-icons/hi';
 
 interface PersonasViewProps {
   tipoFiltro?: TipoPersona;
@@ -22,12 +22,6 @@ const PersonasView: React.FC<PersonasViewProps> = ({ tipoFiltro }) => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [personaToDelete, setPersonaToDelete] = useState<number | null>(null);
   const [showInviteModal, setShowInviteModal] = useState(false);
-  
-  // Estados para búsqueda y paginación
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filteredPersonas, setFilteredPersonas] = useState<Persona[]>([]);
 
   // Obtener tipo de filtro desde URL o prop
   const tipoFromUrl = searchParams.get('tipo') as TipoPersona | null;
@@ -43,46 +37,6 @@ const PersonasView: React.FC<PersonasViewProps> = ({ tipoFiltro }) => {
 
   // Verificar si el usuario es admin
   const isAdmin = user?.authority?.includes('ADMIN');
-
-  // Filtrar personas cuando cambie el término de búsqueda o la lista de personas
-  useEffect(() => {
-    const filtered = personas.filter(persona =>
-      persona.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      persona.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      persona.tipo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      persona.telefono?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    setFilteredPersonas(filtered);
-    setCurrentPage(1); // Reset a primera página al filtrar
-  }, [personas, searchTerm]);
-
-  // Opciones de tamaño de página
-  const pageSizeOptions: { value: number; label: string }[] = [
-    { value: 10, label: '10 por página' },
-    { value: 25, label: '25 por página' },
-    { value: 50, label: '50 por página' },
-  ];
-  const selectedPageSize = pageSizeOptions.find(o => o.value === pageSize) || pageSizeOptions[0];
-
-  // Calcular paginación
-  const totalItems = filteredPersonas.length;
-  const totalPages = Math.ceil(totalItems / pageSize);
-  const startIndex = (currentPage - 1) * pageSize;
-  const endIndex = startIndex + pageSize;
-  const currentItems = filteredPersonas.slice(startIndex, endIndex);
-
-  // Debug temporal para verificar valores
-  console.log('🔍 PersonasView Debug:', {
-    totalPersonas: personas.length,
-    filteredPersonas: filteredPersonas.length,
-    currentPage,
-    pageSize,
-    totalPages,
-    totalItems,
-    startIndex,
-    endIndex,
-    currentItemsLength: currentItems.length
-  });
 
   // Obtener título según el tipo de filtro
   const getTitulo = () => {
@@ -136,7 +90,7 @@ const PersonasView: React.FC<PersonasViewProps> = ({ tipoFiltro }) => {
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: 0.1, duration: 0.3 }}
-        className="flex justify-between items-center"
+        className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
       >
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
           {getTitulo()}
@@ -144,12 +98,12 @@ const PersonasView: React.FC<PersonasViewProps> = ({ tipoFiltro }) => {
         <motion.div
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          className="flex gap-3"
+          className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto"
         >
           <Button 
             variant="solid" 
             onClick={handleCreate}
-            className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600"
+            className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 w-full sm:w-auto"
           >
             <HiOutlinePlus className="w-4 h-4 mr-2" />
             {getBotonTexto()}
@@ -160,7 +114,7 @@ const PersonasView: React.FC<PersonasViewProps> = ({ tipoFiltro }) => {
             <Button 
               variant="outline" 
               onClick={() => setShowInviteModal(true)}
-              className="border-blue-500 dark:border-blue-400 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+              className="border-blue-500 dark:border-blue-400 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 w-full sm:w-auto"
             >     
               <HiOutlineUserAdd className="w-4 h-4 mr-2" />
               Invitar Proveedor
@@ -177,76 +131,13 @@ const PersonasView: React.FC<PersonasViewProps> = ({ tipoFiltro }) => {
       >
         <Card>
           <div className="p-6">
-            {/* Barra de búsqueda y selector de tamaño */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-              <div className="flex-1 w-full sm:w-auto">
-                <Input
-                  placeholder="Buscar por nombre, email, tipo o teléfono..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full"
-                />
-              </div>
-              <div className="w-full sm:w-auto">
-                <Select
-                  value={selectedPageSize}
-                  onChange={(opt: any) => {
-                    console.log('📝 Select onChange:', opt);
-                    if (opt && typeof opt.value === 'number') {
-                      console.log('✅ Cambiando pageSize a:', opt.value);
-                      setPageSize(opt.value);
-                      setCurrentPage(1);
-                    }
-                  }}
-                  options={pageSizeOptions}
-                  isSearchable={false}
-                  className="w-full sm:w-48"
-                />
-              </div>
-            </div>
-
-            {/* Tabla de personas */}
             <PersonaList
-              personas={currentItems}
+              personas={personas}
               loading={loading}
               error={error}
               onEdit={handleEdit}
               onDelete={handleDelete}
             />
-
-            {/* Debug info */}
-            <div className="mt-4 p-2 bg-gray-100 dark:bg-gray-800 rounded text-sm">
-              <div>Total personas: {personas.length}</div>
-              <div>Filtradas: {filteredPersonas.length}</div>
-              <div>Página actual: {currentPage}</div>
-              <div>Tamaño página: {pageSize}</div>
-              <div>Total páginas: {totalPages}</div>
-              <div>Mostrando: {currentItems.length} items</div>
-            </div>
-
-            {/* Paginación */}
-            {totalPages > 1 && (
-              <div className="mt-6 flex justify-center">
-                <Pagination
-                  total={totalItems}
-                  pageSize={pageSize}
-                  currentPage={currentPage}
-                  onChange={(page) => {
-                    console.log('📄 Pagination onChange:', page);
-                    setCurrentPage(page);
-                  }}
-                />
-              </div>
-            )}
-
-            {/* Mensaje cuando no hay resultados */}
-            {!loading && filteredPersonas.length === 0 && (
-              <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-                {searchTerm 
-                  ? 'No se encontraron personas que coincidan con la búsqueda' 
-                  : 'No hay personas registradas'}
-              </div>
-            )}
           </div>
         </Card>
       </motion.div>
