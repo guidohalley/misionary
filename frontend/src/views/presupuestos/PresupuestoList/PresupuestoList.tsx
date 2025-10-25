@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Button, Badge, Pagination, Select, Input, Notification, toast } from '@/components/ui';
-import { HiOutlinePencil, HiOutlineTrash, HiOutlineEye, HiOutlineCheck, HiOutlineMail, HiOutlinePrinter, HiOutlineFilter, HiOutlineViewBoards } from 'react-icons/hi';
+import { HiOutlinePencil, HiOutlineTrash, HiOutlineEye, HiOutlineCheck, HiOutlineMail, HiOutlinePrinter, HiOutlineFilter, HiOutlineViewBoards, HiOutlineArrowLeft } from 'react-icons/hi';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { usePresupuesto } from '@/modules/presupuesto/hooks/usePresupuesto';
@@ -145,6 +145,19 @@ const PresupuestoList: React.FC<PresupuestoListProps> = ({ className }) => {
     return flow[estadoActual] || null;
   };
 
+  // Obtener estado anterior (solo para ADMIN)
+  const getPrevEstado = (estadoActual: EstadoPresupuesto): EstadoPresupuesto | null => {
+    const isAdmin = user?.authority?.includes('ADMIN');
+    if (!isAdmin) return null;
+
+    const reverseFlow = {
+      [EstadoPresupuesto.ENVIADO]: EstadoPresupuesto.BORRADOR,
+      [EstadoPresupuesto.APROBADO]: EstadoPresupuesto.ENVIADO,
+      [EstadoPresupuesto.FACTURADO]: EstadoPresupuesto.APROBADO,
+    };
+    return reverseFlow[estadoActual] || null;
+  };
+
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('es-AR', {
       style: 'currency',
@@ -154,7 +167,7 @@ const PresupuestoList: React.FC<PresupuestoListProps> = ({ className }) => {
 
   // Obtener clientes únicos para el selector
   const uniqueClientes = Array.from(
-    new Map(presupuestos.map(p => [p.clienteId, { id: p.clienteId, nombre: p.cliente.nombre }])).values()
+    new Map(presupuestos.filter(p => p.cliente).map(p => [p.clienteId, { id: p.clienteId, nombre: p.cliente.nombre }])).values()
   );
 
   // Agrupar por cliente si está activado
@@ -416,11 +429,23 @@ const PresupuestoList: React.FC<PresupuestoListProps> = ({ className }) => {
                               <button
                                 onClick={() => handleChangeEstado(presupuesto.id, nextEstado)}
                                 className="p-2 rounded-full text-green-600 dark:text-green-300 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-600 dark:to-slate-700 hover:shadow-lg hover:shadow-green-200 dark:hover:shadow-green-900/50 active:shadow-inner transition-all duration-200"
-                                title={`Cambiar a ${nextEstado}`}
+                                title={`Avanzar a ${nextEstado}`}
                               >
                                 {nextEstado === EstadoPresupuesto.ENVIADO ? <HiOutlineMail className="w-5 h-5" /> : <HiOutlineCheck className="w-5 h-5" />}
                               </button>
                             )}
+                            {(() => {
+                              const prevEstado = getPrevEstado(presupuesto.estado);
+                              return prevEstado && (
+                                <button
+                                  onClick={() => handleChangeEstado(presupuesto.id, prevEstado)}
+                                  className="p-2 rounded-full text-orange-600 dark:text-orange-300 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-600 dark:to-slate-700 hover:shadow-lg hover:shadow-orange-200 dark:hover:shadow-orange-900/50 active:shadow-inner transition-all duration-200"
+                                  title={`Retroceder a ${prevEstado}`}
+                                >
+                                  <HiOutlineArrowLeft className="w-5 h-5" />
+                                </button>
+                              );
+                            })()}
                           </div>
                         </div>
                       </div>
@@ -518,11 +543,23 @@ const PresupuestoList: React.FC<PresupuestoListProps> = ({ className }) => {
                           <button
                             onClick={() => handleChangeEstado(presupuesto.id, nextEstado)}
                             className="p-2 rounded-full text-green-600 dark:text-green-300 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-600 dark:to-slate-700 hover:shadow-lg hover:shadow-green-200 dark:hover:shadow-green-900/50 active:shadow-inner transition-all duration-200"
-                            title={`Cambiar a ${nextEstado}`}
+                            title={`Avanzar a ${nextEstado}`}
                           >
                             {nextEstado === EstadoPresupuesto.ENVIADO ? <HiOutlineMail className="w-5 h-5" /> : <HiOutlineCheck className="w-5 h-5" />}
                           </button>
                         )}
+                        {(() => {
+                          const prevEstado = getPrevEstado(presupuesto.estado);
+                          return prevEstado && (
+                            <button
+                              onClick={() => handleChangeEstado(presupuesto.id, prevEstado)}
+                              className="p-2 rounded-full text-orange-600 dark:text-orange-300 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-600 dark:to-slate-700 hover:shadow-lg hover:shadow-orange-200 dark:hover:shadow-orange-900/50 active:shadow-inner transition-all duration-200"
+                              title={`Retroceder a ${prevEstado}`}
+                            >
+                              <HiOutlineArrowLeft className="w-5 h-5" />
+                            </button>
+                          );
+                        })()}
                         {presupuesto.estado === EstadoPresupuesto.BORRADOR && (
                           <button
                             onClick={() => handleDelete(presupuesto.id)}
@@ -635,11 +672,23 @@ const PresupuestoList: React.FC<PresupuestoListProps> = ({ className }) => {
                     <button
                       onClick={() => handleChangeEstado(presupuesto.id, nextEstado)}
                       className="p-2 rounded-full text-green-600 dark:text-green-300 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-600 dark:to-slate-700 hover:shadow-lg hover:shadow-green-200 dark:hover:shadow-green-900/50 active:shadow-inner transition-all duration-200"
-                      title={`Cambiar a ${nextEstado}`}
+                      title={`Avanzar a ${nextEstado}`}
                     >
                       {nextEstado === EstadoPresupuesto.ENVIADO ? <HiOutlineMail className="w-5 h-5" /> : <HiOutlineCheck className="w-5 h-5" />}
                     </button>
                   )}
+                  {(() => {
+                    const prevEstado = getPrevEstado(presupuesto.estado);
+                    return prevEstado && (
+                      <button
+                        onClick={() => handleChangeEstado(presupuesto.id, prevEstado)}
+                        className="p-2 rounded-full text-orange-600 dark:text-orange-300 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-600 dark:to-slate-700 hover:shadow-lg hover:shadow-orange-200 dark:hover:shadow-orange-900/50 active:shadow-inner transition-all duration-200"
+                        title={`Retroceder a ${prevEstado}`}
+                      >
+                        <HiOutlineArrowLeft className="w-5 h-5" />
+                      </button>
+                    );
+                  })()}
                   {presupuesto.estado === EstadoPresupuesto.BORRADOR && (
                     <button
                       onClick={() => handleDelete(presupuesto.id)}
