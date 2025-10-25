@@ -100,8 +100,8 @@ test.describe('Admin - ABM Proveedor', () => {
     // PASO 3: EDITAR PROVEEDOR
     console.log('\nPASO 3: EDITAR');
     
-    // Hacer click en el boton de editar
-    const editButton = proveedorRow.locator('button').nth(1); // Segundo botón = editar
+    // Hacer click en el icono/botón de editar (el del lápiz)
+    const editButton = proveedorRow.locator('button svg.hi-outline-pencil, button:has(svg)').nth(1);
     await editButton.click();
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
@@ -135,8 +135,8 @@ test.describe('Admin - ABM Proveedor', () => {
     const proveedorRow2 = page.locator(`tr:has-text("${proveedor.email}")`).first();
     await expect(proveedorRow2).toBeVisible({ timeout: 5000 });
     
-    // Hacer click en el boton de eliminar (tercer botón)
-    const deleteButton = proveedorRow2.locator('button').nth(2); // Tercer botón = eliminar
+    // Hacer click en el icono/botón de eliminar (el del trash)
+    const deleteButton = proveedorRow2.locator('button svg.hi-outline-trash, button:has(svg)').nth(2);
     await deleteButton.click();
     await page.waitForTimeout(1000);
     
