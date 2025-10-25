@@ -437,7 +437,23 @@ export class PresupuestoService {
 
     return prisma.presupuesto.update({
       where: { id },
-      data: { estado: estado as EstadoPresupuesto }
+      data: { estado: estado as EstadoPresupuesto },
+      include: {
+        cliente: true,
+        empresa: true,
+        moneda: true,
+        items: {
+          include: {
+            producto: true,
+            servicio: true
+          }
+        },
+        presupuestoImpuestos: {
+          include: {
+            impuesto: true
+          }
+        }
+      }
     }).then(async (presupuestoActualizado) => {
       // Registrar el cambio de estado en el historial
       const snapshotNuevo = await PresupuestoHistorialService.crearSnapshot(id);
@@ -452,7 +468,7 @@ export class PresupuestoService {
         });
       }
       
-      return presupuestoActualizado;
+      return this.transformPresupuesto(presupuestoActualizado);
     });
   }
 
