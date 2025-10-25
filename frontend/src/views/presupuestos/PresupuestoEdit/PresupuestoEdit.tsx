@@ -10,6 +10,8 @@ const PresupuestoEdit: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { selectedPresupuesto, loading, error, getPresupuesto, updatePresupuesto } = usePresupuesto();
   const [initialData, setInitialData] = useState<PresupuestoFormData | undefined>();
+  const [initialItemTypes, setInitialItemTypes] = useState<('producto' | 'servicio')[]>([]);
+  const [initialItemProveedores, setInitialItemProveedores] = useState<(number | undefined)[]>([]);
 
   useEffect(() => {
     if (id) {
@@ -19,11 +21,28 @@ const PresupuestoEdit: React.FC = () => {
 
   useEffect(() => {
     if (selectedPresupuesto) {
-      console.log('🔍 DEBUG PresupuestoEdit - selectedPresupuesto:', selectedPresupuesto);
-      console.log('🔍 DEBUG presupuestoImpuestos:', selectedPresupuesto.presupuestoImpuestos);
-      
       const impuestosSeleccionados = selectedPresupuesto.presupuestoImpuestos?.map(pi => pi.impuestoId) || [];
-      console.log('🔍 DEBUG impuestosSeleccionados mapeados:', impuestosSeleccionados);
+      
+      // Calcular itemTypes y itemProveedores basados en los items existentes
+      const types: ('producto' | 'servicio')[] = [];
+      const proveedores: (number | undefined)[] = [];
+      
+      selectedPresupuesto.items.forEach(item => {
+        if (item.productoId && item.producto) {
+          types.push('producto');
+          proveedores.push(item.producto.proveedorId);
+        } else if (item.servicioId && item.servicio) {
+          types.push('servicio');
+          proveedores.push(item.servicio.proveedorId);
+        } else {
+          // Fallback si no hay datos completos
+          types.push(item.productoId ? 'producto' : 'servicio');
+          proveedores.push(undefined);
+        }
+      });
+      
+      setInitialItemTypes(types);
+      setInitialItemProveedores(proveedores);
       
       setInitialData({
         clienteId: selectedPresupuesto.clienteId,
@@ -99,6 +118,9 @@ const PresupuestoEdit: React.FC = () => {
             onSubmit={handleSubmit}
             onCancel={handleCancel}
             isEdit={true}
+            initialItemTypes={initialItemTypes}
+            initialItemProveedores={initialItemProveedores}
+            currentEstado={selectedPresupuesto.estado}
           />
         </div>
       )}
