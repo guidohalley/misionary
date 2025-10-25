@@ -5,6 +5,7 @@ import { Persona, PersonaListProps } from '../types';
 import { Button, Badge, Tag, Tooltip, Input, Select, Card } from '@/components/ui';
 import DataTablePro, { ColumnDefPro } from '@/components/shared/DataTablePro';
 import { providerAreaOptions } from '../schemas';
+import PersonaQuickViewModal from './PersonaQuickViewModal';
 
 const PersonaList: React.FC<PersonaListProps> = ({
   personas,
@@ -273,7 +274,8 @@ const PersonaList: React.FC<PersonaListProps> = ({
               className="p-2 rounded-full transition-all duration-200 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 hover:shadow-md hover:shadow-blue-200 dark:hover:shadow-blue-900/30 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400"
               onClick={(e) => {
                 e.stopPropagation();
-                // TODO: Abrir modal de detalles
+                setSelectedPersona(row);
+                setShowDetailsModal(true);
               }}
             >
               <HiOutlineEye className="w-4 h-4" />
@@ -698,6 +700,16 @@ const PersonaList: React.FC<PersonaListProps> = ({
             : 'No hay personas registradas'}
         </div>
       )}
+
+      {/* Modal de Vista Rápida */}
+      <PersonaQuickViewModal
+        isOpen={showDetailsModal}
+        onClose={() => {
+          setShowDetailsModal(false);
+          setSelectedPersona(null);
+        }}
+        persona={selectedPersona}
+      />
     </motion.div>
   );
 };
