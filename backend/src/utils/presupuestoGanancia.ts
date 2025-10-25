@@ -1,4 +1,5 @@
 import { Prisma } from '@prisma/client';
+import { roundCurrency } from './currency';
 
 /**
  * Calcula la ganancia de un presupuesto según su configuración
@@ -30,7 +31,7 @@ export function calcularGananciaPorPorcentaje(
   subtotal: number,
   porcentaje: number
 ): number {
-  return (subtotal * porcentaje) / 100;
+  return roundCurrency((subtotal * porcentaje) / 100, 2);
 }
 
 /**
@@ -41,7 +42,7 @@ export function calcularGananciaPorItems(
 ): number {
   if (!items || items.length === 0) return 0;
 
-  return items.reduce((total, item) => {
+  const total = items.reduce((total, item) => {
     const cantidad = Number(item.cantidad || 0);
     const precioUnitario = Number(item.precioUnitario || 0);
     
@@ -54,10 +55,12 @@ export function calcularGananciaPorItems(
     }
     
     // Calcular ganancia del item: precioUnitario * (margen / 100) * cantidad
-    const gananciaItem = precioUnitario * (margen / 100) * cantidad;
+    const gananciaItem = roundCurrency(precioUnitario * (margen / 100) * cantidad, 2);
     
     return total + gananciaItem;
   }, 0);
+  
+  return roundCurrency(total, 2);
 }
 
 /**
