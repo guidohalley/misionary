@@ -50,6 +50,18 @@ export default function PersonaView() {
   const endIndex = startIndex + pageSize;
   const currentItems = filteredPersonas.slice(startIndex, endIndex);
 
+  // Debug temporal
+  console.log('🔍 Paginación Debug:', {
+    totalPersonas: personas.length,
+    filteredPersonas: filteredPersonas.length,
+    currentPage,
+    pageSize,
+    totalPages,
+    startIndex,
+    endIndex,
+    currentItemsLength: currentItems.length
+  });
+
   const handleSubmit = async (data: CreatePersonaDTO | UpdatePersonaDTO) => {
     try {
       if (selectedPersona) {
@@ -93,8 +105,13 @@ export default function PersonaView() {
               />
               <Select
                 value={selectedPageSize}
-                onChange={(opt: { value: number; label: string } | null) => {
-                  if (opt && typeof opt.value === 'number') setPageSize(opt.value);
+                onChange={(opt: any) => {
+                  console.log('📝 Select onChange:', opt);
+                  if (opt && typeof opt.value === 'number') {
+                    console.log('✅ Cambiando pageSize a:', opt.value);
+                    setPageSize(opt.value);
+                    setCurrentPage(1); // Reset a primera página al cambiar tamaño
+                  }
                 }}
                 options={pageSizeOptions}
                 isSearchable={false}
@@ -117,7 +134,10 @@ export default function PersonaView() {
                 total={totalItems}
                 pageSize={pageSize}
                 currentPage={currentPage}
-                onChange={setCurrentPage}
+                onChange={(page) => {
+                  console.log('📄 Pagination onChange:', page);
+                  setCurrentPage(page);
+                }}
               />
             </div>
           )}
