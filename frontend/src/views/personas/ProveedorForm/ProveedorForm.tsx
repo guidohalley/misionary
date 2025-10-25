@@ -1,5 +1,5 @@
 import React from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion } from 'framer-motion';
 import { 
@@ -9,7 +9,8 @@ import {
   FormItem, 
   FormContainer,
   Notification,
-  toast
+  toast,
+  Select
 } from '@/components/ui';
 import { 
   HiOutlineOfficeBuilding, 
@@ -18,7 +19,8 @@ import {
   HiOutlinePhone, 
   HiOutlineCreditCard,
   HiOutlineEye,
-  HiOutlineEyeOff 
+  HiOutlineEyeOff,
+  HiOutlineBriefcase
 } from 'react-icons/hi';
 import { 
   proveedorSchema, 
@@ -26,7 +28,8 @@ import {
   ProveedorFormData, 
   UpdateProveedorFormData,
   TipoPersona,
-  RolUsuario 
+  RolUsuario,
+  providerAreaOptions
 } from '../schemas';
 
 interface ProveedorFormProps {
@@ -54,16 +57,21 @@ export const ProveedorForm: React.FC<ProveedorFormProps> = ({
     handleSubmit,
     formState: { errors, isSubmitting },
     setValue,
-    watch
+    watch,
+    control
   } = useForm<ProveedorFormData | UpdateProveedorFormData>({
     resolver: zodResolver(schema),
     defaultValues: isEdit 
-      ? initialData
+      ? {
+          ...initialData,
+          providerRoles: initialData?.providerRoles || []
+        }
       : {
           tipo: TipoPersona.PROVEEDOR,
           esUsuario: true,
           activo: true,
           roles: [RolUsuario.PROVEEDOR],
+          providerRoles: [],
           ...initialData
         },
     mode: 'onChange'
@@ -179,6 +187,40 @@ export const ProveedorForm: React.FC<ProveedorFormProps> = ({
                     disabled={isSubmitting}
                     prefix={<HiOutlineCreditCard className="text-lg" />}
                   />
+                </FormItem>
+              </div>
+
+              <div className="grid grid-cols-1 gap-6 mt-6">
+                <FormItem
+                  label="Áreas o Especialidades"
+                  invalid={!!errors.providerRoles}
+                  errorMessage={errors.providerRoles?.message}
+                >
+                  <Controller
+                    name="providerRoles"
+                    control={control}
+                    render={({ field }) => (
+                      <Select
+                        isMulti
+                        value={providerAreaOptions.filter(opt => 
+                          field.value?.includes(opt.value)
+                        )}
+                        onChange={(selected: any) => {
+                          const values = selected ? selected.map((s: any) => s.value) : [];
+                          field.onChange(values);
+                          // Guardar la primera área como providerArea principal
+                          setValue('providerArea', values[0] || '');
+                        }}
+                        options={providerAreaOptions}
+                        placeholder="Seleccionar áreas de especialidad..."
+                        className="relative z-50"
+                        menuPlacement="auto"
+                      />
+                    )}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Selecciona una o más áreas donde el proveedor tiene experiencia
+                  </p>
                 </FormItem>
               </div>
             </div>
