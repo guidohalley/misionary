@@ -3,6 +3,7 @@ import LayoutSwitcher from './LayoutSwitcher'
 import ThemeSwitcher from './ThemeSwitcher'
 import DirectionSwitcher from './DirectionSwitcher'
 import NavModeSwitcher from './NavModeSwitcher'
+import AutoThemeToggle from './AutoThemeToggle'
 import CopyButton from './CopyButton'
 
 export type ThemeConfiguratorProps = {
@@ -13,6 +14,10 @@ const ThemeConfigurator = ({ callBackClose }: ThemeConfiguratorProps) => {
     return (
         <div className="flex flex-col h-full justify-between">
             <div className="flex flex-col gap-y-10 mb-6">
+                <div>
+                    <h6 className="mb-3">Tema Automático</h6>
+                    <AutoThemeToggle />
+                </div>
                 <div className="flex items-center justify-between">
                     <div>
                         <h6>Dark Mode</h6>

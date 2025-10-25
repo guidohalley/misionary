@@ -4,6 +4,7 @@ import { PersistGate } from 'redux-persist/integration/react';
 import store, { persistor } from './store';
 import Theme from '@/components/template/Theme';
 import Layout from '@/components/layouts';
+import AutoThemeInitializer from '@/components/template/AutoThemeInitializer';
 import { AuthProvider } from '@/contexts/AuthContext';
 import mockServer from './mock'
 import appConfig from '@/configs/app.config'
@@ -25,6 +26,7 @@ function AppContent() {
     return (
         <Theme>
             <AuthProvider>
+                <AutoThemeInitializer />
                 <Layout />
             </AuthProvider>
         </Theme>
