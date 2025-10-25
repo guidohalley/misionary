@@ -1,4 +1,5 @@
 import prisma from '../config/prisma';
+import { calcularPrecioConMargen } from '../utils/currency';
 
 export class ProductoService {
   /**
@@ -24,7 +25,7 @@ export class ProductoService {
     monedaId?: number;
   }) {
     // Calcular precio automáticamente si no se proporciona
-    const precioFinal = data.precio ?? data.costoProveedor * (1 + data.margenAgencia / 100);
+    const precioFinal = data.precio ?? calcularPrecioConMargen(data.costoProveedor, data.margenAgencia);
     
     const producto = await prisma.producto.create({
       data: {
@@ -79,7 +80,7 @@ export class ProductoService {
         
         // Recalcular precio solo si no se proporciona manualmente
         if (data.precio === undefined) {
-          updateData.precio = costoActual * (1 + margenActual / 100);
+          updateData.precio = calcularPrecioConMargen(costoActual, margenActual);
         }
       }
     }
