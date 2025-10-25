@@ -1,4 +1,5 @@
 import { PrismaClient, Prisma } from '@prisma/client';
+import { roundCurrency, toNumber } from '../utils/currency';
 
 const prisma = new PrismaClient();
 
@@ -331,8 +332,8 @@ export class HistorialPrecioService {
 
       for (const item of items) {
         try {
-          const precioActual = parseFloat(item.precio.toString());
-          const nuevoPrecio = precioActual * (1 + porcentajeAumento / 100);
+          const precioActual = toNumber(item.precio);
+          const nuevoPrecio = roundCurrency(precioActual * (1 + porcentajeAumento / 100), 2);
 
           if (tipo === 'PRODUCTO') {
             // Cerrar precio actual
