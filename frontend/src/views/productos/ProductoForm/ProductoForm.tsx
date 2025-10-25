@@ -55,12 +55,12 @@ const ProductoForm: React.FC<ProductoFormProps> = ({
     reset,
     setValue,
   } = useForm<ProductoFormData>({
-    resolver: zodResolver(productoSchema), // Reactivado con el schema actualizado
+    resolver: zodResolver(productoSchema),
     defaultValues: initialData || {
       nombre: '',
       costoProveedor: 0,
       margenAgencia: 35, // Preestablecido a 35%
-      precio: 0,
+      precio: 0, // Se calculará automáticamente
       proveedorId: mustUseOwnId ? user?.id : undefined, // Precargar ID si es proveedor puro
       monedaId: 1, // ARS por defecto
     },
@@ -69,17 +69,17 @@ const ProductoForm: React.FC<ProductoFormProps> = ({
   const monedaIdSeleccionada = watch('monedaId');
   const monedaSeleccionada = monedas.find(m => m.id === monedaIdSeleccionada);
   
-  // Watch para cálculo de preview del precio (solo visual, no se envía)
+  // Watch para cálculo automático del precio
   const costoProveedor = watch('costoProveedor');
   const margenAgencia = watch('margenAgencia');
 
-  // Preview del precio calculado (solo para mostrar, el backend calculará el real)
-  const precioPreview = useMemo(() => {
+  // Calcular precio automáticamente y actualizar el formulario
+  useEffect(() => {
     if (costoProveedor > 0 && margenAgencia >= 0) {
-      return Math.round(costoProveedor * (1 + margenAgencia / 100) * 100) / 100;
+      const precioCalculado = Math.round(costoProveedor * (1 + margenAgencia / 100) * 100) / 100;
+      setValue('precio', precioCalculado, { shouldValidate: true });
     }
-    return 0;
-  }, [costoProveedor, margenAgencia]);
+  }, [costoProveedor, margenAgencia, setValue]);
 
   useEffect(() => {
     refreshPersonas();
@@ -364,29 +364,27 @@ const ProductoForm: React.FC<ProductoFormProps> = ({
                         />
                       </FormItem>
 
-                      {isAdmin && (
-                        <FormItem
-                          label="Precio Final (Calculado automáticamente)"
-                          invalid={!!errors.precio}
-                          errorMessage={errors.precio?.message}
-                        >
-                          <Controller
-                            name="precio"
-                            control={control}
-                            render={({ field }) => (
-                              <MoneyInput
-                                value={field.value || 0}
-                                onChange={field.onChange}
-                                currency={monedaSeleccionada?.codigo || 'ARS'}
-                                currencySymbol={monedaSeleccionada?.simbolo || '$'}
-                                placeholder="0,00"
-                                disabled={true}
-                                className="bg-gray-50 dark:bg-gray-700"
-                              />
-                            )}
-                          />
-                        </FormItem>
-                      )}
+                      <FormItem
+                        label="Precio Final (Calculado automáticamente)"
+                        invalid={!!errors.precio}
+                        errorMessage={errors.precio?.message}
+                      >
+                        <Controller
+                          name="precio"
+                          control={control}
+                          render={({ field }) => (
+                            <MoneyInput
+                              value={field.value || 0}
+                              onChange={() => {}} // No permitir edición manual
+                              currency={monedaSeleccionada?.codigo || 'ARS'}
+                              currencySymbol={monedaSeleccionada?.simbolo || '$'}
+                              placeholder="0,00"
+                              disabled={true}
+                              className="bg-gray-50 dark:bg-gray-700"
+                            />
+                          )}
+                        />
+                      </FormItem>
                     </div>
                   </div>
                 </Card>

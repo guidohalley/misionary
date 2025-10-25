@@ -15,7 +15,6 @@ export const productoSchema = z.object({
     .max(100, 'El nombre no puede exceder 100 caracteres'),
   
   costoProveedor: z.number()
-    .min(0, 'El costo del proveedor debe ser mayor o igual a 0')
     .positive('El costo del proveedor debe ser positivo'),
   
   margenAgencia: z.number()
@@ -23,9 +22,7 @@ export const productoSchema = z.object({
     .max(1000, 'El margen de agencia no puede exceder 1000%'),
   
   precio: z.number()
-    .min(0, 'El precio debe ser mayor o igual a 0')
-    .positive('El precio debe ser positivo')
-    .optional(), // Opcional porque se calcula automáticamente
+    .positive('El precio debe ser positivo'), // Requerido, se calcula automáticamente
   
   proveedorId: z.number()
     .int('Debe seleccionar un proveedor')
@@ -52,7 +49,7 @@ export type ProductoFormData = {
   nombre: string;
   costoProveedor: number;
   margenAgencia: number;
-  precio?: number; // Opcional, se calcula automáticamente
+  precio: number; // Requerido, se calcula automáticamente
   proveedorId: number;
   monedaId?: number; // Opcional, ARS por defecto
 };
