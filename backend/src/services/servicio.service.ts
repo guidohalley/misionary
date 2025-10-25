@@ -1,5 +1,6 @@
 import prisma from '../config/prisma';
 import type { Servicio } from '@prisma/client';
+import { calcularPrecioConMargen } from '../utils/currency';
 
 export class ServicioService {
   /**
@@ -16,10 +17,26 @@ export class ServicioService {
     };
   }
 
-  static async create(data: any): Promise<Servicio> {
+  static async create(data: {
+    nombre: string;
+    descripcion: string;
+    costoProveedor: number;
+    margenAgencia: number;
+    precio?: number; // Opcional, se calculará automáticamente si no se proporciona
+    proveedorId: number;
+    monedaId?: number;
+  }): Promise<Servicio> {
+    // Calcular precio automáticamente si no se proporciona
+    const precioFinal = data.precio ?? calcularPrecioConMargen(data.costoProveedor, data.margenAgencia);
+    
     const servicio = await prisma.servicio.create({
       data: {
-        ...data,
+        nombre: data.nombre,
+        descripcion: data.descripcion,
+        costoProveedor: data.costoProveedor,
+        margenAgencia: data.margenAgencia,
+        precio: precioFinal,
+        proveedorId: data.proveedorId,
         monedaId: data.monedaId || 1 // ARS por defecto
       },
       include: {
@@ -55,10 +72,35 @@ export class ServicioService {
     return servicios.map(s => this.transformServicio(s));
   }
 
-  static async update(id: number, data: any): Promise<Servicio> {
+  static async update(id: number, data: {
+    nombre?: string;
+    descripcion?: string;
+    costoProveedor?: number;
+    margenAgencia?: number;
+    precio?: number;
+    proveedorId?: number;
+    monedaId?: number;
+  }): Promise<Servicio> {
+    // Si se actualizan costoProveedor o margenAgencia, recalcular precio
+    let updateData: any = { ...data };
+    
+    if (data.costoProveedor !== undefined || data.margenAgencia !== undefined) {
+      // Obtener valores actuales si no se proporcionan
+      const current = await prisma.servicio.findUnique({ where: { id } });
+      if (current) {
+        const costoActual = data.costoProveedor ?? Number(current.costoProveedor);
+        const margenActual = data.margenAgencia ?? Number(current.margenAgencia);
+        
+        // Recalcular precio solo si no se proporciona manualmente
+        if (data.precio === undefined) {
+          updateData.precio = calcularPrecioConMargen(costoActual, margenActual);
+        }
+      }
+    }
+    
     const servicio = await prisma.servicio.update({
       where: { id },
-      data,
+      data: updateData,
       include: {
         proveedor: true,
         moneda: true,
