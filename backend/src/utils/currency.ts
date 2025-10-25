@@ -205,3 +205,4 @@ export function currencyEquals(a: number, b: number, tolerance: number = 0.01): 
   return Math.abs(a - b) <= tolerance;
 }
 
+
