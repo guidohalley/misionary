@@ -10,7 +10,7 @@ import {
 } from 'react-icons/hi';
 import { Card, Badge, Button, Spinner } from '@/components/ui';
 import { Persona } from '../types';
-import axios from 'axios';
+import BaseService from '@/services/BaseService';
 
 interface PersonaQuickViewModalProps {
   isOpen: boolean;
@@ -44,7 +44,8 @@ const PersonaQuickViewModal: React.FC<PersonaQuickViewModalProps> = ({
 
     setLoading(true);
     try {
-      const response = await axios.get(`/api/personas/${persona.id}`);
+      const response = await BaseService.get(`/personas/${persona.id}`);
+      console.log('📊 Detalles de persona:', response.data);
       setDetails({
         productos: response.data.productos || [],
         servicios: response.data.servicios || [],
@@ -52,7 +53,7 @@ const PersonaQuickViewModal: React.FC<PersonaQuickViewModalProps> = ({
         empresas: response.data.empresas || [],
       });
     } catch (error) {
-      console.error('Error al cargar detalles:', error);
+      console.error('❌ Error al cargar detalles:', error);
       setDetails({
         productos: [],
         servicios: [],
