@@ -5,7 +5,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Card, Button, Input, Select, FormItem, FormContainer, Alert } from '@/components/ui';
 import { usePersona } from '../hooks';
-import { updatePersonaAdminSchema, UpdatePersonaAdminFormData, TipoPersona, RolUsuario } from '../schemas';
+import { updatePersonaAdminSchema, UpdatePersonaAdminFormData, TipoPersona, RolUsuario, providerAreaOptions } from '../schemas';
 import { tipoPersonaOptions, rolUsuarioOptions } from '../types';
 
 const PersonaEdit: React.FC = () => {
@@ -20,6 +20,7 @@ const PersonaEdit: React.FC = () => {
     control,
     handleSubmit,
     reset,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<UpdatePersonaAdminFormData>({
     resolver: zodResolver(updatePersonaAdminSchema),
@@ -30,8 +31,11 @@ const PersonaEdit: React.FC = () => {
       cvu: '',
       tipo: undefined,
       roles: [],
+      providerRoles: [],
     },
   });
+
+  const watchTipo = watch('tipo');
 
   // Cargar datos de la persona desde la lista existente
   useEffect(() => {
@@ -47,6 +51,8 @@ const PersonaEdit: React.FC = () => {
         cvu: persona.cvu || '',
         tipo: persona.tipo as TipoPersona,
         roles: persona.roles as RolUsuario[],
+        providerRoles: persona.providerRoles || [],
+        providerArea: persona.providerArea || '',
       });
     }
   }, [id, personas, reset]);
@@ -258,6 +264,45 @@ const PersonaEdit: React.FC = () => {
                     />
                   </FormItem>
                 </div>
+
+                {/* Áreas de Especialidad - Solo para proveedores */}
+                {watchTipo === TipoPersona.PROVEEDOR && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="grid grid-cols-1 gap-6"
+                  >
+                    <FormItem
+                      label="Áreas de Especialidad"
+                      invalid={Boolean(errors.providerRoles)}
+                      errorMessage={errors.providerRoles?.message}
+                    >
+                      <Controller
+                        name="providerRoles"
+                        control={control}
+                        render={({ field }) => (
+                          <Select
+                            isMulti
+                            value={providerAreaOptions.filter(opt => 
+                              field.value?.includes(opt.value)
+                            )}
+                            onChange={(selected: any) => {
+                              field.onChange(selected ? selected.map((s: any) => s.value) : []);
+                            }}
+                            options={providerAreaOptions}
+                            placeholder="Seleccionar áreas de especialidad..."
+                            className="relative z-50"
+                            menuPlacement="auto"
+                          />
+                        )}
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Selecciona una o más áreas donde el proveedor tiene experiencia
+                      </p>
+                    </FormItem>
+                  </motion.div>
+                )}
 
                 {/* Acciones */}
                 <motion.div
