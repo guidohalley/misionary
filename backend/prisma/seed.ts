@@ -1,4 +1,5 @@
 import { PrismaClient, CodigoMoneda, RolUsuario, TipoPersona, TipoCotizacion } from '@prisma/client';
+import { Decimal } from '@prisma/client/runtime/library';
 import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
@@ -47,11 +48,11 @@ async function main() {
         fecha: hoy
       }
     },
-    update: { valor: 1200.0000 },
+    update: { valor: new Decimal('1200.00') },
     create: {
       monedaDesdeId: usdMoneda.id,
       monedaHaciaId: arsMoneda.id,
-      valor: 1200.0000,
+      valor: new Decimal('1200.00'),
       fecha: hoy,
       tipo: TipoCotizacion.OFICIAL
     }
@@ -89,7 +90,7 @@ async function main() {
 
   // 3. Impuestos básicos necesarios
   const impuestos = [
-    { nombre: 'IVA 21%', porcentaje: 21.00, descripcion: 'Impuesto al Valor Agregado' }
+    { nombre: 'IVA 21%', porcentaje: new Decimal('21.00'), descripcion: 'Impuesto al Valor Agregado' }
   ];
 
   for (const imp of impuestos) {
