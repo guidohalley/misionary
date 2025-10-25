@@ -25,6 +25,8 @@ const PersonaList: React.FC<PersonaListProps> = ({
   const [showFilters, setShowFilters] = useState(false);
   const [sortKey, setSortKey] = useState<string>('createdAt');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [selectedPersona, setSelectedPersona] = useState<Persona | null>(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   // Definición de columnas para DataTablePro
   const columns = useMemo<ColumnDefPro<Persona>[]>(() => [
