@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { gastoService } from '../services/gasto.service';
 import { HttpError } from '../utils/http-error';
 import { CategoriaGasto } from '@prisma/client';
+import { toNumber, isValidCurrencyValue } from '../utils/currency';
 
 export class GastoController {
   // ─────────────────── GASTOS OPERATIVOS ─────────────────── 
@@ -90,14 +91,16 @@ export class GastoController {
         throw new HttpError(400, `Categoría inválida. Válidas: ${categoriasValidas.join(', ')}`);
       }
 
-      if (monto <= 0) {
-        throw new HttpError(400, 'El monto debe ser mayor a 0');
+      // Validar y convertir monto
+      const montoNumber = toNumber(monto);
+      if (!isValidCurrencyValue(montoNumber, false, false)) {
+        throw new HttpError(400, 'El monto debe ser un número válido y positivo');
       }
 
       const gastoData = {
         concepto,
         descripcion,
-        monto: parseFloat(monto),
+        monto: montoNumber,
         monedaId: parseInt(monedaId),
         fecha: new Date(fecha),
         categoria: categoria as CategoriaGasto,
@@ -125,17 +128,20 @@ export class GastoController {
       const { id } = req.params;
       const updateData = { ...req.body };
 
-      // Validaciones si se proporcionan
-      if (updateData.monto !== undefined && updateData.monto <= 0) {
-        throw new HttpError(400, 'El monto debe ser mayor a 0');
+      // Validar y convertir monto si se proporciona
+      if (updateData.monto !== undefined) {
+        const montoNumber = toNumber(updateData.monto);
+        if (!isValidCurrencyValue(montoNumber, false, false)) {
+          throw new HttpError(400, 'El monto debe ser un número válido y positivo');
+        }
+        updateData.monto = montoNumber;
       }
 
       // Convertir tipos si es necesario
-      if (updateData.monto) updateData.monto = parseFloat(updateData.monto);
       if (updateData.monedaId) updateData.monedaId = parseInt(updateData.monedaId);
-  if (updateData.proveedorId) updateData.proveedorId = parseInt(updateData.proveedorId);
+      if (updateData.proveedorId) updateData.proveedorId = parseInt(updateData.proveedorId);
       if (updateData.fecha) updateData.fecha = new Date(updateData.fecha);
-  if (updateData.categoriaId) updateData.categoriaId = parseInt(updateData.categoriaId);
+      if (updateData.categoriaId) updateData.categoriaId = parseInt(updateData.categoriaId);
 
       const gastoActualizado = await gastoService.updateGastoOperativo(parseInt(id), updateData);
       
@@ -204,14 +210,16 @@ export class GastoController {
         throw new HttpError(400, 'Los campos gastoId, presupuestoId y porcentaje son obligatorios');
       }
 
-      if (porcentaje <= 0 || porcentaje > 100) {
+      // Validar y convertir porcentaje
+      const porcentajeNumber = toNumber(porcentaje);
+      if (!isValidCurrencyValue(porcentajeNumber, false, false) || porcentajeNumber > 100) {
         throw new HttpError(400, 'El porcentaje debe estar entre 0.01 y 100');
       }
 
       const asignacionData = {
         gastoId: parseInt(gastoId),
         presupuestoId: parseInt(presupuestoId),
-        porcentaje: parseFloat(porcentaje),
+        porcentaje: porcentajeNumber,
         justificacion
       };
 
@@ -232,12 +240,13 @@ export class GastoController {
       const { id } = req.params;
       const updateData = { ...req.body };
 
-      // Validaciones
+      // Validar y convertir porcentaje si se proporciona
       if (updateData.porcentaje !== undefined) {
-        if (updateData.porcentaje <= 0 || updateData.porcentaje > 100) {
+        const porcentajeNumber = toNumber(updateData.porcentaje);
+        if (!isValidCurrencyValue(porcentajeNumber, false, false) || porcentajeNumber > 100) {
           throw new HttpError(400, 'El porcentaje debe estar entre 0.01 y 100');
         }
-        updateData.porcentaje = parseFloat(updateData.porcentaje);
+        updateData.porcentaje = porcentajeNumber;
       }
 
       if (updateData.gastoId) updateData.gastoId = parseInt(updateData.gastoId);
