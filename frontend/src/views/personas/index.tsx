@@ -71,6 +71,19 @@ const PersonasView: React.FC<PersonasViewProps> = ({ tipoFiltro }) => {
   const endIndex = startIndex + pageSize;
   const currentItems = filteredPersonas.slice(startIndex, endIndex);
 
+  // Debug temporal para verificar valores
+  console.log('🔍 PersonasView Debug:', {
+    totalPersonas: personas.length,
+    filteredPersonas: filteredPersonas.length,
+    currentPage,
+    pageSize,
+    totalPages,
+    totalItems,
+    startIndex,
+    endIndex,
+    currentItemsLength: currentItems.length
+  });
+
   // Obtener título según el tipo de filtro
   const getTitulo = () => {
     if (tipoActivo === TipoPersona.CLIENTE) return 'Gestión de Clientes';
@@ -178,7 +191,9 @@ const PersonasView: React.FC<PersonasViewProps> = ({ tipoFiltro }) => {
                 <Select
                   value={selectedPageSize}
                   onChange={(opt: any) => {
+                    console.log('📝 Select onChange:', opt);
                     if (opt && typeof opt.value === 'number') {
+                      console.log('✅ Cambiando pageSize a:', opt.value);
                       setPageSize(opt.value);
                       setCurrentPage(1);
                     }
@@ -199,6 +214,16 @@ const PersonasView: React.FC<PersonasViewProps> = ({ tipoFiltro }) => {
               onDelete={handleDelete}
             />
 
+            {/* Debug info */}
+            <div className="mt-4 p-2 bg-gray-100 dark:bg-gray-800 rounded text-sm">
+              <div>Total personas: {personas.length}</div>
+              <div>Filtradas: {filteredPersonas.length}</div>
+              <div>Página actual: {currentPage}</div>
+              <div>Tamaño página: {pageSize}</div>
+              <div>Total páginas: {totalPages}</div>
+              <div>Mostrando: {currentItems.length} items</div>
+            </div>
+
             {/* Paginación */}
             {totalPages > 1 && (
               <div className="mt-6 flex justify-center">
@@ -206,7 +231,10 @@ const PersonasView: React.FC<PersonasViewProps> = ({ tipoFiltro }) => {
                   total={totalItems}
                   pageSize={pageSize}
                   currentPage={currentPage}
-                  onChange={(page) => setCurrentPage(page)}
+                  onChange={(page) => {
+                    console.log('📄 Pagination onChange:', page);
+                    setCurrentPage(page);
+                  }}
                 />
               </div>
             )}
